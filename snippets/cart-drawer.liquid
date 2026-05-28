@@ -231,6 +231,9 @@
                               </li>
                             {%- endfor -%}
                           </ul>
+
+                          {%- comment -%} MISC: inventory status block (informational only, v1.0) {%- endcomment -%}
+                          {% render 'misc-cart-drawer-injection', item: item %}
                         </td>
 
                         <td class="cart-item__totals right" role="cell" headers="CartDrawer-ColumnTotal">

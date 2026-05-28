@@ -1,0 +1,63 @@
+{%- comment -%}
+  ============================================================
+  MISC inventory status: 3-state breakdown for one cart line.
+
+  Usage:
+    {% render 'misc-inventory-status',
+       ready: ready_qty,
+       incoming: incoming_qty,
+       incoming_eta: eta_date,
+       backorder: backorder_qty %}
+
+  Inputs:
+    ready (integer):       Units available now from current stock
+    incoming (integer):    Units expected from inbound supply
+    incoming_eta (date):   Expected warehouse arrival date (optional)
+    backorder (integer):   Units not yet ordered, no ETA
+
+  Behaviour:
+    Each row only renders if its quantity > 0.
+    Per Functional Definition v1.0: informational only.
+    No fulfillment logic, no shipment grouping, no stock reservation.
+
+  Visual treatment:
+    Three-color dot (green / orange / red) + uppercase label + detail line.
+    Tokens from assets/misc-tokens.css.
+  ============================================================
+{%- endcomment -%}
+
+{%- if ready > 0 or incoming > 0 or backorder > 0 -%}
+  <div class="misc-inventory-status" aria-label="Inventory availability">
+    {%- if ready > 0 -%}
+      <div class="misc-inventory-status__row misc-inventory-status__row--ready">
+        <span class="misc-inventory-status__dot" aria-hidden="true"></span>
+        <div class="misc-inventory-status__text">
+          <div class="misc-inventory-status__label">Ready to ship</div>
+          <div class="misc-inventory-status__detail">{{ ready }} units available now</div>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if incoming > 0 -%}
+      <div class="misc-inventory-status__row misc-inventory-status__row--incoming">
+        <span class="misc-inventory-status__dot" aria-hidden="true"></span>
+        <div class="misc-inventory-status__text">
+          <div class="misc-inventory-status__label">Incoming stock</div>
+          <div class="misc-inventory-status__detail">
+            {{ incoming }} units expected at warehouse{% if incoming_eta != blank %} on {{ incoming_eta | date: '%-d %B %Y' }}{% endif %}
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if backorder > 0 -%}
+      <div class="misc-inventory-status__row misc-inventory-status__row--backorder">
+        <span class="misc-inventory-status__dot" aria-hidden="true"></span>
+        <div class="misc-inventory-status__text">
+          <div class="misc-inventory-status__label">Backorder</div>
+          <div class="misc-inventory-status__detail">{{ backorder }} units, lead time to be confirmed</div>
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+{%- endif -%}

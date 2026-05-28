@@ -1,0 +1,67 @@
+{%- comment -%}
+  ============================================================
+  MISC cart drawer injection: gate + compute + render.
+
+  Usage:
+    {% render 'misc-cart-drawer-injection', item: item %}
+
+  Inputs:
+    item: a cart line item (from cart.items loop)
+
+  Behaviour:
+    1. Gates on customer being logged in.
+       v1.0: any logged-in customer.
+       TODO before launch: tighten to customer.b2b? for B2B-only visibility.
+    2. Reads native inventory_quantity from the variant.
+    3. Reads incoming qty + ETA from variant metafields.
+       Namespace: custom
+       Keys: incoming_qty (integer), incoming_eta (date)
+    4. Hides entirely if both metafields are empty (per spec).
+    5. Splits requested quantity into ready / incoming / backorder buckets.
+    6. Renders misc-inventory-status with the computed values.
+
+  Per Functional Definition v1.0: this is informational only.
+  Does not control fulfillment, shipment grouping, or stock reservation.
+  ============================================================
+{%- endcomment -%}
+
+{%- if customer != blank -%}
+  {%- assign incoming = item.variant.metafields.custom.incoming_qty.value | default: 0 -%}
+  {%- assign eta = item.variant.metafields.custom.incoming_eta.value -%}
+
+  {%- comment -%}
+    Hide entirely if neither metafield is populated.
+    This is the v1.0 conservative behaviour (option chosen by Jeff).
+  {%- endcomment -%}
+  {%- if incoming > 0 or eta != blank -%}
+    {%- assign requested = item.quantity | default: 0 -%}
+    {%- assign stock = item.variant.inventory_quantity | default: 0 -%}
+    {%- if stock < 0 -%}{%- assign stock = 0 -%}{%- endif -%}
+
+    {%- comment -%} Bucket 1: ready (capped at requested) {%- endcomment -%}
+    {%- if stock >= requested -%}
+      {%- assign ready = requested -%}
+    {%- else -%}
+      {%- assign ready = stock -%}
+    {%- endif -%}
+
+    {%- assign remaining = requested | minus: ready -%}
+
+    {%- comment -%} Bucket 2: incoming (capped at remaining demand) {%- endcomment -%}
+    {%- if incoming >= remaining -%}
+      {%- assign coming = remaining -%}
+    {%- else -%}
+      {%- assign coming = incoming -%}
+    {%- endif -%}
+
+    {%- comment -%} Bucket 3: backorder (whatever is left) {%- endcomment -%}
+    {%- assign backorder_qty = remaining | minus: coming -%}
+
+    {%- render 'misc-inventory-status',
+        ready: ready,
+        incoming: coming,
+        incoming_eta: eta,
+        backorder: backorder_qty
+    -%}
+  {%- endif -%}
+{%- endif -%}
