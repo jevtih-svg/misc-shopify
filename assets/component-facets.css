@@ -1165,7 +1165,11 @@ input.mobile-facets__checkbox {
   }
 
   .facets-vertical .facets-wrapper {
-    padding-right: 3rem;
+    /* MISC: removed Trade's 3rem padding-right. Our sidebar is a
+       fixed 320px column rendered by snippets/misc-facets.liquid
+       and the right edge is drawn by the grid-wrap's border-left.
+       The padding was creating a 3rem dead zone inside the sidebar. */
+    padding-right: 0;
   }
 
   .facets-vertical .facets-wrapper--no-filters {

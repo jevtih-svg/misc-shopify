@@ -1,0 +1,176 @@
+{%- comment -%}
+  ============================================================
+  MISC facets snippet — fork of Trade's snippets/facets.liquid.
+
+  Forked: 2026-05-28
+  Source: Trade theme, snippets/facets.liquid
+
+  Why forked:
+    Trade's facets snippet is 937 lines covering horizontal /
+    vertical / drawer / mobile layouts. Our catalog only uses
+    the desktop vertical layout, and we need exact control of
+    the markup to match the MISC mockup at
+    /Cowork/30 Projects/Misc/Mockups/misc-sidebar-mockup.html.
+
+  What we keep from Trade:
+    - The <facet-filters-form> custom element + <form id="FacetFiltersForm">
+      wrapper so Trade's facets.js can intercept change events
+      and run its AJAX refresh against the section.
+    - Input names (filter.v.*, filter.p.*) so the URL params
+      match Shopify's expected filter format.
+    - filter.values / value.active / value.url_to_add /
+      value.url_to_remove / value.param_name from the Liquid
+      results object.
+    - The mobile/drawer layout is not rendered here; Trade's
+      original facets snippet stays available for the mobile
+      surface if we ever want it (it's never called by our
+      catalog section though, so this is just defence).
+
+  Inputs (mirrors Trade's facets snippet):
+    - results               : collection or search results
+    - enable_filtering
+    - enable_sorting
+    - filter_type           : 'vertical' (we only handle vertical)
+    - paginate
+
+  Re-merge with Trade upstream:
+    When Trade ships a major update, skim facets.liquid for new
+    Liquid patterns (new filter types, new metadata on values,
+    accessibility tweaks) and port them here. The original
+    facets.liquid stays untouched.
+  ============================================================
+{%- endcomment -%}
+
+{%- liquid
+  if results.url
+    assign results_url = results.url
+  else
+    assign sort_by = results.sort_by | default: results.default_sort_by
+    assign terms = results.terms | escape
+    assign results_url = '?q=' | append: terms | append: '&options%5Bprefix%5D=last&sort_by=' | append: sort_by
+  endif
+
+  assign show_more_threshold = 8
+-%}
+
+<facet-filters-form class="facets misc-sidebar small-hide" data-id="{{ section.id }}">
+  <form
+    id="FacetFiltersForm"
+    class="misc-sidebar__form"
+  >
+    {%- if results.terms -%}
+      <input type="hidden" name="q" value="{{ results.terms | escape }}">
+      <input name="options[prefix]" type="hidden" value="last">
+    {%- endif -%}
+
+    <div id="FacetsWrapperDesktop">
+      {%- comment -%}
+        Empty wrapper kept for facets.js DOM hooks. The real
+        filter UI follows below. Active-facets + FILTER heading
+        live in the misc-filter-bar above the catalog body, not
+        inside the sidebar.
+      {%- endcomment -%}
+
+      {%- for filter in results.filters -%}
+        <details class="misc-filter-group js-filter" open data-index="{{ forloop.index }}">
+          <summary class="misc-filter-group__summary">
+            <span class="misc-filter-group__title">{{ filter.label | escape }}</span>
+            {%- if filter.type == 'price_range' -%}
+              {%- if filter.min_value.value != blank or filter.max_value.value != blank -%}
+                <span class="misc-filter-group__badge">1</span>
+              {%- endif -%}
+            {%- elsif filter.active_values.size > 0 -%}
+              <span class="misc-filter-group__badge">{{ filter.active_values.size }}</span>
+            {%- endif -%}
+          </summary>
+
+          {%- case filter.type -%}
+
+            {%- when 'price_range' -%}
+              <div class="misc-filter-group__body">
+                <div class="misc-price-inputs">
+                  <label class="misc-price-input-wrap">
+                    <span class="misc-price-input-prefix">{{ cart.currency.symbol }}</span>
+                    <input
+                      type="number"
+                      name="{{ filter.min_value.param_name }}"
+                      value="{{ filter.min_value.value | money_without_currency | replace: ',', '.' }}"
+                      placeholder="Min"
+                      class="misc-price-input"
+                      aria-label="Minimum price"
+                      min="0"
+                      step="0.01"
+                    >
+                  </label>
+                  <label class="misc-price-input-wrap">
+                    <span class="misc-price-input-prefix">{{ cart.currency.symbol }}</span>
+                    <input
+                      type="number"
+                      name="{{ filter.max_value.param_name }}"
+                      value="{{ filter.max_value.value | money_without_currency | replace: ',', '.' }}"
+                      placeholder="Max"
+                      class="misc-price-input"
+                      aria-label="Maximum price"
+                      min="0"
+                      step="0.01"
+                    >
+                  </label>
+                </div>
+                <p class="misc-filter-group__hint">
+                  Range up to {{ filter.range_max | money }}
+                </p>
+              </div>
+
+            {%- when 'boolean', 'list' -%}
+              <ul class="misc-filter-group__options" role="list">
+                {%- for value in filter.values -%}
+                  {%- assign show_class = '' -%}
+                  {%- if forloop.index > show_more_threshold and value.active == false -%}
+                    {%- assign show_class = ' misc-filter-option--hidden' -%}
+                  {%- endif -%}
+                  <li class="misc-filter-option-row{{ show_class }}">
+                    <label class="misc-filter-option">
+                      <input
+                        type="checkbox"
+                        class="misc-filter-option__check"
+                        name="{{ value.param_name }}"
+                        value="{{ value.value | escape }}"
+                        {% if value.active %}checked{% endif %}
+                        {% if value.count == 0 and value.active == false %}disabled{% endif %}
+                      >
+                      <span class="misc-filter-option__label">{{ value.label | escape }}</span>
+                      <span class="misc-filter-option__count">{{ value.count }}</span>
+                    </label>
+                  </li>
+                {%- endfor -%}
+              </ul>
+              {%- if filter.values.size > show_more_threshold -%}
+                {%- assign hidden_count = filter.values.size | minus: show_more_threshold -%}
+                <button
+                  type="button"
+                  class="misc-filter-more"
+                  data-misc-show-more
+                  aria-expanded="false"
+                >
+                  Show {{ hidden_count }} more
+                </button>
+              {%- endif -%}
+
+          {%- endcase -%}
+        </details>
+      {%- endfor -%}
+    </div>
+
+    {%- comment -%}
+      No-JS submit fallback: when JS is off the buyer needs a
+      button to apply the filters. With JS on, Trade's facets.js
+      intercepts input changes and AJAX-refreshes the page.
+    {%- endcomment -%}
+    <noscript>
+      <div class="misc-sidebar__noscript">
+        <button type="submit" class="misc-sidebar__submit">Apply filters</button>
+      </div>
+    </noscript>
+
+  </form>
+</facet-filters-form>

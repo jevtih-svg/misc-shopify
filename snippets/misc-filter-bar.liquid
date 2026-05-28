@@ -1,0 +1,96 @@
+{%- comment -%}
+  ============================================================
+  MISC filter bar — single full-width row above the catalog body.
+
+  Layout:
+    [320px LEFT cell]            [REST: pills | sort + count]
+    FILTER  Clear all            ACTIVE  pill pill pill  Sort by ...  N products
+
+  The sort dropdown and product count are rendered HERE in this
+  bar (not in a separate row above). Trade's original
+  `.facets-vertical-sort` block is hidden via CSS in
+  misc-collection.css so we don't show duplicates.
+
+  When the buyer changes the sort dropdown, a tiny inline
+  `onchange` handler rewrites the URL with the new `sort_by`
+  param while preserving every existing filter param — so
+  active filters survive a sort change. No form submission, no
+  Trade AJAX dependency.
+
+  Usage:
+    {% render 'misc-filter-bar', collection: collection, results_url: collection.url %}
+  ============================================================
+{%- endcomment -%}
+
+{%- liquid
+  assign active_count = 0
+  for filter in collection.filters
+    if filter.type == 'price_range'
+      if filter.min_value.value != blank or filter.max_value.value != blank
+        assign active_count = active_count | plus: 1
+      endif
+    else
+      assign active_count = active_count | plus: filter.active_values.size
+    endif
+  endfor
+  assign current_sort = collection.sort_by | default: collection.default_sort_by
+-%}
+
+<div class="misc-filter-bar">
+  <div class="misc-filter-bar__left">
+    <h2 class="misc-filter-bar__title">
+      Filter
+      {%- if active_count > 0 -%}
+        <span class="misc-filter-bar__count">{{ active_count }}</span>
+      {%- endif -%}
+    </h2>
+    {%- if active_count > 0 -%}
+      <a href="{{ results_url }}" class="misc-filter-bar__clear">Clear all</a>
+    {%- endif -%}
+  </div>
+
+  <div class="misc-filter-bar__right">
+
+    {%- comment -%} ACTIVE PILLS — left side of right cell {%- endcomment -%}
+    <div class="misc-filter-bar__pills">
+      {%- if active_count > 0 -%}
+        <span class="misc-filter-bar__label">Active</span>
+        {%- for filter in collection.filters -%}
+          {%- if filter.type == 'price_range' -%}
+            {%- if filter.min_value.value != blank or filter.max_value.value != blank -%}
+              <a href="{{ filter.url_to_remove }}" class="misc-applied-pill">
+                {{ filter.min_value.value | default: 0 | money }}&ndash;{{ filter.max_value.value | default: filter.range_max | money }}
+                <span class="misc-applied-pill__close" aria-hidden="true">&times;</span>
+              </a>
+            {%- endif -%}
+          {%- else -%}
+            {%- for value in filter.active_values -%}
+              <a href="{{ value.url_to_remove }}" class="misc-applied-pill">
+                {{ value.label }}
+                <span class="misc-applied-pill__close" aria-hidden="true">&times;</span>
+              </a>
+            {%- endfor -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} SORT + COUNT — right side of right cell {%- endcomment -%}
+    <div class="misc-filter-bar__sort">
+      <label for="MiscSortBy" class="misc-sort__label">Sort by:</label>
+      <select
+        id="MiscSortBy"
+        class="misc-sort__select"
+        onchange="(function(v){var u=new URL(window.location);u.searchParams.set('sort_by',v);window.location=u.toString();})(this.value)"
+      >
+        {%- for option in collection.sort_options -%}
+          <option value="{{ option.value | escape }}"{% if option.value == current_sort %} selected{% endif %}>
+            {{- option.name | escape -}}
+          </option>
+        {%- endfor -%}
+      </select>
+      <span class="misc-sort__count">{{ collection.products_count }} products</span>
+    </div>
+
+  </div>
+</div>

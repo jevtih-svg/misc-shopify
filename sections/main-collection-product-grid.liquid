@@ -97,6 +97,11 @@
       </facet-filters-form>
     {%- endif -%}
 
+    {%- comment -%} MISC: filter-bar row above the catalog body {%- endcomment -%}
+    {%- if section.settings.filter_type == 'vertical' and section.settings.enable_filtering -%}
+      {% render 'misc-filter-bar', collection: collection, results_url: collection.url %}
+    {%- endif -%}
+
     <div class="{% if section.settings.filter_type == 'vertical' %} facets-vertical page-width{% endif %}">
       {{ 'component-facets.css' | asset_url | stylesheet_tag }}
       <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
@@ -107,7 +112,8 @@
           id="main-collection-filters"
           data-id="{{ section.id }}"
         >
-          {% render 'facets',
+          {%- comment -%} MISC: render our custom sidebar instead of Trade's facets {%- endcomment -%}
+          {% render 'misc-facets',
             results: collection,
             enable_filtering: section.settings.enable_filtering,
             enable_sorting: section.settings.enable_sorting,
@@ -165,7 +171,8 @@
                     style="--animation-order: {{ forloop.index }};"
                   {% endif %}
                 >
-                  {% render 'card-product',
+                  {%- comment -%} MISC: swap Trade's card for misc-card-product on collection grids only {%- endcomment -%}
+                  {% render 'misc-card-product',
                     card_product: product,
                     media_aspect_ratio: section.settings.image_ratio,
                     image_shape: section.settings.image_shape,

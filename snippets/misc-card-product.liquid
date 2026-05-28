@@ -1,0 +1,380 @@
+{%- comment -%}
+  ============================================================
+  MISC product card v2 — matches Mockups/misc-sidebar-mockup.html.
+
+  Forked from Trade's snippets/card-product.liquid.
+  Originally forked 2026-05-28. Rewritten 2026-05-28 to match
+  the agreed mockup design.
+
+  Structure:
+    [VENDOR caps]
+    [SKU monospaced]
+    [Image]
+    [Product name]
+    [Pack info]
+    [Price]
+    [Stock state line (always sits below the price)]
+    [Stepper, OR per-variant rows for multi-variant products]
+
+  Inputs (mirrors Trade's card-product so the swap is drop-in):
+    - card_product
+    - media_aspect_ratio  ('square' | 'portrait' | 'adapt')
+    - show_vendor
+    - lazy_load
+    - quick_add  ('none' | 'standard' | 'bulk')
+    - section_id
+
+  Used only by: sections/main-collection-product-grid.liquid
+
+  Field map (from MISC_Backorders_Documentation.md and Stokly source):
+    - variant.inventory_quantity            : current stock (can be 0 or negative)
+    - variant.metafields.custom.incoming_qty: integer, units expected in next inbound shipment
+    - variant.metafields.custom.incoming_eta: date, when the inbound shipment arrives at warehouse
+    - variant.metafields.custom.case_pack   : integer, pack quantity (e.g. 5 for "Pack of 5"). Defaults to 1.
+
+  Stock state logic (three states only, per design system v0.4):
+    in stock + incoming     → orange "In stock N · M incoming DD MMM"
+    in stock                → green  "In stock N"
+    no stock + incoming     → orange "M incoming DD MMM"
+    no stock + no incoming  → red    "On backorder"
+  ============================================================
+{%- endcomment -%}
+
+{%- comment -%}
+  DEV FLAG: when TRUE, prices + stepper show for any visitor.
+  MUST be FALSE before merging to main.
+  Toggle via ./scripts/misc-preview.sh from the theme root.
+{%- endcomment -%}
+{%- assign misc_dev_show_price = true -%}
+
+{%- assign misc_show_price = false -%}
+{%- if customer != blank or misc_dev_show_price -%}
+  {%- assign misc_show_price = true -%}
+{%- endif -%}
+
+{%- liquid
+  assign ratio = 1
+  if media_aspect_ratio == 'portrait'
+    assign ratio = 0.8
+  elsif media_aspect_ratio == 'adapt' and card_product.featured_media
+    assign ratio = card_product.featured_media.aspect_ratio
+  endif
+  if ratio == 0 or ratio == null
+    assign ratio = 1
+  endif
+
+  assign primary_variant = card_product.selected_or_first_available_variant
+  assign variant_count = card_product.variants.size
+-%}
+
+<article class="misc-product-card" data-product-id="{{ card_product.id }}">
+
+  {%- comment -%}
+    MISC: always render the vendor caps line at the top of the card.
+    We ignore Trade's section setting `show_vendor` because our design
+    system requires vendor caps on every cell.
+
+    In this dev store every product has `product.vendor = "Misc. Distribution"`
+    because the Stokly import set vendor to the distributor's name.
+    The actual brand (Hibi, TRAVELER'S, Midori, etc.) lives in a
+    metafield. We try, in order:
+      1. shopify.brand        — Shopify's auto-populated brand metafield
+      2. custom.brand         — manually-defined brand metafield
+      3. product.type         — sometimes brand is in product type
+      4. product.vendor       — last resort
+  {%- endcomment -%}
+  {%- liquid
+    # Metafield key is case-sensitive in Shopify Liquid.
+    # The correct field on this store is `custom.Manufacturer`
+    # (capital M). Other fallbacks kept in case the field is
+    # ever renamed or empty on individual products.
+    assign misc_brand = card_product.metafields.custom.Manufacturer.value
+    if misc_brand == blank
+      assign misc_brand = card_product.metafields.shopify.brand.value
+    endif
+    if misc_brand == blank
+      assign misc_brand = card_product.metafields.custom.brand.value
+    endif
+    if misc_brand == blank
+      assign misc_brand = card_product.metafields.custom.manufacturer.value
+    endif
+    if misc_brand == blank and card_product.vendor != 'Misc. Distribution'
+      assign misc_brand = card_product.vendor
+    endif
+    if misc_brand == blank
+      assign misc_brand = card_product.type
+    endif
+    if misc_brand == blank
+      assign misc_brand = card_product.vendor
+    endif
+  -%}
+  {%- if misc_brand != blank -%}
+    <div class="misc-product-card__top-row">
+      <span class="misc-product-card__vendor">{{ misc_brand }}</span>
+    </div>
+  {%- endif -%}
+
+  {%- if primary_variant.sku != blank -%}
+    <div class="misc-product-card__sku">{{ primary_variant.sku }}</div>
+  {%- endif -%}
+
+  <a
+    href="{{ card_product.url }}"
+    class="misc-product-card__media"
+    aria-label="{{ card_product.title | escape }}"
+  >
+    {%- if card_product.featured_media -%}
+      <img
+        src="{{ card_product.featured_media | image_url: width: 800 }}"
+        srcset="
+          {{ card_product.featured_media | image_url: width: 400 }} 400w,
+          {{ card_product.featured_media | image_url: width: 600 }} 600w,
+          {{ card_product.featured_media | image_url: width: 800 }} 800w
+        "
+        sizes="(min-width: 990px) 20vw, (min-width: 750px) 33vw, 50vw"
+        alt="{{ card_product.featured_media.alt | default: card_product.title | escape }}"
+        width="800"
+        height="{{ 800 | divided_by: ratio | round }}"
+        loading="{% if lazy_load %}lazy{% else %}eager{% endif %}"
+        class="misc-product-card__image"
+      >
+    {%- else -%}
+      <div class="misc-product-card__image misc-product-card__image--placeholder">
+        {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+      </div>
+    {%- endif -%}
+  </a>
+
+  <div class="misc-product-card__body">
+
+    <a href="{{ card_product.url }}" class="misc-product-card__name">
+      {{ card_product.title | escape }}
+    </a>
+
+    {%- comment -%} Pack info: "Pack of N" from variant metafield, else "Single unit". {%- endcomment -%}
+    {%- assign pack = primary_variant.metafields.custom.case_pack.value | default: 0 | plus: 0 -%}
+    {%- if pack > 1 -%}
+      <span class="misc-product-card__pack">Pack of {{ pack }}</span>
+    {%- else -%}
+      <span class="misc-product-card__pack">Single unit</span>
+    {%- endif -%}
+
+    <div class="misc-product-card__price-row">
+      {%- if misc_show_price -%}
+        <span class="misc-product-card__price">
+          {%- if variant_count > 1 -%}from {% endif -%}
+          {%- if card_product.price_varies -%}
+            {{ card_product.price_min | money }}
+          {%- else -%}
+            {{ primary_variant.price | money }}
+          {%- endif -%}
+        </span>
+      {%- else -%}
+        <a href="{{ routes.account_login_url }}" class="misc-product-card__price-cta">
+          Login to see price
+        </a>
+      {%- endif -%}
+    </div>
+
+    {%- if misc_show_price and quick_add != 'none' -%}
+
+      {%- comment -%}
+        STOCK STATE LINE — always rendered below price.
+        Multi-variant products show a summary across variants;
+        single-variant products show the actual state.
+      {%- endcomment -%}
+      {%- if variant_count > 1 -%}
+        {%- assign vc_in = 0 -%}
+        {%- assign vc_inbound = 0 -%}
+        {%- assign vc_back = 0 -%}
+        {%- assign vc_oos = 0 -%}
+        {%- for v in card_product.variants -%}
+          {%- assign vi = v.inventory_quantity | default: 0 -%}
+          {%- assign vinc = v.metafields.custom.incoming_qty.value | default: 0 | plus: 0 -%}
+          {%- if vi > 0 -%}
+            {%- assign vc_in = vc_in | plus: 1 -%}
+          {%- elsif vinc > 0 -%}
+            {%- assign vc_inbound = vc_inbound | plus: 1 -%}
+          {%- elsif v.available -%}
+            {%- assign vc_back = vc_back | plus: 1 -%}
+          {%- else -%}
+            {%- assign vc_oos = vc_oos | plus: 1 -%}
+          {%- endif -%}
+        {%- endfor -%}
+        <span class="misc-product-card__stock misc-product-card__stock--neutral">
+          {{- variant_count }} variants
+          {%- if vc_in > 0 %} &middot; {{ vc_in }} in stock{% endif -%}
+          {%- if vc_inbound > 0 %}{% if vc_in > 0 %},{% else %} &middot;{% endif %} {{ vc_inbound }} incoming{% endif -%}
+          {%- if vc_back > 0 %}{% if vc_in > 0 or vc_inbound > 0 %},{% else %} &middot;{% endif %} {{ vc_back }} backorder{% endif -%}
+          {%- if vc_oos > 0 %}{% if vc_in > 0 or vc_inbound > 0 or vc_back > 0 %},{% else %} &middot;{% endif %} {{ vc_oos }} out of stock{% endif -%}
+        </span>
+      {%- else -%}
+        {%- assign inv = primary_variant.inventory_quantity | default: 0 -%}
+        {%- assign inc_qty = primary_variant.metafields.custom.incoming_qty.value | default: 0 | plus: 0 -%}
+        {%- assign inc_eta = primary_variant.metafields.custom.incoming_eta.value -%}
+        {%- if inv > 0 and inc_qty > 0 -%}
+          <span class="misc-product-card__stock misc-product-card__stock--inbound">
+            In stock {{ inv }} &middot; {{ inc_qty }} incoming{% if inc_eta != blank %} {{ inc_eta | date: '%-d %b' }}{% endif %}
+          </span>
+        {%- elsif inv > 0 -%}
+          <span class="misc-product-card__stock misc-product-card__stock--in">In stock {{ inv }}</span>
+        {%- elsif inc_qty > 0 -%}
+          <span class="misc-product-card__stock misc-product-card__stock--inbound">
+            {{ inc_qty }} incoming{% if inc_eta != blank %} {{ inc_eta | date: '%-d %b' }}{% endif %}
+          </span>
+        {%- elsif primary_variant.available -%}
+          <span class="misc-product-card__stock misc-product-card__stock--backorder">On backorder</span>
+        {%- else -%}
+          <span class="misc-product-card__stock misc-product-card__stock--oos">Out of stock</span>
+        {%- endif -%}
+      {%- endif -%}
+
+      {%- comment -%}
+        STEPPER OR VARIANT ROWS.
+        Single-variant products get one big stepper.
+        Multi-variant products get one mini-stepper per variant,
+        so a buyer can dial in different quantities for each colour /
+        size from the catalog without leaving the page.
+      {%- endcomment -%}
+      {%- if variant_count > 1 -%}
+        {%- comment -%}
+          Variants are rendered in three sorted phases so orderable
+          variants always appear at the top:
+            1. in_stock  (green, with stepper)
+            2. incoming  (orange, with stepper)
+            3. backorder (red, with stepper — still orderable)
+          Out-of-stock variants are NOT in this list — they're
+          collected into a single compact line below so the card
+          stays condensed (UX call: less stepper repetition).
+        {%- endcomment -%}
+        {%- assign sort_phases = 'in_stock,incoming,backorder' | split: ',' -%}
+        <ul class="misc-product-card__variants">
+          {%- for sort_phase in sort_phases -%}
+            {%- for v in card_product.variants -%}
+              {%- assign v_inv = v.inventory_quantity | default: 0 -%}
+              {%- assign v_inc = v.metafields.custom.incoming_qty.value | default: 0 | plus: 0 -%}
+              {%- assign v_eta = v.metafields.custom.incoming_eta.value -%}
+
+              {%- assign v_phase = 'oos' -%}
+              {%- if v_inv > 0 -%}
+                {%- assign v_phase = 'in_stock' -%}
+              {%- elsif v_inc > 0 -%}
+                {%- assign v_phase = 'incoming' -%}
+              {%- elsif v.available -%}
+                {%- assign v_phase = 'backorder' -%}
+              {%- endif -%}
+
+              {%- if v_phase != sort_phase -%}{%- continue -%}{%- endif -%}
+
+              {%- assign v_cart_qty = 0 -%}
+              {%- for line_item in cart.items -%}
+                {%- if line_item.variant_id == v.id -%}
+                  {%- assign v_cart_qty = line_item.quantity -%}
+                  {%- break -%}
+                {%- endif -%}
+              {%- endfor -%}
+
+              <li class="misc-variant">
+                <div class="misc-variant__row">
+                  <span class="misc-variant__name">{{ v.title | escape }}</span>
+                  {%- if v_phase == 'in_stock' -%}
+                    <span class="misc-variant__state misc-variant__state--in">In stock {{ v_inv }}</span>
+                  {%- elsif v_phase == 'incoming' -%}
+                    <span class="misc-variant__state misc-variant__state--inbound">
+                      {{ v_inc }} incoming{% if v_eta != blank %} {{ v_eta | date: '%-d %b' }}{% endif %}
+                    </span>
+                  {%- elsif v_phase == 'backorder' -%}
+                    <span class="misc-variant__state misc-variant__state--backorder">On backorder</span>
+                  {%- endif -%}
+                </div>
+                <div
+                  class="misc-qty-stepper misc-qty-stepper--mini"
+                  data-misc-qty-stepper
+                  data-variant-id="{{ v.id }}"
+                >
+                  <button type="button" class="misc-qty-stepper__btn" data-misc-qty="-1" aria-label="Remove one {{ v.title | escape }} from cart">&minus;</button>
+                  <input type="number" value="{{ v_cart_qty }}" min="0" step="1" class="misc-qty-stepper__input" aria-label="Quantity of {{ v.title | escape }} in cart" data-misc-qty-input readonly>
+                  <button type="button" class="misc-qty-stepper__btn" data-misc-qty="+1" aria-label="Add one {{ v.title | escape }} to cart">+</button>
+                </div>
+              </li>
+            {%- endfor -%}
+          {%- endfor -%}
+        </ul>
+
+        {%- comment -%}
+          OOS variants → one compact muted line at the bottom.
+          Reads "Out of stock: Blue, Pink" — buyer sees at-a-glance
+          which colours aren't available without a stepper for each.
+        {%- endcomment -%}
+        {%- assign oos_names = '' -%}
+        {%- for v in card_product.variants -%}
+          {%- assign v_inv = v.inventory_quantity | default: 0 -%}
+          {%- assign v_inc = v.metafields.custom.incoming_qty.value | default: 0 | plus: 0 -%}
+          {%- if v_inv <= 0 and v_inc <= 0 and v.available == false -%}
+            {%- if oos_names != '' -%}
+              {%- assign oos_names = oos_names | append: ', ' -%}
+            {%- endif -%}
+            {%- assign oos_names = oos_names | append: v.title -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if oos_names != '' -%}
+          <p class="misc-product-card__oos-list">
+            <span class="misc-product-card__oos-label">Out of stock:</span>
+            {{ oos_names | escape }}
+          </p>
+        {%- endif -%}
+      {%- else -%}
+        {%- comment -%}
+          Single-variant: show stepper only if variant is orderable.
+          Out-of-stock (no stock, no incoming, policy=deny) products
+          render the "Out of stock" label above and no stepper.
+        {%- endcomment -%}
+        {%- assign sv_orderable = true -%}
+        {%- if inv <= 0 and inc_qty <= 0 and primary_variant.available == false -%}
+          {%- assign sv_orderable = false -%}
+        {%- endif -%}
+        {%- if sv_orderable -%}
+          {%- assign sv_cart_qty = 0 -%}
+          {%- for line_item in cart.items -%}
+            {%- if line_item.variant_id == primary_variant.id -%}
+              {%- assign sv_cart_qty = line_item.quantity -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+          <div
+            class="misc-qty-stepper"
+            data-misc-qty-stepper
+            data-variant-id="{{ primary_variant.id }}"
+          >
+            <button
+              type="button"
+              class="misc-qty-stepper__btn"
+              data-misc-qty="-1"
+              aria-label="Remove one from cart"
+            >
+              &minus;
+            </button>
+            <input
+              type="number"
+              value="{{ sv_cart_qty }}"
+              min="0"
+              step="1"
+              class="misc-qty-stepper__input"
+              aria-label="Quantity in cart"
+              data-misc-qty-input
+              readonly
+            >
+            <button
+              type="button"
+              class="misc-qty-stepper__btn"
+              data-misc-qty="+1"
+              aria-label="Add one to cart"
+            >
+              +
+            </button>
+          </div>
+        {%- endif -%}
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</article>
