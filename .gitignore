@@ -1,0 +1,12 @@
+.DS_Store
+.AppleDouble
+.LSOverride
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+node_modules/
+.shopify/
+.env
+.env.local
