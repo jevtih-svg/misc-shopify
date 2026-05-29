@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "current": {
     "logo_width": 70,
@@ -9,7 +18,7 @@
     "spacing_sections": 0,
     "spacing_grid_horizontal": 12,
     "spacing_grid_vertical": 12,
-    "animations_reveal_on_scroll": true,
+    "animations_reveal_on_scroll": false,
     "animations_hover_elements": "default",
     "buttons_border_thickness": 1,
     "buttons_border_opacity": 100,
@@ -117,6 +126,7 @@
     "show_cart_note": false,
     "cart_drawer_collection": "",
     "cart_color_scheme": "scheme-1",
+    "misc_dev_show_price": true,
     "sections": {
       "main-password-header": {
         "type": "main-password-header",
@@ -195,8 +205,7 @@
           "shadow": "#001128"
         }
       }
-    },
-    "misc_dev_show_price": true
+    }
   },
   "presets": {
     "Trade": {
