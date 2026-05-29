@@ -271,6 +271,33 @@
     {{ 'base.css' | asset_url | stylesheet_tag }}
     {{ 'misc-tokens.css' | asset_url | stylesheet_tag }}
     {{ 'misc-collection.css' | asset_url | stylesheet_tag }}
+
+    {%- comment -%}
+      MISC: inline synchronous layout-preference script. Runs
+      BEFORE the body is parsed, so by the time the grid + list
+      HTML reach the DOM, the right one is already hidden by CSS
+      (no flash of Grid before JS swaps to List).
+
+      Reads the URL `?layout=` first (shareable links win), then
+      falls back to localStorage. Adds `.misc-prefer-list` or
+      `.misc-prefer-grid-5` to <html>; CSS in misc-collection.css
+      keys off those classes to set the correct initial display.
+    {%- endcomment -%}
+    <script>
+      (function () {
+        try {
+          var params = new URLSearchParams(window.location.search);
+          var layout = params.get('layout');
+          if (layout !== 'grid-3' && layout !== 'grid-5' && layout !== 'list') {
+            layout = localStorage.getItem('misc_layout');
+          }
+          if (layout === 'grid-5' || layout === 'list') {
+            document.documentElement.classList.add('misc-prefer-' + layout);
+          }
+        } catch (e) { /* localStorage unavailable; default render */ }
+      })();
+    </script>
+
     <script src="{{ 'misc-quick-add.js' | asset_url }}" defer="defer"></script>
     {%- comment -%} MISC: view toggle + mobile chrome JS {%- endcomment -%}
     <script src="{{ 'misc-view-toggle.js' | asset_url }}" defer="defer"></script>

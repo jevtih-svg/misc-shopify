@@ -26,17 +26,17 @@
 {%- assign per_page = section.settings.products_per_page | plus: 0 -%}
 
 {%- comment -%}
-  MISC: resolve active view from URL param ?view=, falling back
-  to the section setting default_view. Allowed values: grid-3,
-  grid-5, list. If list view is disabled via section setting,
-  coerce to grid-3.
+  MISC: server-side default for active layout. The user-facing
+  layout toggle (Grid 3 / Grid 5 / List) runs entirely in JS via
+  the ?layout= URL param (handled in misc-view-toggle.js). Server
+  initially renders both grid and list, with the list hidden by
+  default; JS applies the correct visibility on load.
+
+  Shopify's ?view= param is reserved for template variants
+  (collection.per-N.json for per-page), so we use ?layout= to
+  avoid collision.
 {%- endcomment -%}
-{%- assign view_param = request.search_params['view'] -%}
-{%- if view_param == 'grid-3' or view_param == 'grid-5' or view_param == 'list' -%}
-  {%- assign active_view = view_param -%}
-{%- else -%}
-  {%- assign active_view = section.settings.default_view -%}
-{%- endif -%}
+{%- assign active_view = section.settings.default_view -%}
 {%- if active_view == 'list' and section.settings.enable_list_view == false -%}
   {%- assign active_view = 'grid-3' -%}
 {%- endif -%}
@@ -129,7 +129,7 @@
       <div
         class="product-grid-container{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
         id="ProductGridContainer"
-        data-active-view="{{ active_view }}"
+        data-active-layout="{{ active_view }}"
         {% if settings.animations_reveal_on_scroll %}data-cascade{% endif %}
       >
         {%- if collection.products.size == 0 -%}

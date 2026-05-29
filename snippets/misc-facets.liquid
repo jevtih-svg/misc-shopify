@@ -116,8 +116,15 @@
                     >
                   </label>
                 </div>
+                {%- comment -%}
+                  Range hint shows both ends per the mockup
+                  ("Range €1.50 to €245.00"). filter.range_min is
+                  Shopify's lower bound for the collection; falls
+                  back to 0 if the filter object doesn't expose it.
+                  MISC: changed from "Range up to X" to two-ended.
+                {%- endcomment -%}
                 <p class="misc-filter-group__hint">
-                  Range up to {{ filter.range_max | money }}
+                  Range {{ filter.range_min | default: 0 | money }} to {{ filter.range_max | money }}
                 </p>
               </div>
 

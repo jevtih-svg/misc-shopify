@@ -1,0 +1,59 @@
+{%- comment -%}
+  ============================================================
+  MISC PDP price block. Gated on misc_show_price.
+
+  Renders:
+    - "from €N,NN" for multi-variant, else "€N,NN"
+    - "RRP €N,NN" if the RRP metafield is set (not struck-through)
+    - Pack info line: "Pack of N · B2B trade price (ex. VAT)" or
+      "Single unit · ..." or "Single unit per variant · ..."
+
+  Inputs:
+    - product
+    - primary_variant
+    - variant_count
+    - misc_show_price (boolean)
+  ============================================================
+{%- endcomment -%}
+
+{%- liquid
+  assign rrp = primary_variant.metafields.custom.rrp.value | default: primary_variant.metafields.custom.RRP.value
+  assign pack = primary_variant.metafields.custom.case_pack.value | default: 0 | plus: 0
+-%}
+
+<div class="misc-pdp__price-block">
+
+  {%- if misc_show_price -%}
+    <div class="misc-pdp__price-row">
+      {%- if variant_count > 1 -%}
+        <span class="misc-pdp__price-from">from</span>
+      {%- endif -%}
+      <span class="misc-pdp__price">
+        {%- if product.price_varies -%}
+          {{ product.price_min | money }}
+        {%- else -%}
+          {{ primary_variant.price | money }}
+        {%- endif -%}
+      </span>
+      {%- if rrp != blank -%}
+        <span class="misc-pdp__rrp">RRP {{ rrp | money }}</span>
+      {%- endif -%}
+    </div>
+  {%- else -%}
+    <div class="misc-pdp__price-row misc-pdp__price-row--gated">
+      {%- render 'misc-price-cta' -%}
+    </div>
+  {%- endif -%}
+
+  <div class="misc-pdp__pack">
+    {%- if variant_count > 1 -%}
+      Single unit per variant
+    {%- elsif pack > 1 -%}
+      Pack of {{ pack }}
+    {%- else -%}
+      Single unit
+    {%- endif -%}
+    {%- if misc_show_price %} &middot; B2B trade price (ex. VAT){% endif -%}
+  </div>
+
+</div>

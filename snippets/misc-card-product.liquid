@@ -41,21 +41,24 @@
 {%- endcomment -%}
 
 {%- comment -%}
-  DEV FLAG: when TRUE, prices + stepper show for any visitor.
-  MUST be FALSE before merging to main.
-  Toggle via ./scripts/misc-preview.sh from the theme root.
+  Price gate: prices, RRP, stepper, and variant rows render only
+  when the visitor is a logged-in customer, OR when the theme
+  setting `misc_dev_show_price` is TRUE.
 
-  Default is FALSE (production safe). The gate is also rendered
-  identically in:
-    - sections/misc-main-product.liquid (PDP)
-    - sections/misc-main-search.liquid (search results)
-    - snippets/misc-cart-drawer-injection.liquid (backorder block)
+  The setting is defined in config/settings_schema.json under
+  "MISC: development" and defaults to FALSE. It must remain FALSE
+  on the published theme. Toggle locally via:
+    ./scripts/misc-preview.sh
+
+  The same gate pattern is rendered identically in:
+    - snippets/misc-product-list.liquid (list view)
+    - sections/misc-main-product.liquid (PDP — when forked)
+    - sections/misc-main-search.liquid (search — when forked)
+    - snippets/misc-cart-drawer-injection.liquid (cart drawer)
   Keep these in sync if the gating logic ever changes.
 {%- endcomment -%}
-{%- assign misc_dev_show_price = true -%}
-
 {%- assign misc_show_price = false -%}
-{%- if customer != blank or misc_dev_show_price -%}
+{%- if customer != blank or settings.misc_dev_show_price -%}
   {%- assign misc_show_price = true -%}
 {%- endif -%}
 
@@ -146,8 +149,13 @@
         class="misc-product-card__image"
       >
     {%- else -%}
-      <div class="misc-product-card__image misc-product-card__image--placeholder">
-        {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+      {%- comment -%}
+        No media: render the MISC unavailable placeholder (same
+        visual language as the PDP gallery placeholder). Replaces
+        Shopify's generic placeholder_svg_tag.
+      {%- endcomment -%}
+      <div class="misc-product-card__image misc-product-card__image--placeholder misc-product-card__image--unavailable">
+        <span class="misc-product-card__unavailable-label">Unavailable</span>
       </div>
     {%- endif -%}
   </a>
@@ -377,6 +385,14 @@
             >
               +
             </button>
+          </div>
+        {%- else -%}
+          {%- comment -%}
+            Single-variant truly OOS: render Unavailable label in
+            the stepper slot so the card reads "OOS, can't buy".
+          {%- endcomment -%}
+          <div class="misc-product-card__unavailable" aria-disabled="true">
+            <span class="misc-product-card__unavailable-label misc-product-card__unavailable-label--inline">Unavailable</span>
           </div>
         {%- endif -%}
       {%- endif -%}

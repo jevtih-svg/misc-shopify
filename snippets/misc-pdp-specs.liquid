@@ -1,0 +1,152 @@
+{%- comment -%}
+  ============================================================
+  MISC PDP specs block. 2-column line-separated grid.
+
+  Fields (per D2):
+    Brand · SKU/Parent SKU · UPQ · RRP · HS Code · Country of Origin
+
+  Always renders ALL 6 rows so the grid stays a clean
+  3×2 table even when some metafields are empty. Empty
+  values show "—" (em dash) instead of being hidden — the
+  earlier hide-when-empty approach caused floating cells.
+
+  RRP gates on customer per D1 (price-equivalent data).
+
+  Title "Product specifications" lives INSIDE the table head
+  (per D2). The Copy all action sits in the head's right slot.
+
+  Inputs:
+    - product
+    - primary_variant
+    - variant_count
+    - misc_show_price (boolean)
+  ============================================================
+{%- endcomment -%}
+
+{%- liquid
+  assign misc_brand = product.metafields.custom.Manufacturer.value
+  if misc_brand == blank
+    assign misc_brand = product.metafields.shopify.brand.value
+  endif
+  if misc_brand == blank
+    assign misc_brand = product.metafields.custom.brand.value
+  endif
+  if misc_brand == blank
+    assign misc_brand = product.metafields.custom.manufacturer.value
+  endif
+  if misc_brand == blank and product.vendor != 'Misc. Distribution'
+    assign misc_brand = product.vendor
+  endif
+  if misc_brand == blank
+    assign misc_brand = product.type
+  endif
+
+  assign hs_code = product.metafields.custom.hs_code.value | default: product.metafields.custom.HS.value
+  assign origin = product.metafields.custom.country_of_origin.value | default: product.metafields.custom.origin.value
+  assign upq = primary_variant.metafields.custom.case_pack.value | default: 1
+  assign rrp = primary_variant.metafields.custom.rrp.value | default: primary_variant.metafields.custom.RRP.value
+
+  assign dash = '—'
+  assign sku_label = 'SKU'
+  if variant_count > 1
+    assign sku_label = 'Parent SKU'
+  endif
+-%}
+
+<div class="misc-pdp__specs" data-misc-copy-source="specs">
+  <div class="misc-pdp__specs-head">
+    <span class="misc-pdp__specs-title">Product specifications</span>
+    <button type="button" class="misc-pdp__copy-btn" data-misc-copy="specs">Copy all</button>
+  </div>
+  <div class="misc-pdp__specs-grid">
+
+    <div class="misc-pdp__spec">
+      <span class="misc-pdp__spec-label">Brand</span>
+      <span class="misc-pdp__spec-value">
+        {%- if misc_brand != blank -%}
+          <strong>{{ misc_brand | escape }}</strong>
+        {%- else -%}
+          <span class="misc-pdp__spec-empty">{{ dash }}</span>
+        {%- endif -%}
+      </span>
+    </div>
+
+    <div class="misc-pdp__spec">
+      <span class="misc-pdp__spec-label">{{ sku_label }}</span>
+      <span class="misc-pdp__spec-value misc-pdp__spec-value--mono">
+        {%- if primary_variant.sku != blank -%}
+          {{ primary_variant.sku | escape }}
+        {%- else -%}
+          <span class="misc-pdp__spec-empty">{{ dash }}</span>
+        {%- endif -%}
+      </span>
+    </div>
+
+    <div class="misc-pdp__spec">
+      <span class="misc-pdp__spec-label">UPQ</span>
+      <span class="misc-pdp__spec-value">
+        {%- if upq != blank -%}
+          {{ upq }}
+        {%- else -%}
+          <span class="misc-pdp__spec-empty">{{ dash }}</span>
+        {%- endif -%}
+      </span>
+    </div>
+
+    <div class="misc-pdp__spec">
+      <span class="misc-pdp__spec-label">RRP</span>
+      <span class="misc-pdp__spec-value">
+        {%- if misc_show_price -%}
+          {%- if variant_count > 1 -%}
+            {%- assign rrp_min = nil -%}
+            {%- assign rrp_max = nil -%}
+            {%- for v in product.variants -%}
+              {%- assign v_rrp = v.metafields.custom.rrp.value | default: v.metafields.custom.RRP.value -%}
+              {%- if v_rrp != blank -%}
+                {%- assign v_rrp_int = v_rrp | plus: 0 -%}
+                {%- if rrp_min == nil or v_rrp_int < rrp_min -%}{%- assign rrp_min = v_rrp_int -%}{%- endif -%}
+                {%- if rrp_max == nil or v_rrp_int > rrp_max -%}{%- assign rrp_max = v_rrp_int -%}{%- endif -%}
+              {%- endif -%}
+            {%- endfor -%}
+            {%- if rrp_min == nil -%}
+              <span class="misc-pdp__spec-empty">{{ dash }}</span>
+            {%- elsif rrp_min == rrp_max -%}
+              {{ rrp_min | money }}
+            {%- else -%}
+              {{ rrp_min | money }} &ndash; {{ rrp_max | money }}
+            {%- endif -%}
+          {%- elsif rrp != blank -%}
+            {{ rrp | money }}
+          {%- else -%}
+            <span class="misc-pdp__spec-empty">{{ dash }}</span>
+          {%- endif -%}
+        {%- else -%}
+          {%- render 'misc-price-cta' -%}
+        {%- endif -%}
+      </span>
+    </div>
+
+    <div class="misc-pdp__spec">
+      <span class="misc-pdp__spec-label">HS Code</span>
+      <span class="misc-pdp__spec-value misc-pdp__spec-value--mono">
+        {%- if hs_code != blank -%}
+          {{ hs_code | escape }}
+        {%- else -%}
+          <span class="misc-pdp__spec-empty">{{ dash }}</span>
+        {%- endif -%}
+      </span>
+    </div>
+
+    <div class="misc-pdp__spec">
+      <span class="misc-pdp__spec-label">Country of Origin</span>
+      <span class="misc-pdp__spec-value">
+        {%- if origin != blank -%}
+          {{ origin | escape }}
+        {%- else -%}
+          <span class="misc-pdp__spec-empty">{{ dash }}</span>
+        {%- endif -%}
+      </span>
+    </div>
+
+  </div>
+</div>

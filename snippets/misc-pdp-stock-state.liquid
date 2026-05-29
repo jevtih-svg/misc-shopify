@@ -1,0 +1,93 @@
+{%- comment -%}
+  ============================================================
+  MISC PDP stock state. Always visible (per D1: logged-out
+  visitors see stock).
+
+  Single-variant states (mockup wording):
+    in_stock + incoming     → orange  "In stock N · M incoming DD MMM"
+    in_stock                → green   "In stock N"
+    incoming only           → orange  "M incoming DD MMM"
+    backorder (available)   → red     "On backorder"
+    out of stock (no avail) → grey    "Out of stock"
+
+  Multi-variant: neutral summary with 3 coloured dots and counts.
+
+  Inputs:
+    - product
+    - primary_variant
+    - variant_count
+  ============================================================
+{%- endcomment -%}
+
+{%- if variant_count > 1 -%}
+  {%- assign vc_in = 0 -%}
+  {%- assign vc_inbound = 0 -%}
+  {%- assign vc_back = 0 -%}
+  {%- assign vc_oos = 0 -%}
+  {%- for v in product.variants -%}
+    {%- assign vi = v.inventory_quantity | default: 0 -%}
+    {%- assign vinc = v.metafields.custom.incoming_qty.value | default: 0 | plus: 0 -%}
+    {%- if vi > 0 -%}
+      {%- assign vc_in = vc_in | plus: 1 -%}
+    {%- elsif vinc > 0 -%}
+      {%- assign vc_inbound = vc_inbound | plus: 1 -%}
+    {%- elsif v.available -%}
+      {%- assign vc_back = vc_back | plus: 1 -%}
+    {%- else -%}
+      {%- assign vc_oos = vc_oos | plus: 1 -%}
+    {%- endif -%}
+  {%- endfor -%}
+  <p class="misc-pdp__stock misc-pdp__stock--summary">
+    <span class="misc-pdp__stock-dots" aria-hidden="true">
+      <span class="misc-pdp__stock-dot misc-pdp__stock-dot--in"></span>
+      <span class="misc-pdp__stock-dot misc-pdp__stock-dot--inbound"></span>
+      <span class="misc-pdp__stock-dot misc-pdp__stock-dot--back"></span>
+    </span>
+    <strong>{{ variant_count }} variants</strong>
+    {%- assign parts = '' -%}
+    {%- if vc_in > 0 -%}{%- assign parts = parts | append: vc_in | append: ' in stock' -%}{%- endif -%}
+    {%- if vc_inbound > 0 -%}
+      {%- if parts != '' -%}{%- assign parts = parts | append: ' &middot; ' -%}{%- endif -%}
+      {%- assign parts = parts | append: vc_inbound | append: ' incoming' -%}
+    {%- endif -%}
+    {%- if vc_back > 0 -%}
+      {%- if parts != '' -%}{%- assign parts = parts | append: ' &middot; ' -%}{%- endif -%}
+      {%- assign parts = parts | append: vc_back | append: ' backorder' -%}
+    {%- endif -%}
+    {%- if vc_oos > 0 -%}
+      {%- if parts != '' -%}{%- assign parts = parts | append: ' &middot; ' -%}{%- endif -%}
+      {%- assign parts = parts | append: vc_oos | append: ' out of stock' -%}
+    {%- endif -%}
+    {%- if parts != '' %} &middot; <span class="misc-pdp__stock-detail">{{ parts }}</span>{% endif -%}
+  </p>
+{%- else -%}
+  {%- assign inv = primary_variant.inventory_quantity | default: 0 -%}
+  {%- assign inc_qty = primary_variant.metafields.custom.incoming_qty.value | default: 0 | plus: 0 -%}
+  {%- assign inc_eta = primary_variant.metafields.custom.incoming_eta.value -%}
+  {%- if inv > 0 and inc_qty > 0 -%}
+    <p class="misc-pdp__stock misc-pdp__stock--inbound">
+      <span class="misc-pdp__stock-dot" aria-hidden="true"></span>
+      In stock {{ inv }} &middot; {{ inc_qty }} incoming{% if inc_eta != blank %} {{ inc_eta | date: '%-d %b' }}{% endif %}
+    </p>
+  {%- elsif inv > 0 -%}
+    <p class="misc-pdp__stock misc-pdp__stock--in">
+      <span class="misc-pdp__stock-dot" aria-hidden="true"></span>
+      In stock {{ inv }}
+    </p>
+  {%- elsif inc_qty > 0 -%}
+    <p class="misc-pdp__stock misc-pdp__stock--inbound">
+      <span class="misc-pdp__stock-dot" aria-hidden="true"></span>
+      {{ inc_qty }} incoming{% if inc_eta != blank %} {{ inc_eta | date: '%-d %b' }}{% endif %}
+    </p>
+  {%- elsif primary_variant.available -%}
+    <p class="misc-pdp__stock misc-pdp__stock--backorder">
+      <span class="misc-pdp__stock-dot" aria-hidden="true"></span>
+      On backorder
+    </p>
+  {%- else -%}
+    <p class="misc-pdp__stock misc-pdp__stock--oos">
+      <span class="misc-pdp__stock-dot" aria-hidden="true"></span>
+      Out of stock
+    </p>
+  {%- endif -%}
+{%- endif -%}

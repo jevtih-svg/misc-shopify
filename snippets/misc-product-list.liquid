@@ -33,10 +33,13 @@
   ============================================================
 {%- endcomment -%}
 
-{%- comment -%} Match the dev flag pattern from misc-card-product.liquid. {%- endcomment -%}
-{%- assign misc_dev_show_price = true -%}
+{%- comment -%}
+  Price gate — same pattern as misc-card-product.liquid.
+  Reads settings.misc_dev_show_price (default FALSE on production).
+  Toggle locally via ./scripts/misc-preview.sh.
+{%- endcomment -%}
 {%- assign misc_show_price = false -%}
-{%- if customer != blank or misc_dev_show_price -%}
+{%- if customer != blank or settings.misc_dev_show_price -%}
   {%- assign misc_show_price = true -%}
 {%- endif -%}
 
@@ -90,7 +93,15 @@
     -%}
 
     {%- if variant_count > 1 -%}
-      {%- comment -%} Multi-variant: parent row + one row per variant. {%- endcomment -%}
+      {%- comment -%}
+        Multi-variant: parent row + one row per variant.
+        Parent row has exactly 3 cells. The name cell spans
+        cols 3 to -1 (last) explicitly so no auto-placement
+        ambiguity. An auto-placed empty trailing cell can be
+        bumped to the NEXT row by grid auto-flow under certain
+        edge cases, which then shifts every subsequent row's
+        cells by one column.
+      {%- endcomment -%}
       <li class="list-row list-row--parent">
         <span class="list-cell list-cell--preview">
           {% render 'misc-list-preview-icon', product: product %}
@@ -100,7 +111,6 @@
           {{ product.title | escape }}
           <span class="list-cell__hint">{{ variant_count }} variants</span>
         </a>
-        <span class="list-cell"></span>
       </li>
 
       {%- for v in product.variants -%}
@@ -166,6 +176,8 @@
                   <input type="number" value="{{ v_cart_qty }}" min="0" step="1" class="misc-qty-stepper__input" data-misc-qty-input readonly>
                   <button type="button" class="misc-qty-stepper__btn" data-misc-qty="+1" aria-label="Add one {{ v.title | escape }}">+</button>
                 </div>
+              {%- else -%}
+                <span class="misc-stepper-placeholder" aria-label="Out of stock, not available for purchase">Unavailable</span>
               {%- endif -%}
             </div>
           {%- else -%}
@@ -223,6 +235,8 @@
                 <input type="number" value="{{ v_cart_qty }}" min="0" step="1" class="misc-qty-stepper__input" data-misc-qty-input readonly>
                 <button type="button" class="misc-qty-stepper__btn" data-misc-qty="+1" aria-label="Add one to cart">+</button>
               </div>
+            {%- else -%}
+              <span class="misc-stepper-placeholder" aria-label="Out of stock, not available for purchase">Unavailable</span>
             {%- endif -%}
           </div>
         {%- else -%}

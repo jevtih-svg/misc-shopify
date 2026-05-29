@@ -730,9 +730,11 @@
   margin: 0 !important;
   padding: 0 !important;
   list-style: none;
-  /* The vertical sidebar-grid boundary line lives on the grid's
-     left edge. Each cell adds its own right + bottom borders. */
-  border-left: 3px solid var(--c-ink);
+  /* No border-left here — #ProductGridContainer's border-left
+     already provides the sidebar/grid boundary line. Stacking
+     both produced a doubled 6px line. List view (.product-list)
+     also relies on ProductGridContainer's border-left, so the
+     two views share the same left frame. */
 }
 
 .collection .product-grid > li,
@@ -1347,6 +1349,34 @@
   grid-template-columns: repeat(5, 1fr) !important;
 }
 
+/* ============================================================
+   LAYOUT PREFERENCE FROM <html> CLASS
+
+   The inline head script in theme.liquid reads the buyer's saved
+   layout from URL or localStorage and adds one of these classes
+   to <html> BEFORE the body parses. These rules then apply
+   immediately on first paint, eliminating the flash where the
+   grid would render first and JS would later swap it to list.
+
+   IMPORTANT: scoped to desktop only (>=1024px). On narrow
+   viewports the list view can't fit (11 columns of B2B detail);
+   the mobile responsive block below forces grid view regardless.
+   Without this media query, the !important `display: grid` rule
+   here would override the mobile hide-list rule and make the
+   table overflow horizontally at tablet/phone widths.
+   ============================================================ */
+@media (min-width: 1024px) {
+  html.misc-prefer-list .product-grid {
+    display: none !important;
+  }
+  html.misc-prefer-list .product-list {
+    display: grid !important;
+  }
+}
+html.misc-prefer-grid-5 .product-grid {
+  grid-template-columns: repeat(5, 1fr) !important;
+}
+
 /* Left frame line for the catalog body. Separates sidebar from
    product grid / list. Was on .grid-wrap before but the live
    theme uses #ProductGridContainer directly so the border needs
@@ -1390,6 +1420,26 @@
 }
 
 .list-row { display: contents; }
+
+/* Pin every cell to its column explicitly. Without this, CSS Grid
+   auto-flow walks through items in document order and places them
+   in the next available cell. With an empty stepper cell on OOS
+   rows the auto-flow algorithm can collapse the cell to zero width
+   and then mis-place subsequent rows, cascading column shifts
+   through the table. Explicit grid-column eliminates all auto-flow
+   ambiguity — each cell lands in its assigned column regardless
+   of content. */
+.list-row > .list-cell--preview  { grid-column: 1; }
+.list-row > .list-cell--brand    { grid-column: 2; }
+.list-row > .list-cell--name     { grid-column: 3; }
+.list-row > .list-cell--sku      { grid-column: 4; }
+.list-row > .list-cell--upq      { grid-column: 5; }
+.list-row > .list-cell--hs       { grid-column: 6; }
+.list-row > .list-cell--country  { grid-column: 7; }
+.list-row > .list-cell--stock    { grid-column: 8; }
+.list-row > .list-cell--rrp      { grid-column: 9; }
+.list-row > .list-cell--price    { grid-column: 10; }
+.list-row > .list-cell--stepper  { grid-column: 11; }
 
 .list-cell {
   position: relative;
@@ -1509,13 +1559,42 @@
   border: 1.5px solid var(--c-ink);
 }
 
+/* Stepper-sized placeholder for out-of-stock rows. Same footprint
+   as the mini-stepper so the right edge of the table stays aligned
+   between orderable and OOS rows. Muted ink-faint border + text
+   reads as "not interactive" without a button affordance. */
+.misc-stepper-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 130px;
+  height: 36px;
+  border: 1.5px dashed var(--c-ink-faint);
+  border-radius: var(--radius-sm);
+  background: var(--c-bg-subtle);
+  color: var(--c-ink-mute);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+}
+.list-row--variant .misc-stepper-placeholder {
+  width: 110px;
+  height: 28px;
+  font-size: 11px;
+}
+
 /* Multi-variant in list view */
 .list-row--parent .list-cell {
   background: var(--c-bg-subtle);
   border-bottom: 1px solid var(--c-line);
 }
 .list-row--parent .list-cell--name {
-  grid-column: 3 / 11;
+  /* Span from col 3 to the end of the grid (-1 = last grid line).
+     Snippet renders only 3 cells (preview, brand, name) so this
+     name cell covers the entire remaining width with no auto-
+     placed trailing cell. */
+  grid-column: 3 / -1;
   font-weight: var(--fw-medium);
   font-size: var(--fs-sm);
   color: var(--c-ink);

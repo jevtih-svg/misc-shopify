@@ -111,24 +111,33 @@
       </div>
 
       {%- comment -%}
-        Per-page dropdown removed. Shopify Liquid has no reliable
-        way to read arbitrary URL query params across theme versions,
-        so the dropdown navigation can't propagate to server-side
-        pagination. Merchant configures per_page in the section
-        settings in the theme editor instead. The current per_page
-        is rendered above the count for visibility.
+        Per-page dropdown. Driven by Shopify's native template
+        variant mechanism: ?view=per-N loads collection.per-N.json
+        which overrides the section's products_per_page setting.
+        The current value comes from section.settings.products_per_page
+        (which the active template overrides).
       {%- endcomment -%}
-      <span class="sort-control__count sort-control__per-page-info">{{ per_page }} per page</span>
+      <div class="sort-control sort-control--per-page">
+        <label class="sort-control__label" for="MiscPerPage">Per page:</label>
+        <select id="MiscPerPage" class="sort-control__select">
+          {%- assign per_page_options = '24,48,72,96' | split: ',' -%}
+          {%- assign current_per_page_num = section.settings.products_per_page | plus: 0 -%}
+          {%- for option in per_page_options -%}
+            {%- assign option_num = option | plus: 0 -%}
+            <option value="{{ option }}"{% if option_num == current_per_page_num %} selected{% endif %}>{{ option }}</option>
+          {%- endfor -%}
+        </select>
+      </div>
 
       <span class="sort-control__count">{{ collection.products_count }} products</span>
 
-      {%- comment -%} View toggle: Grid 3 / Grid 5 / List. JS in misc-view-toggle.js
-                     handles the swap + URL update. {%- endcomment -%}
+      {%- comment -%} Layout toggle: Grid 3 / Grid 5 / List. JS in misc-view-toggle.js
+                     handles the swap + URL update via ?layout=. {%- endcomment -%}
       <div class="view-toggle" role="group" aria-label="View density">
-        <button type="button" class="view-toggle__btn{% if active_view == 'grid-3' %} is-active{% endif %}" data-view="grid-3">Grid 3</button>
-        <button type="button" class="view-toggle__btn{% if active_view == 'grid-5' %} is-active{% endif %}" data-view="grid-5">Grid 5</button>
+        <button type="button" class="view-toggle__btn{% if active_view == 'grid-3' %} is-active{% endif %}" data-layout="grid-3">Grid 3</button>
+        <button type="button" class="view-toggle__btn{% if active_view == 'grid-5' %} is-active{% endif %}" data-layout="grid-5">Grid 5</button>
         {%- if enable_list_view -%}
-          <button type="button" class="view-toggle__btn{% if active_view == 'list' %} is-active{% endif %}" data-view="list">List</button>
+          <button type="button" class="view-toggle__btn{% if active_view == 'list' %} is-active{% endif %}" data-layout="list">List</button>
         {%- endif -%}
       </div>
     </div>
