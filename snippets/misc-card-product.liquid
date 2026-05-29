@@ -44,6 +44,13 @@
   DEV FLAG: when TRUE, prices + stepper show for any visitor.
   MUST be FALSE before merging to main.
   Toggle via ./scripts/misc-preview.sh from the theme root.
+
+  Default is FALSE (production safe). The gate is also rendered
+  identically in:
+    - sections/misc-main-product.liquid (PDP)
+    - sections/misc-main-search.liquid (search results)
+    - snippets/misc-cart-drawer-injection.liquid (backorder block)
+  Keep these in sync if the gating logic ever changes.
 {%- endcomment -%}
 {%- assign misc_dev_show_price = true -%}
 
@@ -170,9 +177,7 @@
           {%- endif -%}
         </span>
       {%- else -%}
-        <a href="{{ routes.account_login_url }}" class="misc-product-card__price-cta">
-          Login to see price
-        </a>
+        {%- render 'misc-price-cta' -%}
       {%- endif -%}
     </div>
 

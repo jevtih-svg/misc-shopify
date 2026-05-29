@@ -1,0 +1,63 @@
+{%- comment -%}
+  ============================================================
+  MISC list-view image preview icon.
+
+  Small grey image-frame button in the leftmost cell of each
+  list row. Hover (with 150ms delay) reveals a 260px floating
+  popover with the product image, name, and SKU.
+
+  CSS in misc-collection.css handles the popover positioning,
+  fade-in transition, and hover persistence.
+
+  Inputs:
+    - product  : the product object (for parent / single-variant rows)
+    - variant  : optional variant object. When passed, prefer the
+                 variant's own featured image; fall back to product.
+    - label    : optional display name override (variant.title etc.)
+  ============================================================
+{%- endcomment -%}
+
+{%- liquid
+  assign show_variant = false
+  if variant != blank
+    assign show_variant = true
+  endif
+
+  if show_variant and variant.featured_image
+    assign img = variant.featured_image
+    assign sku_text = variant.sku
+    assign name_text = product.title | append: ' - ' | append: variant.title
+  else
+    assign img = product.featured_media
+    if show_variant
+      assign sku_text = variant.sku
+      assign name_text = product.title | append: ' - ' | append: variant.title
+    else
+      assign first_variant = product.selected_or_first_available_variant
+      assign sku_text = first_variant.sku
+      assign name_text = product.title
+    endif
+  endif
+
+  assign img_url = img | image_url: width: 600
+  assign img_alt = img.alt | default: name_text
+-%}
+
+<button type="button" class="preview-trigger" aria-label="Preview image of {{ name_text | escape }}">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect x="3" y="3" width="18" height="18" rx="2"/>
+    <circle cx="9" cy="9" r="1.5"/>
+    <polyline points="21 15 16 10 5 21"/>
+  </svg>
+</button>
+<div class="preview-popover" role="tooltip">
+  <div class="preview-popover__image">
+    {%- if img -%}
+      <img src="{{ img_url }}" alt="{{ img_alt | escape }}" loading="lazy" width="260" height="260">
+    {%- endif -%}
+  </div>
+  <div class="preview-popover__caption">
+    <span class="preview-popover__name">{{ name_text | escape }}</span>
+    <span class="preview-popover__sku">{{ sku_text | escape }}</span>
+  </div>
+</div>

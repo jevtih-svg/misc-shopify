@@ -1,0 +1,16 @@
+{%- comment -%}
+  Reusable "Log in to see pricing" CTA. Renders wherever a price
+  would normally render for logged-out visitors. Keeps the wording
+  and link target consistent across card, PDP, search, cart, etc.
+
+  Inputs (optional):
+    - block_modifier : 'small' | '' (default '')
+                       'small' renders a smaller version for tight
+                       slots like search autocomplete results.
+{%- endcomment -%}
+<a
+  href="{{ routes.account_login_url }}"
+  class="misc-price-cta{% if block_modifier == 'small' %} misc-price-cta--small{% endif %}"
+>
+  Log in to see pricing
+</a>

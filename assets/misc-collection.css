@@ -214,6 +214,55 @@
   min-width: 0;
 }
 
+/* Right-cell tools cluster: sort + per-page + count + view toggle.
+   `margin-left: auto` pins it to the right edge of the filter bar
+   regardless of whether any pills are rendered (when pills is empty,
+   the empty div has 0 width and `flex: 1` doesn't always grow it
+   reliably across browsers; margin-left:auto is the bulletproof way
+   to push a flex item to the end). */
+.misc-filter-bar__tools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-shrink: 0;
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.sort-control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.sort-control__label {
+  color: var(--c-ink-mute);
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-sm);
+}
+.sort-control__select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0 var(--space-4) 0 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--c-ink);
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpolyline points='3,5 6,8 9,5' fill='none' stroke='%230A0A0A' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: 12px 12px;
+}
+.sort-control__select:focus { outline: none; }
+.sort-control__count {
+  color: var(--c-ink-mute);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+
 .misc-filter-bar__sort {
   display: flex;
   align-items: center;
@@ -670,13 +719,13 @@
 
 /* ============================================================
    PRODUCT GRID
-   5 columns desktop, edge-to-edge, 3px ink hairlines around
-   every cell. The grid-wrap carries the boundary line so it
-   spans the full catalog body height.
+   Default 3 columns on desktop. Switchable to 5 via the view
+   toggle (adds .is-cols-5 class; rule lives further down in
+   the VIEW TOGGLE section).
    ============================================================ */
 .collection .product-grid {
   display: grid !important;
-  grid-template-columns: repeat(5, 1fr) !important;
+  grid-template-columns: repeat(3, 1fr) !important;
   gap: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -809,7 +858,9 @@
   color: var(--c-ink);
 }
 
-.misc-product-card__price-cta {
+.misc-product-card__price-cta,
+.misc-price-cta {
+  display: inline-block;
   font-size: var(--fs-xs);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -817,10 +868,16 @@
   color: var(--c-ink);
   text-decoration: none;
   border-bottom: 1px solid currentColor;
+  padding-bottom: 2px;
 }
 
-.misc-product-card__price-cta:hover {
+.misc-product-card__price-cta:hover,
+.misc-price-cta:hover {
   color: var(--c-ink-mute);
+}
+
+.misc-price-cta--small {
+  font-size: var(--fs-2xs);
 }
 
 /* Stock state line (always sits below the price) */
@@ -1153,9 +1210,8 @@
     flex: 0 0 280px;
     max-width: 280px;
   }
-  .collection .product-grid {
-    grid-template-columns: repeat(4, 1fr) !important;
-  }
+  /* No column override at this width — let the view toggle apply
+     (3 default, 5 if user clicked Grid 5). */
 }
 
 @media (max-width: 1023px) {
@@ -1163,7 +1219,10 @@
     flex: 0 0 260px;
     max-width: 260px;
   }
-  .collection .product-grid {
+  /* Force 3 cols below laptop regardless of toggle (Grid 5 button
+     is hidden in the mobile responsive block below). */
+  .collection .product-grid,
+  .collection .product-grid.is-cols-5 {
     grid-template-columns: repeat(3, 1fr) !important;
   }
 }
@@ -1242,3 +1301,594 @@
     font-size: var(--fs-sm);
   }
 }
+
+/* ============================================================
+   VIEW TOGGLE (Grid 3 / Grid 5 / List)
+   Inside the filter bar's right tools cluster.
+   ============================================================ */
+.view-toggle {
+  display: inline-flex;
+  border: 1.5px solid var(--c-ink);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.view-toggle__btn {
+  appearance: none;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  border: 0;
+  border-right: 1px solid var(--c-ink);
+  padding: 6px var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+}
+.view-toggle__btn:last-child { border-right: 0; }
+.view-toggle__btn.is-active {
+  background: var(--c-ink);
+  color: var(--c-bg);
+}
+.view-toggle__btn:hover:not(.is-active) { background: var(--c-bg-subtle); }
+
+.sort-control--per-page { /* same styles as .sort-control */ }
+
+/* When the list view is active, hide the grid. The grid carries
+   `display: grid` from its own rule, which beats the [hidden]
+   UA stylesheet. Force display: none. Same for the list when grid
+   view is active. */
+.product-grid[hidden],
+.product-list[hidden] { display: none !important; }
+
+/* Grid 5 column variant */
+.collection .product-grid.is-cols-5 {
+  grid-template-columns: repeat(5, 1fr) !important;
+}
+
+/* Left frame line for the catalog body. Separates sidebar from
+   product grid / list. Was on .grid-wrap before but the live
+   theme uses #ProductGridContainer directly so the border needs
+   to live there. */
+#ProductGridContainer {
+  border-left: 3px solid var(--c-ink);
+  min-width: 0;
+}
+
+/* ============================================================
+   LIST VIEW (condensed table-style row layout)
+
+   Single grid container (.product-list) holds every cell. Each
+   row (.list-row) uses `display: contents` so its children
+   become direct grid items of the outer grid. Columns auto-size
+   to their widest content ACROSS ALL ROWS and align perfectly.
+   ============================================================ */
+.product-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--c-bg);
+  /* No right border — horizontal row lines extend to the viewport
+     edge naturally. A right vertical line would feel excessive
+     against the wide table. */
+
+  display: grid;
+  /* Preview | Brand | Name | SKU | UPQ | HS | Origin | Stock | RRP | Price | Stepper */
+  grid-template-columns:
+    40px
+    max-content
+    minmax(160px, 1fr)
+    max-content
+    max-content
+    max-content
+    max-content
+    minmax(140px, max-content)
+    max-content
+    max-content
+    max-content;
+}
+
+.list-row { display: contents; }
+
+.list-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: var(--space-3);
+  border-bottom: 3px solid var(--c-ink);
+  background: var(--c-bg);
+  font-size: var(--fs-xs);
+  color: var(--c-ink);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lh-body);
+  min-width: 0;
+  white-space: nowrap;
+}
+
+/* Inset grey vertical divider via pseudo-element so it sits BEHIND
+   the heavy 3px row borders instead of cutting through them. */
+.list-row > .list-cell:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--c-line);
+  pointer-events: none;
+}
+.list-row > .list-cell:first-child { padding-left: var(--space-5); }
+.list-row > .list-cell:last-child  { padding-right: var(--space-5); }
+
+/* Header row */
+.list-row--head .list-cell {
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--c-ink-mute);
+}
+/* Header alignment per column (preview=1, brand=2, name=3, sku=4,
+   upq=5, hs=6, origin=7, stock=8, rrp=9, price=10, stepper=11). */
+.list-row--head > .list-cell:nth-child(5),
+.list-row--head > .list-cell:nth-child(6),
+.list-row--head > .list-cell:nth-child(7),
+.list-row--head > .list-cell:nth-child(8),
+.list-row--head > .list-cell:nth-child(9),
+.list-row--head > .list-cell:nth-child(10) {
+  justify-content: center !important;
+}
+
+/* Cell type modifiers */
+.list-cell--brand {
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-2xs);
+  padding-right: var(--space-5);
+}
+.list-cell--name {
+  font-size: var(--fs-sm);
+  color: var(--c-ink);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.list-cell--name:hover { text-decoration: underline; }
+.list-cell--sku, .list-cell--hs {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  color: var(--c-ink-mute);
+}
+.list-cell--hs { justify-content: center; }
+.list-cell--upq, .list-cell--country {
+  justify-content: center;
+  font-size: var(--fs-xs);
+  color: var(--c-ink-mute);
+}
+
+/* Stock cell: column flex so multiple states stack on multiple
+   lines. Sentence case (no uppercase). */
+.list-cell--stock {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0;
+  text-transform: none;
+  gap: 2px;
+  white-space: normal;
+}
+.list-cell--stock-in        { color: var(--c-state-instock); }
+.list-cell--stock-inbound   { color: var(--c-state-inbound); }
+.list-cell--stock-backorder { color: var(--c-state-backorder); }
+.list-cell--stock-oos       { color: var(--c-ink-mute); }
+
+.list-cell--rrp {
+  color: var(--c-ink-mute);
+  font-size: var(--fs-2xs);
+  justify-content: center;
+}
+.list-cell--price {
+  font-weight: var(--fw-medium);
+  font-size: var(--fs-md);
+  justify-content: center;
+}
+.list-cell--stepper {
+  justify-content: flex-end;
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+.list-cell--stepper .mini-stepper {
+  width: 130px;
+  height: 36px;
+  border: 1.5px solid var(--c-ink);
+}
+
+/* Multi-variant in list view */
+.list-row--parent .list-cell {
+  background: var(--c-bg-subtle);
+  border-bottom: 1px solid var(--c-line);
+}
+.list-row--parent .list-cell--name {
+  grid-column: 3 / 11;
+  font-weight: var(--fw-medium);
+  font-size: var(--fs-sm);
+  color: var(--c-ink);
+}
+.list-row--parent .list-cell--name::after { display: none; }
+.list-cell__hint {
+  margin-left: var(--space-3);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-regular);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  color: var(--c-ink-mute);
+}
+.list-row--variant .list-cell {
+  border-bottom: 1px solid var(--c-line);
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+  font-size: var(--fs-2xs);
+}
+.list-row--variant .list-cell--stepper {
+  padding-top: var(--space-1);
+  padding-bottom: var(--space-1);
+}
+.list-row--variant .list-cell--stepper .mini-stepper {
+  height: 28px;
+  width: 110px;
+}
+.list-row--variant .list-cell--name {
+  padding-left: 28px;
+  position: relative;
+  font-size: var(--fs-xs);
+  color: var(--c-ink);
+}
+.list-row--variant .list-cell--name::before {
+  content: "";
+  position: absolute;
+  left: var(--space-3);
+  top: 50%;
+  width: 10px;
+  height: 1px;
+  background: var(--c-ink-mute);
+}
+.list-row--variant-last .list-cell { border-bottom: 3px solid var(--c-ink); }
+
+/* Filtered-out rows (search) */
+.list-row.is-hidden,
+.product-grid > li.is-hidden { display: none !important; }
+
+/* ============================================================
+   LIST VIEW IMAGE PREVIEW POPOVER
+   Hover the eye/photo icon to reveal a 260px floating popover
+   with the product image. 150ms delay to suppress flicker on
+   cursor sweeps.
+   ============================================================ */
+.list-cell--preview {
+  padding: var(--space-2) 0 !important;
+  justify-content: center;
+}
+.preview-trigger {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--c-ink-mute);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: color 100ms ease, background 100ms ease;
+}
+.preview-trigger:hover,
+.preview-trigger:focus-visible {
+  color: var(--c-ink);
+  background: var(--c-bg-subtle);
+  outline: none;
+}
+.preview-trigger svg { width: 18px; height: 18px; display: block; }
+
+.preview-popover {
+  position: absolute;
+  left: calc(100% + var(--space-2));
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  width: 260px;
+  background: var(--c-bg);
+  border: 3px solid var(--c-ink);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.10);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 120ms ease, visibility 120ms ease;
+}
+.list-cell--preview:hover .preview-popover,
+.preview-trigger:focus-visible ~ .preview-popover {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 150ms;
+  pointer-events: auto;
+}
+.preview-popover__image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--c-bg-subtle);
+}
+.preview-popover__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.preview-popover__caption {
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  border-top: 1px solid var(--c-line);
+  font-size: var(--fs-2xs);
+  white-space: normal;
+}
+.preview-popover__name {
+  display: block;
+  font-weight: var(--fw-medium);
+  color: var(--c-ink);
+  font-size: var(--fs-xs);
+  line-height: 1.3;
+}
+.preview-popover__sku {
+  display: block;
+  font-family: var(--font-mono);
+  color: var(--c-ink-mute);
+  margin-top: 2px;
+}
+
+/* ============================================================
+   MOBILE-ONLY CHROME (Phase 10)
+   - "Best on desktop" notice banner
+   - Mobile filter trigger button in filter bar
+   - Sidebar drawer header/footer
+   ============================================================ */
+.mobile-desktop-notice {
+  display: none;
+  position: relative;
+  background: var(--c-bg-subtle);
+  border-bottom: 1px solid var(--c-line);
+  padding: var(--space-2) 36px var(--space-2) var(--space-4);
+  font-size: var(--fs-2xs);
+  color: var(--c-ink-mute);
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}
+.mobile-desktop-notice.is-dismissed { display: none !important; }
+.mobile-desktop-notice__close {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 6px 10px;
+  color: var(--c-ink-mute);
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.filter-bar__mobile-trigger {
+  display: none;
+  appearance: none;
+  background: var(--c-bg);
+  border: 0;
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-sans);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  color: var(--c-ink);
+  cursor: pointer;
+  align-items: center;
+  gap: var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  border-right: 3px solid var(--c-ink);
+  flex: 1 1 auto;
+  min-height: 48px;
+}
+.filter-bar__mobile-trigger svg { width: 18px; height: 18px; }
+.filter-bar__mobile-trigger:hover { background: var(--c-bg-subtle); }
+.filter-bar__mobile-trigger .misc-filter-bar__count { margin-left: auto; }
+
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+.sidebar-backdrop.is-open {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+.sidebar__mobile-header,
+.sidebar__mobile-footer { display: none; }
+.sidebar__mobile-header {
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 3px solid var(--c-ink);
+  background: var(--c-bg);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.sidebar__mobile-title {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+.sidebar__mobile-close {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: var(--space-2);
+  color: var(--c-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sidebar__mobile-close svg { width: 22px; height: 22px; }
+.sidebar__mobile-footer {
+  padding: var(--space-3) var(--space-4);
+  border-top: 3px solid var(--c-ink);
+  background: var(--c-bg);
+  position: sticky;
+  bottom: 0;
+}
+.sidebar__mobile-apply {
+  appearance: none;
+  width: 100%;
+  background: var(--c-ink);
+  color: var(--c-bg);
+  border: 0;
+  padding: var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  min-height: 48px;
+}
+body.drawer-open { overflow: hidden; }
+
+/* ============================================================
+   RESPONSIVE BREAKPOINTS (Phase 10)
+   - Below 1024px : sidebar becomes drawer, list view hidden
+   - Below 768px  : 1-col horizontal cards, mobile filter bar
+   - Below 420px  : tighter card padding, smaller image
+   ============================================================ */
+
+@media (max-width: 1023px) {
+  /* Hide the inline sidebar layout cells */
+  .misc-filter-bar__left { display: none; }
+  .misc-filter-bar__right { border-left: 0; flex-wrap: wrap; }
+
+  /* Frame the catalog horizontally on mobile. Filter bar gets
+     left + right borders; grid-wrap's default border-left
+     continues as the left frame line below the filter bar. */
+  .misc-filter-bar {
+    border-left: 3px solid var(--c-ink);
+    border-right: 3px solid var(--c-ink);
+  }
+
+  /* Show the mobile trigger */
+  .filter-bar__mobile-trigger { display: inline-flex; }
+
+  /* Sidebar becomes drawer */
+  .facets-vertical .facets-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 340px;
+    max-width: 90vw;
+    z-index: 999;
+    background: var(--c-bg);
+    border-right: 3px solid var(--c-ink);
+    transform: translateX(-100%);
+    transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    flex: none;
+    max-width: 340px;
+  }
+  .facets-vertical .facets-wrapper.is-open { transform: translateX(0); }
+
+  .sidebar__mobile-header,
+  .sidebar__mobile-footer { display: flex; }
+
+  /* Hide list view, Per page, Grid 5 below laptop */
+  .view-toggle__btn[data-view="list"],
+  .view-toggle__btn[data-view="grid-5"] { display: none; }
+  .sort-control--per-page { display: none; }
+
+  /* If user lands on list view at this size, force grid */
+  .product-list { display: none !important; }
+}
+
+@media (max-width: 767px) {
+  /* "Best on desktop" notice visible */
+  .mobile-desktop-notice { display: flex; }
+
+  /* Mobile filter bar: two equal-width buttons */
+  .misc-filter-bar { padding: 0; }
+  .filter-bar__mobile-trigger { flex: 1 1 50%; justify-content: center; min-height: 56px; }
+  .misc-filter-bar__right { flex: 1 1 50%; padding: 0; justify-content: center; border-left: 0; flex-wrap: nowrap; }
+  .misc-filter-bar__pills { display: none; }
+  .misc-filter-bar__tools { flex: 1; justify-content: center; padding: var(--space-3); min-height: 56px; gap: var(--space-2); }
+  .sort-control__label { display: none; }
+  .sort-control__count { display: none; }
+  .view-toggle { display: none !important; }
+
+  /* Grid: 1 col, horizontal cards */
+  .collection .product-grid { grid-template-columns: 1fr !important; }
+
+  /* Horizontal card layout (image left, info right) */
+  .misc-product-card {
+    display: grid !important;
+    grid-template-columns: 120px 1fr;
+    column-gap: var(--space-3);
+    padding: var(--space-3);
+  }
+  .misc-product-card__media {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    align-self: start;
+    width: 120px;
+    height: 120px;
+    margin: 0;
+  }
+  .misc-product-card__top-row { grid-column: 2; grid-row: 1; padding: 0; font-size: var(--fs-2xs); }
+  .misc-product-card__sku { grid-column: 2; grid-row: 2; padding: 0; margin: 0; align-self: start; }
+  .misc-product-card__body { grid-column: 2; grid-row: 3; padding: 0; margin-top: var(--space-1); }
+  .misc-product-card__name { font-size: var(--fs-sm); -webkit-line-clamp: 2; min-height: auto; }
+  .misc-product-card__price { font-size: var(--fs-md); }
+
+  /* Bigger touch targets */
+  .misc-qty-stepper { height: 48px; }
+  .misc-qty-stepper__btn { flex: 0 0 44px; font-size: var(--fs-lg); }
+  .misc-qty-stepper__input { font-size: var(--fs-md); height: 44px !important; padding: 10px 0 !important; }
+  .misc-qty-stepper--mini { height: 36px; }
+  .misc-qty-stepper--mini .misc-qty-stepper__btn { flex: 0 0 36px; font-size: var(--fs-md); }
+
+  .facets-vertical .facets-wrapper { width: 100%; max-width: 100%; }
+}
+
+@media (max-width: 419px) {
+  .misc-product-card {
+    grid-template-columns: 96px 1fr;
+    column-gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+  }
+  .misc-product-card__media { width: 96px; height: 96px; }
+  .misc-product-card__name { font-size: var(--fs-xs); }
+  .misc-product-card__rrp,
+  .misc-product-card__price-row .misc-product-card__rrp { display: none; }
+}
+

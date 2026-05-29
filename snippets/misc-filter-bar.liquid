@@ -1,24 +1,26 @@
 {%- comment -%}
   ============================================================
-  MISC filter bar — single full-width row above the catalog body.
+  MISC filter bar — full-width row above the catalog body.
 
-  Layout:
-    [320px LEFT cell]            [REST: pills | sort + count]
-    FILTER  Clear all            ACTIVE  pill pill pill  Sort by ...  N products
+  Desktop layout:
+    [320px LEFT cell]                 [REST: pills | sort + per page + count + view toggle]
+    FILTER 3  Clear all               ACTIVE  pill pill   Sort by A-Z   Per page 48   N products   [G3][G5][L]
 
-  The sort dropdown and product count are rendered HERE in this
-  bar (not in a separate row above). Trade's original
-  `.facets-vertical-sort` block is hidden via CSS in
-  misc-collection.css so we don't show duplicates.
+  Mobile layout (<1024px):
+    [Filter trigger button]           [Sort by]
+    (pills + per page + view toggle are hidden on mobile;
+     filter button opens the sidebar drawer)
 
-  When the buyer changes the sort dropdown, a tiny inline
-  `onchange` handler rewrites the URL with the new `sort_by`
-  param while preserving every existing filter param — so
-  active filters survive a sort change. No form submission, no
-  Trade AJAX dependency.
+  Sort and view-toggle are always pinned to the right regardless
+  of how many active filter pills exist. Active filter count is a
+  small ink badge on the FILTER label in the left cell.
 
-  Usage:
-    {% render 'misc-filter-bar', collection: collection, results_url: collection.url %}
+  Inputs:
+    - collection        : the collection object (for filters, sort, count)
+    - results_url       : the collection URL (for the Clear all link)
+    - active_view       : 'grid-3' | 'grid-5' | 'list'
+    - per_page          : 24 | 48 | 72 | 96 (current per-page value)
+    - enable_list_view  : boolean (hide the List button when false)
   ============================================================
 {%- endcomment -%}
 
@@ -36,7 +38,23 @@
   assign current_sort = collection.sort_by | default: collection.default_sort_by
 -%}
 
-<div class="misc-filter-bar">
+{%- comment -%}
+  The `active-facets-desktop` class is required so Trade's
+  facets.js can replace the inner HTML on every AJAX filter
+  change. Without this the pills, count badge, and Clear all
+  link don't refresh when the buyer ticks a filter checkbox.
+{%- endcomment -%}
+<div class="misc-filter-bar active-facets-desktop">
+
+  {%- comment -%} Mobile-only trigger button (hidden on desktop via CSS). {%- endcomment -%}
+  <button type="button" class="filter-bar__mobile-trigger" data-mobile-filter-trigger aria-label="Open filters">
+    {{- 'icon-filter.svg' | inline_asset_content -}}
+    <span>Filter</span>
+    {%- if active_count > 0 -%}
+      <span class="misc-filter-bar__count">{{ active_count }}</span>
+    {%- endif -%}
+  </button>
+
   <div class="misc-filter-bar__left">
     <h2 class="misc-filter-bar__title">
       Filter
@@ -51,7 +69,7 @@
 
   <div class="misc-filter-bar__right">
 
-    {%- comment -%} ACTIVE PILLS — left side of right cell {%- endcomment -%}
+    {%- comment -%} ACTIVE PILLS — left side of right cell. Hidden on mobile. {%- endcomment -%}
     <div class="misc-filter-bar__pills">
       {%- if active_count > 0 -%}
         <span class="misc-filter-bar__label">Active</span>
@@ -75,21 +93,44 @@
       {%- endif -%}
     </div>
 
-    {%- comment -%} SORT + COUNT — right side of right cell {%- endcomment -%}
-    <div class="misc-filter-bar__sort">
-      <label for="MiscSortBy" class="misc-sort__label">Sort by:</label>
-      <select
-        id="MiscSortBy"
-        class="misc-sort__select"
-        onchange="(function(v){var u=new URL(window.location);u.searchParams.set('sort_by',v);window.location=u.toString();})(this.value)"
-      >
-        {%- for option in collection.sort_options -%}
-          <option value="{{ option.value | escape }}"{% if option.value == current_sort %} selected{% endif %}>
-            {{- option.name | escape -}}
-          </option>
-        {%- endfor -%}
-      </select>
-      <span class="misc-sort__count">{{ collection.products_count }} products</span>
+    {%- comment -%} TOOLS — pinned to the right edge regardless of pills count. {%- endcomment -%}
+    <div class="misc-filter-bar__tools">
+
+      {%- comment -%} Sort dropdown. The change handler is wired in
+                     misc-view-toggle.js via event delegation on the
+                     #MiscSortBy id so it survives AJAX filter swaps. {%- endcomment -%}
+      <div class="sort-control">
+        <label class="sort-control__label" for="MiscSortBy">Sort by:</label>
+        <select id="MiscSortBy" class="sort-control__select">
+          {%- for option in collection.sort_options -%}
+            <option value="{{ option.value | escape }}"{% if option.value == current_sort %} selected{% endif %}>
+              {{- option.name | escape -}}
+            </option>
+          {%- endfor -%}
+        </select>
+      </div>
+
+      {%- comment -%}
+        Per-page dropdown removed. Shopify Liquid has no reliable
+        way to read arbitrary URL query params across theme versions,
+        so the dropdown navigation can't propagate to server-side
+        pagination. Merchant configures per_page in the section
+        settings in the theme editor instead. The current per_page
+        is rendered above the count for visibility.
+      {%- endcomment -%}
+      <span class="sort-control__count sort-control__per-page-info">{{ per_page }} per page</span>
+
+      <span class="sort-control__count">{{ collection.products_count }} products</span>
+
+      {%- comment -%} View toggle: Grid 3 / Grid 5 / List. JS in misc-view-toggle.js
+                     handles the swap + URL update. {%- endcomment -%}
+      <div class="view-toggle" role="group" aria-label="View density">
+        <button type="button" class="view-toggle__btn{% if active_view == 'grid-3' %} is-active{% endif %}" data-view="grid-3">Grid 3</button>
+        <button type="button" class="view-toggle__btn{% if active_view == 'grid-5' %} is-active{% endif %}" data-view="grid-5">Grid 5</button>
+        {%- if enable_list_view -%}
+          <button type="button" class="view-toggle__btn{% if active_view == 'list' %} is-active{% endif %}" data-view="list">List</button>
+        {%- endif -%}
+      </div>
     </div>
 
   </div>
