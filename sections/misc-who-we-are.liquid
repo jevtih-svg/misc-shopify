@@ -1,0 +1,60 @@
+{%- comment -%}
+  MISC who we are — centered editorial paragraph
+  All section settings (no blocks). Eyebrow, title, body, footer stamp.
+{%- endcomment -%}
+
+{{ 'misc-home.css' | asset_url | stylesheet_tag }}
+
+<section class="misc-who-we-are" aria-label="{{ section.settings.eyebrow | default: 'About us' }}">
+  <div class="misc-who-we-are__inner">
+    {%- if section.settings.eyebrow != blank -%}
+      <div class="misc-who-we-are__eyebrow">{{ section.settings.eyebrow }}</div>
+    {%- endif -%}
+    {%- if section.settings.title != blank -%}
+      <h2 class="misc-who-we-are__title">{{ section.settings.title }}</h2>
+    {%- endif -%}
+    {%- if section.settings.body != blank -%}
+      <div class="misc-who-we-are__body">{{ section.settings.body }}</div>
+    {%- endif -%}
+    {%- if section.settings.stamp_text != blank -%}
+      <span class="misc-who-we-are__since">{{ section.settings.stamp_text }}</span>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "MISC Who We Are",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Who we are"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Building a brand portfolio that speaks the language of good design."
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Body copy",
+      "default": "<p>Based in Amsterdam, Misc.distribution has been distributing Midori since 2010 and we have been carefully building our brand portfolio since.</p><p>At first glance it may seem as though Japanese brands are our forte, but it is aesthetics that draws us in. It just so happens we frequently seem to find this in Japan, but Studio Unto from Taiwan and BLOCK from our hometown are testimony to our worldwide interest in nice brands.</p>"
+    },
+    {
+      "type": "text",
+      "id": "stamp_text",
+      "label": "Footer stamp",
+      "default": "Amsterdam · Since 2010"
+    }
+  ],
+  "presets": [
+    {
+      "name": "MISC Who We Are"
+    }
+  ]
+}
+{% endschema %}

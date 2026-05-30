@@ -242,14 +242,7 @@
                           data-section-id="{{ section.id }}"
                           data-variant-id="{{ product.selected_or_first_available_variant.id }}"
                         >
-                          {%- comment -%}
-                            MISC: gate volume pricing block on logged-in customer.
-                            Liquid doesn't support parens in `if`, so resolve the
-                            gate to a boolean variable first.
-                          {%- endcomment -%}
-                          {%- assign misc_show_price = false -%}
-                          {%- if customer != blank or settings.misc_dev_show_price -%}{%- assign misc_show_price = true -%}{%- endif -%}
-                          {%- if product.selected_or_first_available_variant.quantity_price_breaks.size > 0 and misc_show_price -%}
+                          {%- if product.selected_or_first_available_variant.quantity_price_breaks.size > 0 -%}
                             {%- assign variant_price_compare = product.selected_or_first_available_variant.compare_at_price -%}
                             <div class="price-per-item">
                               {%- if variant_price_compare -%}

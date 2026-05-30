@@ -23,25 +23,11 @@
   Multi-variant products render as a parent row (brand + name
   only) followed by one child row per variant.
 
-  All prices, RRPs, and stock figures are gated behind a logged-
-  in customer. Logged-out visitors see a "Log in to see pricing"
-  CTA in the price slot.
-
   Inputs:
     - collection   : the collection object
     - active_view  : current view (so we know whether to render hidden or not)
   ============================================================
 {%- endcomment -%}
-
-{%- comment -%}
-  Price gate — same pattern as misc-card-product.liquid.
-  Reads settings.misc_dev_show_price (default FALSE on production).
-  Toggle locally via ./scripts/misc-preview.sh.
-{%- endcomment -%}
-{%- assign misc_show_price = false -%}
-{%- if customer != blank or settings.misc_dev_show_price -%}
-  {%- assign misc_show_price = true -%}
-{%- endif -%}
 
 <ul class="product-list" {% if active_view != 'list' %}hidden{% endif %}>
 
@@ -166,25 +152,19 @@
               <span class="list-cell--stock-oos">Out of stock</span>
             {%- endif -%}
           </span>
-          {%- if misc_show_price -%}
-            <span class="list-cell list-cell--rrp">{% if v_rrp != blank %}{{ v_rrp | money }}{% endif %}</span>
-            <span class="list-cell list-cell--price">{{ v.price | money }}</span>
-            <div class="list-cell list-cell--stepper">
-              {%- if v_orderable -%}
-                <div class="mini-stepper misc-qty-stepper misc-qty-stepper--mini" data-misc-qty-stepper data-variant-id="{{ v.id }}">
-                  <button type="button" class="misc-qty-stepper__btn" data-misc-qty="-1" aria-label="Remove one {{ v.title | escape }}">&minus;</button>
-                  <input type="number" value="{{ v_cart_qty }}" min="0" step="1" class="misc-qty-stepper__input" data-misc-qty-input readonly>
-                  <button type="button" class="misc-qty-stepper__btn" data-misc-qty="+1" aria-label="Add one {{ v.title | escape }}">+</button>
-                </div>
-              {%- else -%}
-                <span class="misc-stepper-placeholder" aria-label="Out of stock, not available for purchase">Unavailable</span>
-              {%- endif -%}
-            </div>
-          {%- else -%}
-            <span class="list-cell list-cell--rrp"></span>
-            <span class="list-cell list-cell--price">{%- render 'misc-price-cta', block_modifier: 'small' -%}</span>
-            <span class="list-cell"></span>
-          {%- endif -%}
+          <span class="list-cell list-cell--rrp">{% if v_rrp != blank %}{{ v_rrp | money }}{% endif %}</span>
+          <span class="list-cell list-cell--price">{{ v.price | money }}</span>
+          <div class="list-cell list-cell--stepper">
+            {%- if v_orderable -%}
+              <div class="mini-stepper misc-qty-stepper misc-qty-stepper--mini" data-misc-qty-stepper data-variant-id="{{ v.id }}">
+                <button type="button" class="misc-qty-stepper__btn" data-misc-qty="-1" aria-label="Remove one {{ v.title | escape }}">&minus;</button>
+                <input type="number" value="{{ v_cart_qty }}" min="0" step="1" class="misc-qty-stepper__input" data-misc-qty-input readonly>
+                <button type="button" class="misc-qty-stepper__btn" data-misc-qty="+1" aria-label="Add one {{ v.title | escape }}">+</button>
+              </div>
+            {%- else -%}
+              <span class="misc-stepper-placeholder" aria-label="Out of stock, not available for purchase">Unavailable</span>
+            {%- endif -%}
+          </div>
         </li>
       {%- endfor -%}
 
@@ -225,25 +205,19 @@
             <span class="list-cell--stock-oos">Out of stock</span>
           {%- endif -%}
         </span>
-        {%- if misc_show_price -%}
-          <span class="list-cell list-cell--rrp">{% if rrp != blank %}{{ rrp | money }}{% endif %}</span>
-          <span class="list-cell list-cell--price">{{ primary_variant.price | money }}</span>
-          <div class="list-cell list-cell--stepper">
-            {%- if sv_orderable -%}
-              <div class="mini-stepper misc-qty-stepper misc-qty-stepper--mini" data-misc-qty-stepper data-variant-id="{{ primary_variant.id }}">
-                <button type="button" class="misc-qty-stepper__btn" data-misc-qty="-1" aria-label="Remove one from cart">&minus;</button>
-                <input type="number" value="{{ v_cart_qty }}" min="0" step="1" class="misc-qty-stepper__input" data-misc-qty-input readonly>
-                <button type="button" class="misc-qty-stepper__btn" data-misc-qty="+1" aria-label="Add one to cart">+</button>
-              </div>
-            {%- else -%}
-              <span class="misc-stepper-placeholder" aria-label="Out of stock, not available for purchase">Unavailable</span>
-            {%- endif -%}
-          </div>
-        {%- else -%}
-          <span class="list-cell list-cell--rrp"></span>
-          <span class="list-cell list-cell--price">{%- render 'misc-price-cta', block_modifier: 'small' -%}</span>
-          <span class="list-cell"></span>
-        {%- endif -%}
+        <span class="list-cell list-cell--rrp">{% if rrp != blank %}{{ rrp | money }}{% endif %}</span>
+        <span class="list-cell list-cell--price">{{ primary_variant.price | money }}</span>
+        <div class="list-cell list-cell--stepper">
+          {%- if sv_orderable -%}
+            <div class="mini-stepper misc-qty-stepper misc-qty-stepper--mini" data-misc-qty-stepper data-variant-id="{{ primary_variant.id }}">
+              <button type="button" class="misc-qty-stepper__btn" data-misc-qty="-1" aria-label="Remove one from cart">&minus;</button>
+              <input type="number" value="{{ v_cart_qty }}" min="0" step="1" class="misc-qty-stepper__input" data-misc-qty-input readonly>
+              <button type="button" class="misc-qty-stepper__btn" data-misc-qty="+1" aria-label="Add one to cart">+</button>
+            </div>
+          {%- else -%}
+            <span class="misc-stepper-placeholder" aria-label="Out of stock, not available for purchase">Unavailable</span>
+          {%- endif -%}
+        </div>
       </li>
     {%- endif -%}
 

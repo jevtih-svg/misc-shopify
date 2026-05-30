@@ -40,28 +40,6 @@
   ============================================================
 {%- endcomment -%}
 
-{%- comment -%}
-  Price gate: prices, RRP, stepper, and variant rows render only
-  when the visitor is a logged-in customer, OR when the theme
-  setting `misc_dev_show_price` is TRUE.
-
-  The setting is defined in config/settings_schema.json under
-  "MISC: development" and defaults to FALSE. It must remain FALSE
-  on the published theme. Toggle locally via:
-    ./scripts/misc-preview.sh
-
-  The same gate pattern is rendered identically in:
-    - snippets/misc-product-list.liquid (list view)
-    - sections/misc-main-product.liquid (PDP — when forked)
-    - sections/misc-main-search.liquid (search — when forked)
-    - snippets/misc-cart-drawer-injection.liquid (cart drawer)
-  Keep these in sync if the gating logic ever changes.
-{%- endcomment -%}
-{%- assign misc_show_price = false -%}
-{%- if customer != blank or settings.misc_dev_show_price -%}
-  {%- assign misc_show_price = true -%}
-{%- endif -%}
-
 {%- liquid
   assign ratio = 1
   if media_aspect_ratio == 'portrait'
@@ -175,21 +153,17 @@
     {%- endif -%}
 
     <div class="misc-product-card__price-row">
-      {%- if misc_show_price -%}
-        <span class="misc-product-card__price">
-          {%- if variant_count > 1 -%}from {% endif -%}
-          {%- if card_product.price_varies -%}
-            {{ card_product.price_min | money }}
-          {%- else -%}
-            {{ primary_variant.price | money }}
-          {%- endif -%}
-        </span>
-      {%- else -%}
-        {%- render 'misc-price-cta' -%}
-      {%- endif -%}
+      <span class="misc-product-card__price">
+        {%- if variant_count > 1 -%}from {% endif -%}
+        {%- if card_product.price_varies -%}
+          {{ card_product.price_min | money }}
+        {%- else -%}
+          {{ primary_variant.price | money }}
+        {%- endif -%}
+      </span>
     </div>
 
-    {%- if misc_show_price and quick_add != 'none' -%}
+    {%- if quick_add != 'none' -%}
 
       {%- comment -%}
         STOCK STATE LINE — always rendered below price.

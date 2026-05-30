@@ -33,17 +33,6 @@
 <script src="{{ 'misc-cart-ledger.js' | asset_url }}" defer></script>
 
 {%- comment -%}
-  Login gate. Per conventions, prices / stock / steppers / the
-  inventory breakdown sit behind a logged-in customer. The dev-
-  only `misc_dev_show_price` checkbox in settings_schema opens
-  the gate for local preview.
-{%- endcomment -%}
-{%- assign misc_show_data = false -%}
-{%- if customer != blank or settings.misc_dev_show_price -%}
-  {%- assign misc_show_data = true -%}
-{%- endif -%}
-
-{%- comment -%}
   Customer-driven values used in the Account & credit column.
   All defaults until Stok.ly populates customer metafields.
 {%- endcomment -%}
@@ -357,47 +346,36 @@
                   <span class="misc-cart-ledger__pack">{{ pack_label }}</span>
                 </td>
                 <td class="misc-cart-ledger__col-qty misc-cart-ledger__num">
-                  {%- if misc_show_data -%}
-                    <span class="misc-cart-ledger__stepper">
-                      <button type="button" class="misc-cart-ledger__step-btn" data-step="-1" aria-label="Decrease quantity">−</button>
-                      <input
-                        type="number"
-                        class="misc-cart-ledger__qty-input"
-                        name="updates[{{ item.variant.id }}]"
-                        value="{{ item.quantity }}"
-                        min="0"
-                        data-variant-id="{{ item.variant.id }}"
-                        data-line="{{ forloop.index }}"
-                        aria-label="Quantity for {{ item.product.title | escape }}">
-                      <button type="button" class="misc-cart-ledger__step-btn" data-step="1" aria-label="Increase quantity">+</button>
-                    </span>
-                  {%- else -%}
-                    {{ item.quantity }}
-                  {%- endif -%}
+                  <span class="misc-cart-ledger__stepper">
+                    <button type="button" class="misc-cart-ledger__step-btn" data-step="-1" aria-label="Decrease quantity">&minus;</button>
+                    <input
+                      type="number"
+                      class="misc-cart-ledger__qty-input"
+                      name="updates[{{ item.variant.id }}]"
+                      value="{{ item.quantity }}"
+                      min="0"
+                      data-variant-id="{{ item.variant.id }}"
+                      data-line="{{ forloop.index }}"
+                      aria-label="Quantity for {{ item.product.title | escape }}">
+                    <button type="button" class="misc-cart-ledger__step-btn" data-step="1" aria-label="Increase quantity">+</button>
+                  </span>
                 </td>
-                <td class="misc-cart-ledger__col-unit misc-cart-ledger__num">
-                  {%- if misc_show_data -%}{{ item.variant.price | money_without_currency }}{%- else -%}&mdash;{%- endif -%}
-                </td>
+                <td class="misc-cart-ledger__col-unit misc-cart-ledger__num">{{ item.variant.price | money_without_currency }}</td>
                 <td class="misc-cart-ledger__col-rrp misc-cart-ledger__num">
-                  {%- if misc_show_data and item.variant.compare_at_price > 0 -%}
+                  {%- if item.variant.compare_at_price > 0 -%}
                     {{ item.variant.compare_at_price | money_without_currency }}
                   {%- else -%}
                     &mdash;
                   {%- endif -%}
                 </td>
                 <td class="misc-cart-ledger__col-subtotal misc-cart-ledger__num">
-                  {%- if misc_show_data -%}
-                    <span data-line-subtotal>{{ line_amount_cents | money_without_currency }}</span>
-                    <button type="button" class="misc-cart-ledger__remove" data-variant-id="{{ item.variant.id }}" aria-label="Remove {{ item.product.title | escape }}">&times;</button>
-                  {%- else -%}
-                    &mdash;
-                  {%- endif -%}
+                  <span data-line-subtotal>{{ line_amount_cents | money_without_currency }}</span>
+                  <button type="button" class="misc-cart-ledger__remove" data-variant-id="{{ item.variant.id }}" aria-label="Remove {{ item.product.title | escape }}">&times;</button>
                 </td>
               </tr>
 
               {%- comment -%} Availability sub-rows. Render only buckets > 0. {%- endcomment -%}
-              {%- if misc_show_data -%}
-                {%- if ready > 0 -%}
+              {%- if ready > 0 -%}
                   <tr class="misc-cart-ledger__avail-row misc-cart-ledger__avail-row--in" data-bucket="in" data-line="{{ forloop.index }}">
                     <td></td><td></td>
                     <td class="misc-cart-ledger__col-product">
@@ -427,18 +405,17 @@
                     <td class="misc-cart-ledger__num">{{ coming_amount_cents | money_without_currency }}</td>
                   </tr>
                 {%- endif -%}
-                {%- if bo > 0 -%}
-                  <tr class="misc-cart-ledger__avail-row misc-cart-ledger__avail-row--backorder" data-bucket="backorder" data-line="{{ forloop.index }}">
-                    <td></td><td></td>
-                    <td class="misc-cart-ledger__col-product">
-                      <span class="misc-cart-ledger__state-label misc-cart-ledger__state-label--backorder">Backorder</span>
-                      <span class="misc-cart-ledger__state-detail">&mdash; lead time to be confirmed by account manager</span>
-                    </td>
-                    <td class="misc-cart-ledger__num">{{ bo }}</td>
-                    <td></td><td></td>
-                    <td class="misc-cart-ledger__num">{{ bo_amount_cents | money_without_currency }}</td>
-                  </tr>
-                {%- endif -%}
+              {%- if bo > 0 -%}
+                <tr class="misc-cart-ledger__avail-row misc-cart-ledger__avail-row--backorder" data-bucket="backorder" data-line="{{ forloop.index }}">
+                  <td></td><td></td>
+                  <td class="misc-cart-ledger__col-product">
+                    <span class="misc-cart-ledger__state-label misc-cart-ledger__state-label--backorder">Backorder</span>
+                    <span class="misc-cart-ledger__state-detail">&mdash; lead time to be confirmed by account manager</span>
+                  </td>
+                  <td class="misc-cart-ledger__num">{{ bo }}</td>
+                  <td></td><td></td>
+                  <td class="misc-cart-ledger__num">{{ bo_amount_cents | money_without_currency }}</td>
+                </tr>
               {%- endif -%}
             {%- endfor -%}
           </tbody>

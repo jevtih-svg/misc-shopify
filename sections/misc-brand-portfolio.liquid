@@ -1,0 +1,140 @@
+{%- comment -%}
+  MISC brand portfolio — dark editorial band
+  Section settings: meta header (label, count, since), CTA.
+  Blocks: "brand" (name + url). Each is a clickable name in the
+  wrap list with a hairline divider on the right.
+{%- endcomment -%}
+
+{{ 'misc-home.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign brand_count = section.blocks | where: 'type', 'brand' | size
+-%}
+
+<section class="misc-brand-strip" aria-label="{{ section.settings.aria_label | default: 'Brand portfolio' }}">
+  <div class="misc-brand-strip__meta">
+    <div>
+      <strong>{{ section.settings.meta_label | default: 'Our brand portfolio' }}</strong>
+      {%- if section.settings.meta_subtitle != blank -%}
+        · {{ section.settings.meta_subtitle }}
+      {%- endif -%}
+    </div>
+    <div class="misc-brand-strip__meta-right">
+      {%- if section.settings.show_count -%}
+        <span>{{ brand_count }} brands</span>
+      {%- endif -%}
+      {%- if section.settings.since_text != blank -%}
+        <span>{{ section.settings.since_text }}</span>
+      {%- endif -%}
+    </div>
+  </div>
+
+  {%- if brand_count > 0 -%}
+    <div class="misc-brand-strip__list">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'brand' -%}
+          <a href="{{ block.settings.url | default: '#' }}" class="misc-brand-strip__name" {{ block.shopify_attributes }}>{{ block.settings.name }}</a>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+  {%- if section.settings.cta_label != blank -%}
+    <a href="{{ section.settings.cta_url | default: '#' }}" class="misc-brand-strip__cta">
+      {{ section.settings.cta_label }}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "MISC Brand Portfolio",
+  "max_blocks": 30,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Meta header"
+    },
+    {
+      "type": "text",
+      "id": "meta_label",
+      "label": "Label",
+      "default": "Our brand portfolio"
+    },
+    {
+      "type": "text",
+      "id": "meta_subtitle",
+      "label": "Subtitle (after dot)",
+      "default": "Carefully selected, design-led stationery"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_count",
+      "label": "Show brand count (right side)",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "since_text",
+      "label": "Right-side text",
+      "default": "Established 2010"
+    },
+    {
+      "type": "header",
+      "content": "Call to action"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Button label",
+      "default": "View all brands"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Button URL"
+    },
+    {
+      "type": "header",
+      "content": "Accessibility"
+    },
+    {
+      "type": "text",
+      "id": "aria_label",
+      "label": "Accessibility label",
+      "default": "Brand portfolio"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "brand",
+      "name": "Brand",
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Brand name",
+          "default": "Brand"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Brand link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "MISC Brand Portfolio",
+      "blocks": [
+        { "type": "brand", "settings": { "name": "Hibi" } },
+        { "type": "brand", "settings": { "name": "Hightide" } },
+        { "type": "brand", "settings": { "name": "ITO Bindery" } },
+        { "type": "brand", "settings": { "name": "Kokuyo" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

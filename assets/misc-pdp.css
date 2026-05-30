@@ -221,9 +221,6 @@
   gap: var(--space-3);
   flex-wrap: wrap;
 }
-.misc-pdp__price-row--gated {
-  align-items: stretch;
-}
 .misc-pdp__price-from {
   font-size: var(--fs-sm);
   color: var(--c-ink-mute);
@@ -329,12 +326,6 @@
   height: 100% !important;
   line-height: 37px !important; /* 40 - (1.5 * 2) border */
   padding: 0 !important;
-}
-
-/* Logged-out CTA in the buy slot */
-.misc-pdp__buy-gate {
-  margin-top: var(--space-5);
-  max-width: 320px;
 }
 
 /* ============================================================

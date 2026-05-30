@@ -1451,21 +1451,5 @@
         "default": "scheme-1"
       }
     ]
-  },
-  {
-    "name": "MISC: development",
-    "settings": [
-      {
-        "type": "paragraph",
-        "content": "Developer-only settings for the MISC theme. Do NOT toggle on a production theme."
-      },
-      {
-        "type": "checkbox",
-        "id": "misc_dev_show_price",
-        "label": "DEV: show prices to logged-out visitors",
-        "info": "When ON, prices, RRP, and the quantity stepper render for any visitor, including unauthenticated ones. ONLY use locally to preview the price layout. Must remain OFF on the published theme. Toggle via ./scripts/misc-preview.sh from the theme root.",
-        "default": false
-      }
-    ]
   }
 ]

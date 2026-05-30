@@ -126,7 +126,6 @@
     "show_cart_note": false,
     "cart_drawer_collection": "",
     "cart_color_scheme": "scheme-1",
-    "misc_dev_show_price": true,
     "sections": {
       "main-password-header": {
         "type": "main-password-header",
@@ -205,8 +204,7 @@
           "shadow": "#001128"
         }
       }
-    },
-    "misc_dev_show_price": false
+    }
   },
   "presets": {
     "Trade": {
@@ -398,8 +396,7 @@
           }
         }
       },
-      "content_for_index": [],
-      "misc_dev_show_price": false
+      "content_for_index": []
     }
   }
 }

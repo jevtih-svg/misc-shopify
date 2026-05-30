@@ -25,15 +25,6 @@
 {{ 'misc-pdp.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'misc-pdp.js' | asset_url }}" defer="defer"></script>
 
-{%- comment -%}
-  Price gate flag — same convention as misc-card-product.liquid.
-  Reads the theme setting + customer state.
-{%- endcomment -%}
-{%- assign misc_show_price = false -%}
-{%- if customer != blank or settings.misc_dev_show_price -%}
-  {%- assign misc_show_price = true -%}
-{%- endif -%}
-
 {%- liquid
   assign primary_variant = product.selected_or_first_available_variant
   assign variant_count = product.variants.size
@@ -76,16 +67,13 @@
     </section>
 
     {%- comment -%}
-      PRICE + STOCK STATE always renders second. The price slot is
-      gated; the stock state always renders (per D1: "stock should
-      be seen, rest hidden" for logged-out visitors).
+      PRICE + STOCK STATE always renders second.
     {%- endcomment -%}
     <section class="misc-pdp__section">
       {%- render 'misc-pdp-price',
          product: product,
          primary_variant: primary_variant,
-         variant_count: variant_count,
-         misc_show_price: misc_show_price
+         variant_count: variant_count
       -%}
 
       {%- comment -%}
@@ -100,66 +88,55 @@
       -%}
 
       {%- comment -%}
-        Stepper (single-variant) OR variant table (multi-variant)
-        OR CTA (logged-out).
+        Stepper (single-variant) OR variant table (multi-variant).
       {%- endcomment -%}
-      {%- if misc_show_price -%}
-        {%- if variant_count > 1 -%}
-          {%- render 'misc-pdp-variant-table',
-             product: product
-          -%}
-        {%- else -%}
-          {%- comment -%}
-            Orderable = has stock OR has incoming OR variant.available
-            (backorderable). True OOS variants (no stock, no incoming,
-            policy=deny) get the Unavailable placeholder instead of
-            a stepper, so they can't be added to the cart.
-          {%- endcomment -%}
-          {%- assign sv_inv = primary_variant.inventory_quantity | default: 0 -%}
-          {%- assign sv_inc = primary_variant.metafields.custom.incoming_qty.value | default: 0 | plus: 0 -%}
-          {%- assign sv_orderable = false -%}
-          {%- if sv_inv > 0 or sv_inc > 0 or primary_variant.available -%}
-            {%- assign sv_orderable = true -%}
-          {%- endif -%}
-
-          {%- if sv_orderable -%}
-            {%- assign sv_cart_qty = 0 -%}
-            {%- for line_item in cart.items -%}
-              {%- if line_item.variant_id == primary_variant.id -%}
-                {%- assign sv_cart_qty = line_item.quantity -%}
-                {%- break -%}
-              {%- endif -%}
-            {%- endfor -%}
-            <div
-              class="misc-qty-stepper misc-pdp__buy-stepper"
-              data-misc-qty-stepper
-              data-variant-id="{{ primary_variant.id }}"
-            >
-              <button type="button" class="misc-qty-stepper__btn" data-misc-qty="-1" aria-label="Remove one from cart">&minus;</button>
-              <input type="number" value="{{ sv_cart_qty }}" min="0" step="1" class="misc-qty-stepper__input" aria-label="Quantity in cart" data-misc-qty-input>
-              <button type="button" class="misc-qty-stepper__btn" data-misc-qty="+1" aria-label="Add one to cart">+</button>
-            </div>
-          {%- else -%}
-            <div class="misc-pdp__unavailable-slot" aria-disabled="true">
-              <span class="misc-pdp__unavailable-label">Unavailable</span>
-            </div>
-          {%- endif -%}
-        {%- endif -%}
-
-        {%- comment -%}
-          Notice block — split-shipment / incoming / backorder.
-          Renders only when a notice condition fires.
-        {%- endcomment -%}
-        {%- render 'misc-pdp-notice', product: product, primary_variant: primary_variant -%}
+      {%- if variant_count > 1 -%}
+        {%- render 'misc-pdp-variant-table',
+           product: product
+        -%}
       {%- else -%}
         {%- comment -%}
-          Logged-out: render a second CTA in the purchase slot per
-          D1. Same wording as the price CTA.
+          Orderable = has stock OR has incoming OR variant.available
+          (backorderable). True OOS variants (no stock, no incoming,
+          policy=deny) get the Unavailable placeholder instead of
+          a stepper, so they can't be added to the cart.
         {%- endcomment -%}
-        <div class="misc-pdp__buy-gate">
-          {%- render 'misc-price-cta' -%}
-        </div>
+        {%- assign sv_inv = primary_variant.inventory_quantity | default: 0 -%}
+        {%- assign sv_inc = primary_variant.metafields.custom.incoming_qty.value | default: 0 | plus: 0 -%}
+        {%- assign sv_orderable = false -%}
+        {%- if sv_inv > 0 or sv_inc > 0 or primary_variant.available -%}
+          {%- assign sv_orderable = true -%}
+        {%- endif -%}
+
+        {%- if sv_orderable -%}
+          {%- assign sv_cart_qty = 0 -%}
+          {%- for line_item in cart.items -%}
+            {%- if line_item.variant_id == primary_variant.id -%}
+              {%- assign sv_cart_qty = line_item.quantity -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+          <div
+            class="misc-qty-stepper misc-pdp__buy-stepper"
+            data-misc-qty-stepper
+            data-variant-id="{{ primary_variant.id }}"
+          >
+            <button type="button" class="misc-qty-stepper__btn" data-misc-qty="-1" aria-label="Remove one from cart">&minus;</button>
+            <input type="number" value="{{ sv_cart_qty }}" min="0" step="1" class="misc-qty-stepper__input" aria-label="Quantity in cart" data-misc-qty-input>
+            <button type="button" class="misc-qty-stepper__btn" data-misc-qty="+1" aria-label="Add one to cart">+</button>
+          </div>
+        {%- else -%}
+          <div class="misc-pdp__unavailable-slot" aria-disabled="true">
+            <span class="misc-pdp__unavailable-label">Unavailable</span>
+          </div>
+        {%- endif -%}
       {%- endif -%}
+
+      {%- comment -%}
+        Notice block — split-shipment / incoming / backorder.
+        Renders only when a notice condition fires.
+      {%- endcomment -%}
+      {%- render 'misc-pdp-notice', product: product, primary_variant: primary_variant -%}
     </section>
 
     {%- comment -%} ============================================================
@@ -170,7 +147,7 @@
 
         {%- when 'specs' -%}
           <section class="misc-pdp__section" {{ block.shopify_attributes }}>
-            {%- render 'misc-pdp-specs', product: product, primary_variant: primary_variant, variant_count: variant_count, misc_show_price: misc_show_price -%}
+            {%- render 'misc-pdp-specs', product: product, primary_variant: primary_variant, variant_count: variant_count -%}
           </section>
 
         {%- when 'description' -%}

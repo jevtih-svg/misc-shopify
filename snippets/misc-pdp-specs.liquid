@@ -10,8 +10,6 @@
   values show "—" (em dash) instead of being hidden — the
   earlier hide-when-empty approach caused floating cells.
 
-  RRP gates on customer per D1 (price-equivalent data).
-
   Title "Product specifications" lives INSIDE the table head
   (per D2). The Copy all action sits in the head's right slot.
 
@@ -19,7 +17,6 @@
     - product
     - primary_variant
     - variant_count
-    - misc_show_price (boolean)
   ============================================================
 {%- endcomment -%}
 
@@ -96,32 +93,28 @@
     <div class="misc-pdp__spec">
       <span class="misc-pdp__spec-label">RRP</span>
       <span class="misc-pdp__spec-value">
-        {%- if misc_show_price -%}
-          {%- if variant_count > 1 -%}
-            {%- assign rrp_min = nil -%}
-            {%- assign rrp_max = nil -%}
-            {%- for v in product.variants -%}
-              {%- assign v_rrp = v.metafields.custom.rrp.value | default: v.metafields.custom.RRP.value -%}
-              {%- if v_rrp != blank -%}
-                {%- assign v_rrp_int = v_rrp | plus: 0 -%}
-                {%- if rrp_min == nil or v_rrp_int < rrp_min -%}{%- assign rrp_min = v_rrp_int -%}{%- endif -%}
-                {%- if rrp_max == nil or v_rrp_int > rrp_max -%}{%- assign rrp_max = v_rrp_int -%}{%- endif -%}
-              {%- endif -%}
-            {%- endfor -%}
-            {%- if rrp_min == nil -%}
-              <span class="misc-pdp__spec-empty">{{ dash }}</span>
-            {%- elsif rrp_min == rrp_max -%}
-              {{ rrp_min | money }}
-            {%- else -%}
-              {{ rrp_min | money }} &ndash; {{ rrp_max | money }}
+        {%- if variant_count > 1 -%}
+          {%- assign rrp_min = nil -%}
+          {%- assign rrp_max = nil -%}
+          {%- for v in product.variants -%}
+            {%- assign v_rrp = v.metafields.custom.rrp.value | default: v.metafields.custom.RRP.value -%}
+            {%- if v_rrp != blank -%}
+              {%- assign v_rrp_int = v_rrp | plus: 0 -%}
+              {%- if rrp_min == nil or v_rrp_int < rrp_min -%}{%- assign rrp_min = v_rrp_int -%}{%- endif -%}
+              {%- if rrp_max == nil or v_rrp_int > rrp_max -%}{%- assign rrp_max = v_rrp_int -%}{%- endif -%}
             {%- endif -%}
-          {%- elsif rrp != blank -%}
-            {{ rrp | money }}
-          {%- else -%}
+          {%- endfor -%}
+          {%- if rrp_min == nil -%}
             <span class="misc-pdp__spec-empty">{{ dash }}</span>
+          {%- elsif rrp_min == rrp_max -%}
+            {{ rrp_min | money }}
+          {%- else -%}
+            {{ rrp_min | money }} &ndash; {{ rrp_max | money }}
           {%- endif -%}
+        {%- elsif rrp != blank -%}
+          {{ rrp | money }}
         {%- else -%}
-          {%- render 'misc-price-cta' -%}
+          <span class="misc-pdp__spec-empty">{{ dash }}</span>
         {%- endif -%}
       </span>
     </div>

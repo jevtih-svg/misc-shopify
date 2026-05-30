@@ -815,28 +815,6 @@
   color: var(--c-ink);
 }
 
-.misc-product-card__price-cta,
-.misc-price-cta {
-  display: inline-block;
-  font-size: var(--fs-xs);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  font-weight: var(--fw-medium);
-  color: var(--c-ink);
-  text-decoration: none;
-  border-bottom: 1px solid currentColor;
-  padding-bottom: 2px;
-}
-
-.misc-product-card__price-cta:hover,
-.misc-price-cta:hover {
-  color: var(--c-ink-mute);
-}
-
-.misc-price-cta--small {
-  font-size: var(--fs-2xs);
-}
-
 /* Stock state line (always sits below the price) */
 .misc-product-card__stock {
   font-size: var(--fs-2xs);

@@ -2,37 +2,27 @@
   "name": "t:sections.footer.name",
   "type": "footer",
   "sections": {
-    "footer": {
-      "type": "footer",
-      "blocks": {
-        "link_list": {
-          "type": "link_list",
-          "settings": {
-            "heading": "Quick links",
-            "menu": "footer"
-          }
-        }
-      },
-      "block_order": [
-        "link_list"
-      ],
+    "misc-footer": {
+      "type": "misc-footer",
       "settings": {
-        "color_scheme": "scheme-4",
-        "newsletter_enable": false,
-        "newsletter_heading": "Subscribe to our emails",
-        "enable_follow_on_shop": true,
-        "show_social": true,
-        "enable_country_selector": true,
-        "enable_language_selector": true,
-        "payment_enable": true,
-        "show_policy": true,
-        "margin_top": 0,
-        "padding_top": 36,
-        "padding_bottom": 36
+        "brand_mark": "Misc.Distribution",
+        "brand_statement": "Distributing design stationery across Europe.",
+        "stamp_label_left": "Based in",
+        "stamp_value_left": "Amsterdam · NL",
+        "stamp_label_right": "Since",
+        "stamp_value_right": "2010",
+        "portal_title": "Customer Portal",
+        "quick_title": "Quick Links",
+        "contact_title": "Contact",
+        "contact_phone": "+31 20 261 38 66",
+        "contact_email": "hello@misc-distribution.com",
+        "contact_instagram_handle": "@misc.distribution",
+        "contact_instagram_url": "http://instagram.com/misc.distribution",
+        "copyright": "© Misc.Distribution"
       }
     }
   },
   "order": [
-    "footer"
+    "misc-footer"
   ]
 }

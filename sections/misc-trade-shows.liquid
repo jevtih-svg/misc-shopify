@@ -1,0 +1,152 @@
+{%- comment -%}
+  MISC trade shows — image left, date-aligned event cards right
+  Section settings: image, eyebrow, title.
+  Blocks: "show" (month, days, name, venue, stand, stand_is_tbc).
+{%- endcomment -%}
+
+{{ 'misc-home.css' | asset_url | stylesheet_tag }}
+
+<section class="misc-trade-shows" aria-label="{{ section.settings.title | default: 'Trade shows' }}">
+  <div class="misc-trade-shows__media">
+    {%- if section.settings.image != blank -%}
+      {{ section.settings.image | image_url: width: 1400 | image_tag:
+        loading: 'lazy',
+        widths: '600, 900, 1200, 1400',
+        sizes: '(min-width: 900px) 50vw, 100vw',
+        alt: section.settings.image_alt | default: section.settings.title
+      }}
+    {%- elsif section.settings.fallback_asset != blank -%}
+      <img src="{{ section.settings.fallback_asset | asset_url }}" alt="{{ section.settings.image_alt | default: section.settings.title }}" loading="lazy">
+    {%- endif -%}
+  </div>
+
+  <div class="misc-trade-shows__panel">
+    {%- if section.settings.eyebrow != blank -%}
+      <div class="misc-trade-shows__eyebrow">{{ section.settings.eyebrow }}</div>
+    {%- endif -%}
+    {%- if section.settings.title != blank -%}
+      <h2 class="misc-trade-shows__title">{{ section.settings.title }}</h2>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <div>
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'show' -%}
+            <div class="misc-trade-show-card" {{ block.shopify_attributes }}>
+              <div class="misc-trade-show-card__date">
+                {{ block.settings.month }}
+                <span class="misc-trade-show-card__date-day">{{ block.settings.days }}</span>
+              </div>
+              <div class="misc-trade-show-card__body">
+                <div class="misc-trade-show-card__name">{{ block.settings.name }}</div>
+                {%- if block.settings.venue != blank -%}
+                  <div class="misc-trade-show-card__venue">{{ block.settings.venue }}</div>
+                {%- endif -%}
+                {%- if block.settings.stand != blank -%}
+                  <div class="misc-trade-show-card__stand{% if block.settings.stand_is_tbc %} misc-trade-show-card__stand--tbc{% endif %}">{{ block.settings.stand }}</div>
+                {%- endif -%}
+              </div>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "MISC Trade Shows",
+  "max_blocks": 8,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image (left column)"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text"
+    },
+    {
+      "type": "text",
+      "id": "fallback_asset",
+      "label": "Fallback theme asset",
+      "info": "Used only when no image is uploaded. e.g. misc-home-trade-shows.jpg"
+    },
+    {
+      "type": "header",
+      "content": "Right panel"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Meet us in person"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Trade shows 2026"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "show",
+      "name": "Trade show",
+      "settings": [
+        {
+          "type": "text",
+          "id": "month",
+          "label": "Month (short)",
+          "default": "Feb"
+        },
+        {
+          "type": "text",
+          "id": "days",
+          "label": "Days",
+          "default": "06 – 10"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Show name",
+          "default": "Show Name"
+        },
+        {
+          "type": "text",
+          "id": "venue",
+          "label": "Venue",
+          "default": "Venue, City"
+        },
+        {
+          "type": "text",
+          "id": "stand",
+          "label": "Stand / hall",
+          "default": "Hall · Stand"
+        },
+        {
+          "type": "checkbox",
+          "id": "stand_is_tbc",
+          "label": "Stand is TBC (italic + muted)",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "MISC Trade Shows",
+      "blocks": [
+        { "type": "show" }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,402 +1,135 @@
 {
   "sections": {
-    "image_banner": {
-      "type": "image-banner",
+    "hero": {
+      "type": "misc-hero-slider",
       "blocks": {
-        "text": {
-          "type": "text",
+        "slide-md": {
+          "type": "slide",
           "settings": {
-            "text": "Welcome industry insiders",
-            "text_style": "caption-with-letter-spacing"
+            "eyebrow": "Featured · MD Product",
+            "title": "From a brand about paper, to a brand about taking a pause.",
+            "brand": "MD Product",
+            "body": "<p>MD Paper, a single sheet of paper created in the 1960s, marks the origin of MD PRODUCT. After years of working closely with this paper, we eventually realized the essential value inherent in the act of \"writing.\" That value lies in the precious time spent facing oneself: arranging one's thoughts and expressing an honest and genuine sensibility. We call this moment \"Yohaku.\"</p><p>Our desire is to expand the experience of creating this Yohaku, a margin in time, not just on the surface of paper, but into our spaces, our days, and our lives themselves.</p>",
+            "cta_label": "Shop MD Product",
+            "image_alt": "MD Product calendar with hands writing",
+            "fallback_asset": "misc-home-md-product.jpg"
           }
         },
-        "heading": {
-          "type": "heading",
+        "slide-studio": {
+          "type": "slide",
           "settings": {
-            "heading": "Grow your business with us",
-            "heading_size": "h1"
+            "eyebrow": "Featured · Studio Unto",
+            "title": "Like picking up a rock & start coloring.",
+            "brand": "Studio Unto",
+            "body": "<p>Each Studio Unto Color Gem is produced with natural materials such as burnt chalk, apple, stones and granite.</p><p>Using the Color Gems is a process similar to rock erosion: every line you draw and every indentation you press into it slowly transforms the crayon cube, turning the natural process of erosion into an artistic footprint.</p>",
+            "cta_label": "Shop Studio Unto",
+            "image_alt": "Studio Unto Color Gem drawing a line",
+            "fallback_asset": "misc-home-studio-unto.jpg"
           }
         },
-        "button": {
-          "type": "buttons",
+        "slide-stalogy": {
+          "type": "slide",
           "settings": {
-            "button_label_1": "Shop all",
-            "button_link_1": "shopify://collections/all",
-            "button_style_secondary_1": false,
-            "button_label_2": "",
-            "button_link_2": "",
-            "button_style_secondary_2": false
+            "eyebrow": "Featured · Stálogy",
+            "title": "A pen that doesn't get in the way of writing.",
+            "brand": "Stálogy",
+            "body": "<p>Born from Nitto Denko's adhesive technology, Stálogy makes tools for the discipline of writing every day. Quiet objects, considered details, no decoration.</p><p>The 027 water-based gel ink ball point pen pairs a non-slip grip with a low-resistance tip — the kind of pen you stop noticing the moment you start using it.</p>",
+            "cta_label": "Shop Stálogy",
+            "image_alt": "Stálogy 027 gel pen writing on a small notepad",
+            "fallback_asset": "misc-home-stalogy.jpg"
+          }
+        },
+        "slide-hibi": {
+          "type": "slide",
+          "settings": {
+            "eyebrow": "Featured · Hibi",
+            "title": "The incense of Awaji Island & the matches of Harima.",
+            "brand": "Hibi · 10 minute aroma",
+            "body": "<p>These two traditional industries of Hyogo Prefecture first encountered each other in 2011. The collaboration started with the idea of an incense that could be lit like striking a match.</p><p>The brand name <em>hibi</em> means \"day to day,\" or daily, in Japanese. It was given with the hope that you would keep it around you every day and freely enjoy its fragrance.</p>",
+            "cta_label": "Shop Hibi",
+            "image_alt": "Hibi match incense in box on wooden table",
+            "fallback_asset": "misc-home-hibi.jpg"
           }
         }
       },
-      "block_order": [
-        "text",
-        "heading",
-        "button"
-      ],
+      "block_order": ["slide-md", "slide-studio", "slide-stalogy", "slide-hibi"],
       "settings": {
-        "image_overlay_opacity": 40,
-        "image_height": "small",
-        "desktop_content_position": "middle-left",
-        "show_text_box": false,
-        "desktop_content_alignment": "left",
-        "color_scheme": "scheme-5",
-        "image_behavior": "none",
-        "mobile_content_alignment": "center",
-        "stack_images_on_mobile": true,
-        "show_text_below": false
+        "aria_label": "Featured stories"
       }
     },
-    "multicolumn": {
-      "type": "multicolumn",
+    "brand-portfolio": {
+      "type": "misc-brand-portfolio",
       "blocks": {
-        "column1": {
-          "type": "column",
+        "b-hibi":     { "type": "brand", "settings": { "name": "Hibi" } },
+        "b-hightide": { "type": "brand", "settings": { "name": "Hightide" } },
+        "b-ito":      { "type": "brand", "settings": { "name": "ITO Bindery" } },
+        "b-kokuyo":   { "type": "brand", "settings": { "name": "Kokuyo" } },
+        "b-md":       { "type": "brand", "settings": { "name": "MD Product" } },
+        "b-midori":   { "type": "brand", "settings": { "name": "Midori" } },
+        "b-nahe":     { "type": "brand", "settings": { "name": "Nähe" } },
+        "b-paperlux": { "type": "brand", "settings": { "name": "Paperlux" } },
+        "b-penco":    { "type": "brand", "settings": { "name": "Penco" } },
+        "b-stalogy":  { "type": "brand", "settings": { "name": "Stálogy" } },
+        "b-studio":   { "type": "brand", "settings": { "name": "Studio Unto" } },
+        "b-trc":      { "type": "brand", "settings": { "name": "Traveler's Company" } },
+        "b-block":    { "type": "brand", "settings": { "name": "BLOCK" } }
+      },
+      "block_order": [
+        "b-hibi", "b-hightide", "b-ito", "b-kokuyo", "b-md", "b-midori",
+        "b-nahe", "b-paperlux", "b-penco", "b-stalogy", "b-studio", "b-trc", "b-block"
+      ],
+      "settings": {
+        "meta_label": "Our brand portfolio",
+        "meta_subtitle": "Carefully selected, design-led stationery",
+        "show_count": true,
+        "since_text": "Established 2010",
+        "cta_label": "View all brands",
+        "aria_label": "Brand portfolio"
+      }
+    },
+    "trade-shows": {
+      "type": "misc-trade-shows",
+      "blocks": {
+        "show-ambiente": {
+          "type": "show",
           "settings": {
-            "title": "Insert partner logo",
-            "text": "",
-            "link_label": "",
-            "link": ""
+            "month": "Feb",
+            "days": "06 – 10",
+            "name": "Ambiente",
+            "venue": "Messe Frankfurt, Frankfurt am Main",
+            "stand": "Hall 4.2 · Stand H.29",
+            "stand_is_tbc": false
           }
         },
-        "column2": {
-          "type": "column",
+        "show-mo": {
+          "type": "show",
           "settings": {
-            "title": "Insert partner logo",
-            "text": "",
-            "link_label": "",
-            "link": ""
-          }
-        },
-        "column3": {
-          "type": "column",
-          "settings": {
-            "title": "Insert partner logo",
-            "text": "",
-            "link_label": "",
-            "link": ""
-          }
-        },
-        "column4": {
-          "type": "column",
-          "settings": {
-            "title": "Insert partner logo",
-            "text": "",
-            "link_label": "",
-            "link": ""
-          }
-        },
-        "column5": {
-          "type": "column",
-          "settings": {
-            "title": "Insert partner logo",
-            "text": "",
-            "link_label": "",
-            "link": ""
-          }
-        },
-        "column6": {
-          "type": "column",
-          "settings": {
-            "title": "Insert partner logo",
-            "text": "",
-            "link_label": "",
-            "link": ""
+            "month": "Sep",
+            "days": "10 – 14",
+            "name": "Maison & Objet",
+            "venue": "Villepinte Exhibition Centre, Paris Nord",
+            "stand": "Hall & stand to be confirmed",
+            "stand_is_tbc": true
           }
         }
       },
-      "block_order": [
-        "column1",
-        "column2",
-        "column3",
-        "column4",
-        "column5",
-        "column6"
-      ],
+      "block_order": ["show-ambiente", "show-mo"],
       "settings": {
-        "title": "",
-        "heading_size": "h1",
-        "image_width": "full",
-        "image_ratio": "adapt",
-        "columns_desktop": 6,
-        "column_alignment": "center",
-        "background_style": "none",
-        "button_label": "",
-        "button_link": "",
-        "color_scheme": "scheme-2",
-        "columns_mobile": "2",
-        "swipe_on_mobile": true,
-        "padding_top": 12,
-        "padding_bottom": 12
+        "eyebrow": "Meet us in person",
+        "title": "Trade shows 2026",
+        "image_alt": "Penco display at trade fair",
+        "fallback_asset": "misc-home-trade-shows.jpg"
       }
     },
-    "rich_text": {
-      "type": "rich-text",
-      "blocks": {
-        "text": {
-          "type": "text",
-          "settings": {
-            "text": "<p>Outstanding service | Exclusive pricing | Industry expertise</p>"
-          }
-        }
-      },
-      "block_order": [
-        "text"
-      ],
+    "who-we-are": {
+      "type": "misc-who-we-are",
       "settings": {
-        "desktop_content_position": "center",
-        "content_alignment": "center",
-        "color_scheme": "scheme-3",
-        "full_width": true,
-        "padding_top": 4,
-        "padding_bottom": 4
-      }
-    },
-    "featured_collection1": {
-      "type": "featured-collection",
-      "settings": {
-        "title": "Proven bestsellers",
-        "heading_size": "h2",
-        "description": "",
-        "show_description": false,
-        "description_style": "body",
-        "collection": "",
-        "products_to_show": 10,
-        "columns_desktop": 5,
-        "full_width": false,
-        "show_view_all": true,
-        "view_all_style": "solid",
-        "enable_desktop_slider": false,
-        "color_scheme": "",
-        "image_ratio": "adapt",
-        "image_shape": "default",
-        "show_secondary_image": false,
-        "show_vendor": false,
-        "show_rating": false,
-        "quick_add": "bulk",
-        "columns_mobile": "2",
-        "swipe_on_mobile": false,
-        "padding_top": 36,
-        "padding_bottom": 52
-      }
-    },
-    "collection_list": {
-      "type": "collection-list",
-      "blocks": {
-        "featured_collection1": {
-          "type": "featured_collection",
-          "settings": {
-            "collection": ""
-          }
-        },
-        "featured_collection2": {
-          "type": "featured_collection",
-          "settings": {
-            "collection": ""
-          }
-        },
-        "featured_collection3": {
-          "type": "featured_collection",
-          "settings": {
-            "collection": ""
-          }
-        },
-        "featured_collection4": {
-          "type": "featured_collection",
-          "settings": {
-            "collection": ""
-          }
-        },
-        "featured_collection5": {
-          "type": "featured_collection",
-          "settings": {
-            "collection": ""
-          }
-        }
-      },
-      "block_order": [
-        "featured_collection1",
-        "featured_collection2",
-        "featured_collection3",
-        "featured_collection4",
-        "featured_collection5"
-      ],
-      "settings": {
-        "title": "Shop our top categories",
-        "heading_size": "h2",
-        "image_ratio": "square",
-        "columns_desktop": 5,
-        "color_scheme": "scheme-4",
-        "show_view_all": false,
-        "columns_mobile": "1",
-        "swipe_on_mobile": false,
-        "padding_top": 48,
-        "padding_bottom": 60
-      }
-    },
-    "multicolumn1": {
-      "type": "multicolumn",
-      "blocks": {
-        "column7": {
-          "type": "column",
-          "settings": {
-            "title": "Add a customer testimonial",
-            "text": "",
-            "link_label": "Shop now",
-            "link": ""
-          }
-        },
-        "column8": {
-          "type": "column",
-          "settings": {
-            "title": "Add a customer testimonial",
-            "text": "",
-            "link_label": "Shop now",
-            "link": ""
-          }
-        },
-        "column9": {
-          "type": "column",
-          "settings": {
-            "title": "Add a customer testimonial",
-            "text": "",
-            "link_label": "Shop now",
-            "link": ""
-          }
-        },
-        "column10": {
-          "type": "column",
-          "settings": {
-            "title": "Add a customer testimonial",
-            "text": "",
-            "link_label": "Shop now",
-            "link": ""
-          }
-        }
-      },
-      "block_order": [
-        "column7",
-        "column8",
-        "column9",
-        "column10"
-      ],
-      "settings": {
-        "title": "",
-        "heading_size": "h1",
-        "image_width": "full",
-        "image_ratio": "adapt",
-        "columns_desktop": 4,
-        "column_alignment": "center",
-        "background_style": "none",
-        "button_label": "",
-        "button_link": "",
-        "color_scheme": "scheme-2",
-        "columns_mobile": "1",
-        "swipe_on_mobile": true,
-        "padding_top": 68,
-        "padding_bottom": 68
-      }
-    },
-    "featured_collection2": {
-      "type": "featured-collection",
-      "settings": {
-        "title": "New arrivals",
-        "heading_size": "h2",
-        "description": "",
-        "show_description": false,
-        "description_style": "body",
-        "collection": "",
-        "products_to_show": 6,
-        "columns_desktop": 5,
-        "full_width": false,
-        "show_view_all": false,
-        "view_all_style": "solid",
-        "enable_desktop_slider": true,
-        "color_scheme": "",
-        "image_ratio": "adapt",
-        "image_shape": "default",
-        "show_secondary_image": false,
-        "show_vendor": false,
-        "show_rating": false,
-        "quick_add": "bulk",
-        "columns_mobile": "2",
-        "swipe_on_mobile": false,
-        "padding_top": 36,
-        "padding_bottom": 52
-      }
-    },
-    "multicolumn2": {
-      "type": "multicolumn",
-      "blocks": {
-        "column11": {
-          "type": "column",
-          "settings": {
-            "title": "Add educational content",
-            "text": "<p>Provide content for your customers that sets their business up for success</p>",
-            "link_label": "Read now",
-            "link": ""
-          }
-        },
-        "column12": {
-          "type": "column",
-          "settings": {
-            "title": "Add educational content",
-            "text": "<p>Provide content for your customers that sets their business up for success</p>",
-            "link_label": "Read now",
-            "link": ""
-          }
-        },
-        "column13": {
-          "type": "column",
-          "settings": {
-            "title": "Add educational content",
-            "text": "<p>Provide content for your customers that sets their business up for success</p>",
-            "link_label": "Read now",
-            "link": ""
-          }
-        },
-        "column14": {
-          "type": "column",
-          "settings": {
-            "title": "Add educational content",
-            "text": "<p>Provide content for your customers that sets their business up for success</p>",
-            "link_label": "Read now",
-            "link": ""
-          }
-        }
-      },
-      "block_order": [
-        "column11",
-        "column12",
-        "column13",
-        "column14"
-      ],
-      "settings": {
-        "title": "You're set up for success",
-        "heading_size": "h2",
-        "image_width": "full",
-        "image_ratio": "adapt",
-        "columns_desktop": 4,
-        "column_alignment": "left",
-        "background_style": "primary",
-        "button_label": "",
-        "button_link": "",
-        "color_scheme": "scheme-3",
-        "columns_mobile": "1",
-        "swipe_on_mobile": false,
-        "padding_top": 44,
-        "padding_bottom": 48
+        "eyebrow": "Who we are",
+        "title": "Building a brand portfolio that speaks the language of good design.",
+        "body": "<p>Based in Amsterdam, Misc.distribution has been distributing Midori since 2010 and we have been carefully building our brand portfolio since.</p><p>At first glance it may seem as though Japanese brands are our forte, but it is aesthetics that draws us in. It just so happens we frequently seem to find this in Japan, but Studio Unto from Taiwan and BLOCK from our hometown are testimony to our worldwide interest in nice brands.</p>",
+        "stamp_text": "Amsterdam · Since 2010"
       }
     }
   },
-  "order": [
-    "image_banner",
-    "multicolumn",
-    "rich_text",
-    "featured_collection1",
-    "collection_list",
-    "multicolumn1",
-    "featured_collection2",
-    "multicolumn2"
-  ]
+  "order": ["hero", "brand-portfolio", "trade-shows", "who-we-are"]
 }

@@ -1,0 +1,261 @@
+{%- comment -%}
+  MISC footer — fork of Trade's sections/footer.liquid
+  Forked: 2026-05-30
+  Replaces Trade's footer entirely for the MISC theme. Renders:
+    1. 4-column grid (brand · customer portal · quick links · contact)
+       — customer portal column only appears when customer != blank,
+         in which case the grid stays 4-col; when logged out, the
+         layout switches to 3-col via .is-3col modifier.
+    2. Bottom bar (copyright + policy links)
+
+  Editability: brand block + contact are section settings; portal
+  links and quick links pull from linklists (configured in admin →
+  Navigation), with fallback inline if a menu is missing.
+{%- endcomment -%}
+
+{%- comment -%} CSS loaded once globally from layout/theme.liquid {%- endcomment -%}
+
+{%- liquid
+  assign portal_menu = linklists[section.settings.portal_menu]
+  assign quick_menu = linklists[section.settings.quick_menu]
+  assign show_portal = false
+  if customer != blank
+    assign show_portal = true
+  endif
+  assign cols_class = ''
+  if show_portal == false
+    assign cols_class = ' is-3col'
+  endif
+-%}
+
+<footer class="misc-site-footer">
+  <div class="misc-site-footer__cols{{ cols_class }}">
+
+    {%- comment -%} 1. Brand statement {%- endcomment -%}
+    <div class="misc-site-footer__col">
+      <div class="misc-site-footer__brand-mark">
+        {%- assign mark = section.settings.brand_mark | default: 'Misc.Distribution' -%}
+        {{ mark | replace: '.', '<span class="dot">.</span>' }}
+      </div>
+      <p class="misc-site-footer__brand-statement">{{ section.settings.brand_statement | default: 'Distributing design stationery across Europe.' }}</p>
+      <div class="misc-site-footer__stamp">
+        <div class="misc-site-footer__stamp-block">
+          <span class="misc-site-footer__stamp-label">{{ section.settings.stamp_label_left | default: 'Based in' }}</span>
+          <span class="misc-site-footer__stamp-value">{{ section.settings.stamp_value_left | default: 'Amsterdam · NL' }}</span>
+        </div>
+        <div class="misc-site-footer__stamp-block">
+          <span class="misc-site-footer__stamp-label">{{ section.settings.stamp_label_right | default: 'Since' }}</span>
+          <span class="misc-site-footer__stamp-value">{{ section.settings.stamp_value_right | default: '2010' }}</span>
+        </div>
+      </div>
+    </div>
+
+    {%- comment -%} 2. Customer Portal — conditional, signed-in only {%- endcomment -%}
+    {%- if show_portal -%}
+      <div class="misc-site-footer__col">
+        <h4 class="misc-site-footer__col-title">
+          {{ section.settings.portal_title | default: 'Customer Portal' }}
+        </h4>
+        <div class="misc-site-footer__links">
+          {%- if portal_menu.links.size > 0 -%}
+            {%- for link in portal_menu.links -%}
+              <a href="{{ link.url }}">{{ link.title }} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+            {%- endfor -%}
+          {%- else -%}
+            <a href="{{ routes.account_url }}">My Account <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+            <a href="{{ routes.account_url }}/orders">Orders <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+            <a href="{{ routes.account_url }}/orders">Invoices <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+            <a href="{{ routes.account_url }}">Backordered items <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+            <a href="/pages/contact">Support <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} 3. Quick Links (mirror of top nav) {%- endcomment -%}
+    <div class="misc-site-footer__col">
+      <h4 class="misc-site-footer__col-title">
+        {{ section.settings.quick_title | default: 'Quick Links' }}
+      </h4>
+      <div class="misc-site-footer__links">
+        {%- if quick_menu.links.size > 0 -%}
+          {%- for link in quick_menu.links -%}
+            <a href="{{ link.url }}">{{ link.title }} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+          {%- endfor -%}
+        {%- else -%}
+          <a href="{{ routes.root_url }}">Home <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+          <a href="{{ routes.collections_url }}">Catalogue <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+          <a href="{{ routes.collections_url }}">Curated Collections <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        {%- endif -%}
+      </div>
+    </div>
+
+    {%- comment -%} 4. Contact details {%- endcomment -%}
+    <div class="misc-site-footer__col">
+      <h4 class="misc-site-footer__col-title">{{ section.settings.contact_title | default: 'Contact' }}</h4>
+      <div class="misc-site-footer__contact-list">
+        {%- if section.settings.contact_phone != blank -%}
+          <a href="tel:{{ section.settings.contact_phone | replace: ' ', '' }}" class="misc-site-footer__contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.37 1.9.72 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0122 16.92z"/></svg>
+            <span>
+              <span class="misc-site-footer__contact-meta">Phone</span>
+              <span class="misc-site-footer__contact-value">{{ section.settings.contact_phone }}</span>
+            </span>
+          </a>
+        {%- endif -%}
+        {%- if section.settings.contact_email != blank -%}
+          <a href="mailto:{{ section.settings.contact_email }}" class="misc-site-footer__contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 7l9 6 9-6M3 7v10a1 1 0 001 1h16a1 1 0 001-1V7M3 7l9-4 9 4"/></svg>
+            <span>
+              <span class="misc-site-footer__contact-meta">Email</span>
+              <span class="misc-site-footer__contact-value">{{ section.settings.contact_email }}</span>
+            </span>
+          </a>
+        {%- endif -%}
+        {%- if section.settings.contact_instagram_handle != blank -%}
+          <a href="{{ section.settings.contact_instagram_url }}" target="_blank" rel="noopener" class="misc-site-footer__contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+            <span>
+              <span class="misc-site-footer__contact-meta">Instagram</span>
+              <span class="misc-site-footer__contact-value">{{ section.settings.contact_instagram_handle }}</span>
+            </span>
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+
+  </div>
+
+  <div class="misc-site-footer__bottom">
+    <div>{{ section.settings.copyright | default: '© Misc.Distribution' }} {{ 'now' | date: '%Y' }}. All rights reserved.</div>
+    <div class="misc-site-footer__bottom-links">
+      {%- for link in shop.policies -%}
+        {%- if link.body != blank -%}
+          <a href="{{ link.url }}">{{ link.title }}</a>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "MISC Footer",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Brand statement"
+    },
+    {
+      "type": "text",
+      "id": "brand_mark",
+      "label": "Wordmark",
+      "default": "Misc.Distribution"
+    },
+    {
+      "type": "text",
+      "id": "brand_statement",
+      "label": "Statement",
+      "default": "Distributing design stationery across Europe."
+    },
+    {
+      "type": "text",
+      "id": "stamp_label_left",
+      "label": "Stamp left label",
+      "default": "Based in"
+    },
+    {
+      "type": "text",
+      "id": "stamp_value_left",
+      "label": "Stamp left value",
+      "default": "Amsterdam · NL"
+    },
+    {
+      "type": "text",
+      "id": "stamp_label_right",
+      "label": "Stamp right label",
+      "default": "Since"
+    },
+    {
+      "type": "text",
+      "id": "stamp_value_right",
+      "label": "Stamp right value",
+      "default": "2010"
+    },
+    {
+      "type": "header",
+      "content": "Customer Portal column (signed-in only)"
+    },
+    {
+      "type": "text",
+      "id": "portal_title",
+      "label": "Column title",
+      "default": "Customer Portal"
+    },
+    {
+      "type": "link_list",
+      "id": "portal_menu",
+      "label": "Menu"
+    },
+    {
+      "type": "header",
+      "content": "Quick Links column"
+    },
+    {
+      "type": "text",
+      "id": "quick_title",
+      "label": "Column title",
+      "default": "Quick Links"
+    },
+    {
+      "type": "link_list",
+      "id": "quick_menu",
+      "label": "Menu"
+    },
+    {
+      "type": "header",
+      "content": "Contact column"
+    },
+    {
+      "type": "text",
+      "id": "contact_title",
+      "label": "Column title",
+      "default": "Contact"
+    },
+    {
+      "type": "text",
+      "id": "contact_phone",
+      "label": "Phone",
+      "default": "+31 20 261 38 66"
+    },
+    {
+      "type": "text",
+      "id": "contact_email",
+      "label": "Email",
+      "default": "hello@misc-distribution.com"
+    },
+    {
+      "type": "text",
+      "id": "contact_instagram_handle",
+      "label": "Instagram handle (display)",
+      "default": "@misc.distribution"
+    },
+    {
+      "type": "text",
+      "id": "contact_instagram_url",
+      "label": "Instagram URL",
+      "default": "http://instagram.com/misc.distribution"
+    },
+    {
+      "type": "header",
+      "content": "Bottom bar"
+    },
+    {
+      "type": "text",
+      "id": "copyright",
+      "label": "Copyright prefix",
+      "default": "© Misc.Distribution"
+    }
+  ]
+}
+{% endschema %}

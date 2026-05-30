@@ -1,23 +1,12 @@
 {%- comment -%}
-  Reusable "Log in to see pricing" CTA. Renders wherever a price
-  would normally render for logged-out visitors. Keeps the wording
-  and link target consistent across card, PDP, search, cart, etc.
+  DEPRECATED 2026-05-30 — file kept empty because Shopify CLI cannot
+  always delete theme files cleanly from this environment. Safe to
+  remove manually from the repo.
 
-  The CTA includes a `return_url` query param so the buyer lands
-  back on the page they came from after authenticating. Shopify's
-  account login flow honours `return_url` natively. We pass only
-  `request.path` (path-only, no scheme) to avoid an open-redirect
-  vulnerability — `request.path` is already path-only on Shopify
-  but we URL-encode it as defence in depth.
+  The "Log in to see pricing" gate has been removed from the theme.
+  Customer-tier price access is now handled by an external app tied
+  to customer registration, not by theme Liquid.
 
-  Inputs (optional):
-    - block_modifier : 'small' | '' (default '')
-                       'small' renders a smaller version for tight
-                       slots like search autocomplete results.
+  Do not re-introduce this snippet. If you need a logged-out CTA in
+  the future, add it through the app, not here.
 {%- endcomment -%}
-<a
-  href="{{ routes.account_login_url }}?return_url={{ request.path | url_encode }}"
-  class="misc-price-cta{% if block_modifier == 'small' %} misc-price-cta--small{% endif %}"
->
-  Log in to see pricing
-</a>

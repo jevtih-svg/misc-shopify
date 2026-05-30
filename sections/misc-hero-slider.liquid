@@ -1,0 +1,165 @@
+{%- comment -%}
+  MISC hero slider — section with one block per slide
+  Each slide block has: eyebrow, title, brand, body, cta_label,
+  cta_url, image, image_alt. Merchants add/reorder/remove slides
+  via the theme editor's "Add block" affordance.
+{%- endcomment -%}
+
+{{ 'misc-home.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'misc-hero-slider.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign slide_count = section.blocks.size
+-%}
+
+<section class="misc-hero" aria-label="{{ section.settings.aria_label | default: 'Featured stories' }}">
+  <div class="misc-hero__viewport">
+
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'slide' -%}
+        <div class="misc-hero__slide{% if forloop.first %} is-active{% endif %}" {{ block.shopify_attributes }}>
+          <div class="misc-hero__text">
+            {%- if block.settings.eyebrow != blank -%}
+              <div class="misc-hero__eyebrow">{{ block.settings.eyebrow }}</div>
+            {%- endif -%}
+            {%- if block.settings.title != blank -%}
+              <h2 class="misc-hero__title">{{ block.settings.title }}</h2>
+            {%- endif -%}
+            {%- if block.settings.brand != blank -%}
+              <div class="misc-hero__brand">{{ block.settings.brand }}</div>
+            {%- endif -%}
+            {%- if block.settings.body != blank -%}
+              <div class="misc-hero__body">{{ block.settings.body }}</div>
+            {%- endif -%}
+            {%- if block.settings.cta_label != blank -%}
+              <a href="{{ block.settings.cta_url | default: '#' }}" class="misc-hero__cta">
+                {{ block.settings.cta_label }}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            {%- endif -%}
+          </div>
+          <div class="misc-hero__media">
+            {%- if block.settings.image != blank -%}
+              {{ block.settings.image | image_url: width: 1400 | image_tag:
+                loading: 'lazy',
+                widths: '600, 900, 1200, 1400, 1800',
+                sizes: '(min-width: 900px) 58vw, 100vw',
+                alt: block.settings.image_alt | default: block.settings.title
+              }}
+            {%- elsif block.settings.fallback_asset != blank -%}
+              <img src="{{ block.settings.fallback_asset | asset_url }}" alt="{{ block.settings.image_alt | default: block.settings.title }}" loading="lazy">
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if slide_count > 1 -%}
+      <div class="misc-hero__dots">
+        <span data-misc-hero-counter>01 / {{ slide_count | prepend: '0' | slice: -2, 2 }}</span>
+        <span class="misc-hero__dot-track"><span class="misc-hero__dot-progress" data-misc-hero-progress style="width: {{ 100 | divided_by: slide_count }}%"></span></span>
+      </div>
+      <div class="misc-hero__controls">
+        <button class="misc-hero__nav-btn" data-misc-hero-prev type="button" aria-label="Previous slide">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button class="misc-hero__nav-btn" data-misc-hero-next type="button" aria-label="Next slide">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "MISC Hero Slider",
+  "max_blocks": 8,
+  "settings": [
+    {
+      "type": "text",
+      "id": "aria_label",
+      "label": "Accessibility label",
+      "default": "Featured stories"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Text panel"
+        },
+        {
+          "type": "text",
+          "id": "eyebrow",
+          "label": "Eyebrow (caps)",
+          "default": "Featured · Brand"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Slide headline goes here."
+        },
+        {
+          "type": "text",
+          "id": "brand",
+          "label": "Brand label",
+          "default": "Brand Name"
+        },
+        {
+          "type": "richtext",
+          "id": "body",
+          "label": "Body copy",
+          "default": "<p>Two short paragraphs about the brand or story. Keep it tight — the slide is 600px tall and clips overflow.</p>"
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "Button label",
+          "default": "Shop now"
+        },
+        {
+          "type": "url",
+          "id": "cta_url",
+          "label": "Button URL"
+        },
+        {
+          "type": "header",
+          "content": "Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Slide image"
+        },
+        {
+          "type": "text",
+          "id": "image_alt",
+          "label": "Image alt text"
+        },
+        {
+          "type": "text",
+          "id": "fallback_asset",
+          "label": "Fallback theme asset",
+          "info": "Used only when no image is uploaded. Filename of an asset in /assets (e.g. misc-home-md-product.jpg)."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "MISC Hero Slider",
+      "blocks": [
+        { "type": "slide" },
+        { "type": "slide" },
+        { "type": "slide" }
+      ]
+    }
+  ]
+}
+{% endschema %}
