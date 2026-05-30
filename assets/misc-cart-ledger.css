@@ -23,8 +23,20 @@
   background: var(--misc-bg);
   font-size: 14px;
   line-height: 1.55;
-  padding-bottom: 150px; /* space for the sticky action bar */
+  /* Reserve room for the sticky action bar AND act as the
+     positioning context the bar docks against once the buyer
+     reaches the bottom (see .is-bar-docked below). */
+  position: relative;
+  padding-bottom: 164px; /* space for the sticky action bar */
 }
+
+/* Global utility: anything inside the cart ledger marked with the
+   .is-hidden class OR the [hidden] HTML attribute is removed from
+   layout. The [hidden] override is necessary because grid/flex
+   display rules elsewhere override the user-agent default of
+   display: none for [hidden]. */
+.misc-cart-ledger .is-hidden,
+.misc-cart-ledger [hidden] { display: none !important; }
 
 .misc-cart-ledger__page {
   max-width: 1180px;
@@ -143,7 +155,12 @@
   min-width: 56px;
   flex-shrink: 0;
 }
-.misc-cart-ledger__filter-options { display: flex; flex-wrap: wrap; gap: 18px; flex: 1; }
+/* Horizontal gap between chips + a vertical row-gap so that when
+   chips wrap to a second line (many brands, long sort labels, or
+   narrow viewports) the active chip's underline never collides
+   with the chips on the line below. Without the row-gap the wrapped
+   lines stack with no breathing room and visibly overlap. */
+.misc-cart-ledger__filter-options { display: flex; flex-wrap: wrap; gap: 8px 18px; flex: 1; }
 .misc-cart-ledger__reset {
   background: none;
   border: 0;
@@ -159,8 +176,12 @@
 .misc-cart-ledger__chip {
   appearance: none;
   background: none;
+  /* Reserve the 2px underline up front (transparent) so toggling
+     the active state only changes its colour, never the chip's
+     height. This stops the row from shifting on click. */
   border: 0;
-  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+  padding: 4px 0 2px;
   font-family: inherit;
   font-size: 13px;
   color: var(--misc-ink-mute);
@@ -173,7 +194,7 @@
 .misc-cart-ledger__chip.is-active {
   color: var(--misc-ink);
   font-weight: 600;
-  border-bottom: 2px solid var(--misc-ink);
+  border-bottom-color: var(--misc-ink);
 }
 .misc-cart-ledger__chip-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
 .misc-cart-ledger__chip-dot--in { background: var(--misc-green); }
@@ -210,7 +231,7 @@
 .misc-cart-ledger__col-num { width: 28px; }
 .misc-cart-ledger__col-sku { width: 96px; }
 .misc-cart-ledger__col-product { width: auto; }
-.misc-cart-ledger__col-qty { width: 110px; }
+.misc-cart-ledger__col-qty { width: 150px; }
 .misc-cart-ledger__col-unit { width: 90px; }
 .misc-cart-ledger__col-rrp { width: 90px; }
 .misc-cart-ledger__col-subtotal { width: 130px; }
@@ -265,8 +286,15 @@
   appearance: none;
   background: none;
   border: 1px solid var(--misc-hairline-strong);
+  /* flex:none + border-box + no padding so the buttons keep a
+     fixed size and never grow (which would squeeze the input)
+     or shrink. */
+  flex: none;
+  box-sizing: border-box;
   width: 22px;
   height: 22px;
+  min-width: 22px;
+  padding: 0;
   line-height: 1;
   font-family: inherit;
   font-size: 14px;
@@ -276,8 +304,15 @@
 }
 .misc-cart-ledger__step-btn:hover { background: var(--misc-bg-alt); border-color: var(--misc-ink); }
 .misc-cart-ledger__qty-input {
-  width: 40px;
+  /* Sized to hold a 4-digit quantity (e.g. 9999) with margin.
+     5-digit orders are out of scope. flex:none stops the input
+     from being shrunk by the +/- buttons in the flex stepper
+     (the cause of the clipped value); box-sizing keeps padding +
+     border inside the declared width so the value never clips. */
+  flex: none;
+  width: 68px;
   height: 22px;
+  box-sizing: border-box;
   border: 1px solid var(--misc-hairline-strong);
   border-radius: 2px;
   text-align: center;
@@ -285,8 +320,10 @@
   font-size: 13px;
   font-variant-numeric: tabular-nums;
   font-weight: 500;
-  padding: 0;
+  padding: 0 4px;
   background: var(--misc-bg);
+  appearance: textfield;
+  -moz-appearance: textfield;
 }
 .misc-cart-ledger__qty-input:focus { outline: none; border-color: var(--misc-ink); }
 .misc-cart-ledger__qty-input::-webkit-outer-spin-button,
@@ -618,6 +655,241 @@
 .misc-cart-ledger__field-textarea:focus { outline: none; border-color: var(--misc-ink); }
 .misc-cart-ledger__field-hint { font-size: 11px; color: var(--misc-ink-mute); }
 
+/* Inline "Saved" indicator next to the field label. Hidden until
+   the cart-attribute AJAX save resolves; fades after ~1.5s. */
+.misc-cart-ledger__field-label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.misc-cart-ledger__field-saved {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--misc-green);
+  opacity: 1;
+  transition: opacity 200ms ease;
+}
+.misc-cart-ledger__field-saved.is-fading { opacity: 0; }
+
+/* ------------------------------------------------------------ */
+/* Images view — classical row layout                           */
+/* --------------------------------------------------------------*/
+/* 160px thumbnail left, info stack middle, qty/total/remove    */
+/* right, then a tinted band of stock-breakdown rows under each */
+/* item. Default visible (table view starts .is-hidden).        */
+/* ------------------------------------------------------------ */
+.misc-cart-ledger__images { border-top: 1px solid var(--misc-hairline-strong); }
+.misc-cart-ledger__images.is-hidden { display: none !important; }
+
+/* Brand subheader inserted by JS in the images view when sorted
+   by brand (parallel to the table's .misc-cart-ledger__brand-row). */
+.misc-cart-ledger__images-brand-row {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: var(--misc-ink);
+  padding: 18px 0 8px;
+  border-top: 1px solid var(--misc-ink);
+}
+.misc-cart-ledger__images-brand-row:first-child { border-top: 0; }
+
+.misc-cart-ledger__image-item {
+  display: grid;
+  grid-template-columns: 160px 1fr auto;
+  column-gap: 28px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--misc-hairline);
+  align-items: start;
+}
+.misc-cart-ledger__image-item.is-hidden { display: none !important; }
+
+.misc-cart-ledger__image-media {
+  width: 160px;
+  height: 160px;
+  border: 1px solid var(--misc-hairline);
+  background: var(--misc-bg-alt);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.misc-cart-ledger__image-media a { display: block; width: 100%; height: 100%; }
+.misc-cart-ledger__image-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: var(--misc-bg);
+  display: block;
+}
+
+.misc-cart-ledger__image-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.misc-cart-ledger__image-brand {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: var(--misc-ink);
+}
+.misc-cart-ledger__image-name {
+  font-size: 17px;
+  color: var(--misc-ink);
+  font-weight: 500;
+  line-height: 1.3;
+  text-decoration: none;
+}
+.misc-cart-ledger__image-name:hover { text-decoration: underline; }
+.misc-cart-ledger__image-variant {
+  font-size: 12px;
+  color: var(--misc-ink-mute);
+  margin-top: 1px;
+}
+.misc-cart-ledger__image-meta {
+  font-size: 12px;
+  color: var(--misc-ink-mute);
+  font-family: "JetBrains Mono", ui-monospace, "Menlo", monospace;
+  margin-top: 1px;
+}
+.misc-cart-ledger__image-price-row {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--misc-ink-mute);
+  font-variant-numeric: tabular-nums;
+}
+.misc-cart-ledger__image-price-row strong { color: var(--misc-ink); font-weight: 500; }
+.misc-cart-ledger__image-price-rrp { margin-left: 10px; }
+
+.misc-cart-ledger__image-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 140px;
+}
+.misc-cart-ledger__image-actions .misc-cart-ledger__step-btn { width: 28px; height: 28px; }
+.misc-cart-ledger__image-actions .misc-cart-ledger__qty-input { width: 76px; height: 28px; font-size: 14px; }
+.misc-cart-ledger__image-total {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.misc-cart-ledger__image-total-amount {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--misc-ink);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.misc-cart-ledger__image-total-units {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--misc-ink-mute);
+  font-variant-numeric: tabular-nums;
+}
+.misc-cart-ledger__image-remove {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: inherit;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--misc-ink-mute);
+  cursor: pointer;
+  text-decoration: underline;
+}
+.misc-cart-ledger__image-remove:hover { color: var(--misc-red); }
+
+/* Stock breakdown band below image-info+actions */
+.misc-cart-ledger__image-avails {
+  grid-column: 2 / -1;
+  margin-top: 12px;
+  background: var(--misc-bg-alt);
+  border: 1px solid var(--misc-hairline);
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+}
+.misc-cart-ledger__image-avail {
+  display: grid;
+  grid-template-columns: 12px 1fr auto auto;
+  column-gap: 12px;
+  align-items: baseline;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  border-bottom: 1px dotted var(--misc-hairline);
+}
+.misc-cart-ledger__image-avail:last-child { border-bottom: 0; }
+.misc-cart-ledger__image-avail.is-hidden { display: none !important; }
+.misc-cart-ledger__image-avail-dot {
+  width: 8px; height: 8px; border-radius: 50%; align-self: center;
+}
+.misc-cart-ledger__image-avail--in .misc-cart-ledger__image-avail-dot { background: var(--misc-green); }
+.misc-cart-ledger__image-avail--inbound .misc-cart-ledger__image-avail-dot { background: var(--misc-orange); }
+.misc-cart-ledger__image-avail--backorder .misc-cart-ledger__image-avail-dot { background: var(--misc-red); }
+.misc-cart-ledger__image-avail-state { font-weight: 600; }
+.misc-cart-ledger__image-avail--in .misc-cart-ledger__image-avail-state { color: var(--misc-green); }
+.misc-cart-ledger__image-avail--inbound .misc-cart-ledger__image-avail-state { color: var(--misc-orange); }
+.misc-cart-ledger__image-avail--backorder .misc-cart-ledger__image-avail-state { color: var(--misc-red); }
+.misc-cart-ledger__image-avail-detail { color: var(--misc-ink-mute); font-weight: 400; margin-left: 4px; }
+.misc-cart-ledger__image-avail-qty { color: var(--misc-ink); font-weight: 500; white-space: nowrap; }
+.misc-cart-ledger__image-avail-amount { color: var(--misc-ink); font-weight: 600; white-space: nowrap; min-width: 80px; text-align: right; }
+
+/* Images view footer — same pair as the table footer */
+.misc-cart-ledger__images-foot {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--misc-hairline-strong);
+  padding: 12px 0 0;
+  margin-top: -1px;
+}
+.misc-cart-ledger__images-foot-row {
+  display: grid;
+  grid-template-columns: 160px 1fr auto auto;
+  column-gap: 28px;
+  padding: 6px 0;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.misc-cart-ledger__images-foot-row--filtered {
+  font-weight: 500;
+  color: var(--misc-ink-mute);
+  font-size: 12px;
+  border-bottom: 1px dotted var(--misc-hairline);
+  padding-bottom: 8px;
+  margin-bottom: 2px;
+}
+.misc-cart-ledger__images-foot-row--total {
+  font-weight: 600;
+  color: var(--misc-ink);
+}
+.misc-cart-ledger__images-foot-label { grid-column: 2 / 3; text-align: right; }
+.misc-cart-ledger__images-foot-qty { text-align: right; min-width: 60px; }
+.misc-cart-ledger__images-foot-amount { text-align: right; min-width: 110px; padding-right: 8px; }
+
+@media (max-width: 720px) {
+  .misc-cart-ledger__image-item { grid-template-columns: 100px 1fr; gap: 16px; }
+  .misc-cart-ledger__image-media { width: 100px; height: 100px; }
+  .misc-cart-ledger__image-actions {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  .misc-cart-ledger__image-avails { grid-column: 1 / -1; }
+  .misc-cart-ledger__images-foot-row { grid-template-columns: 100px 1fr auto auto; }
+}
+
 /* ------------------------------------------------------------ */
 /* Continue link + sticky action bar                            */
 /* ------------------------------------------------------------ */
@@ -639,6 +911,15 @@
   border-top: 3px solid var(--misc-ink);
   padding: 18px 32px;
   z-index: 50;
+}
+/* Docked state: once the buyer scrolls to the end of the cart,
+   JS adds .is-bar-docked so the bar switches from viewport-fixed
+   to absolute at the bottom of the cart section. It then stops
+   above the footer instead of floating over it. The reserved
+   padding-bottom keeps a gap between the last content and the
+   parked bar. */
+.misc-cart-ledger.is-bar-docked .misc-cart-ledger__action-bar {
+  position: absolute;
 }
 .misc-cart-ledger__action-bar-inner {
   max-width: 1180px;

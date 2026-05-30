@@ -7,10 +7,52 @@
 /* ============================================================
    Page layout
 ============================================================ */
+/* ============================================================
+   Page header — breadcrumb above the PDP body. Same visual
+   treatment as the Contact page's misc-contact-page-header__
+   breadcrumb (defined in assets/misc-contact.css) so the top
+   section reads identically across pages.
+============================================================ */
+.misc-pdp-page-header__breadcrumb {
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  /* MISC: 3px ink line just after the breadcrumb. This closes the
+     top of the PDP grid so the gallery/info divider and the section
+     dividers connect to a real top frame instead of floating below
+     the header. The header band line + this line bracket the
+     breadcrumb row. */
+  border-bottom: 3px solid var(--c-ink);
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--c-ink-mute);
+  font-weight: var(--fw-medium);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.misc-pdp-page-header__breadcrumb a {
+  color: var(--c-ink-mute);
+  text-decoration: none;
+}
+.misc-pdp-page-header__breadcrumb a:hover {
+  color: var(--c-ink);
+  text-decoration: none;
+}
+.misc-pdp-page-header__breadcrumb span[aria-hidden] {
+  color: var(--c-ink-faint);
+}
+.misc-pdp-page-header__breadcrumb [aria-current="page"] {
+  color: var(--c-ink);
+}
+
 .misc-pdp {
   display: grid;
   grid-template-columns: 1.1fr 1fr;
-  border-top: 3px solid var(--c-ink);
+  /* No border-top: the breadcrumb's 3px bottom border above is the
+     top frame of the grid (the gallery/info + section dividers
+     connect into it). Keep border-bottom so the page closes cleanly
+     against related-products / footer below. */
   border-bottom: 3px solid var(--c-ink);
 }
 

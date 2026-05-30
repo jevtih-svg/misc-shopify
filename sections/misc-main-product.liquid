@@ -28,7 +28,66 @@
 {%- liquid
   assign primary_variant = product.selected_or_first_available_variant
   assign variant_count = product.variants.size
+
+  comment
+    Breadcrumb chain: Catalogue / Brand / Collection / Product.
+    Resolve the parent collection but SKIP Shopify's automatic
+    "frontpage" collection — that is the old "Home page" crumb that
+    linked to a one-product feed. Prefer the contextual collection
+    the buyer clicked through from; otherwise the first real
+    (non-frontpage) collection the product belongs to.
+  endcomment
+  assign parent_collection = nil
+  if collection != blank and collection.handle != 'frontpage'
+    assign parent_collection = collection
+  else
+    for misc_col in product.collections
+      if misc_col.handle != 'frontpage'
+        assign parent_collection = misc_col
+        break
+      endif
+    endfor
+  endif
+
+  comment
+    Brand for the breadcrumb. Display value uses the shared
+    misc-brand fallback chain. The Brand crumb links to the
+    all-products catalogue filtered by the custom.Manufacturer
+    metafield (the store's primary brand key). NOTE: this filter
+    only narrows results if the Manufacturer metafield is enabled
+    as a storefront filter in Shopify Search & Discovery.
+  endcomment
+  capture misc_brand
+    render 'misc-brand', product: product
+  endcapture
+  assign misc_brand = misc_brand | strip
+  assign brand_filter = product.metafields.custom.Manufacturer.value
+  if brand_filter == blank
+    assign brand_filter = misc_brand
+  endif
 -%}
+
+{%- comment -%} ============================================================
+  PAGE HEADER — breadcrumb above the body. Mirrors the pattern from
+  sections/misc-contact.liquid so the top section is consistent
+  across pages (Home / parent / current).
+
+  Sits outside <section class="misc-pdp"> because that element is a
+  CSS grid; nesting the breadcrumb inside would make it a grid item.
+============================================================ {%- endcomment -%}
+<nav class="misc-pdp-page-header__breadcrumb" aria-label="Breadcrumb">
+  <a href="{{ routes.collections_url }}">Catalogue</a>
+  {%- if misc_brand != blank -%}
+    <span aria-hidden="true">/</span>
+    <a href="{{ routes.collections_url }}/all?filter.p.m.custom.Manufacturer={{ brand_filter | url_encode }}">{{ misc_brand | escape }}</a>
+  {%- endif -%}
+  {%- if parent_collection != blank -%}
+    <span aria-hidden="true">/</span>
+    <a href="{{ parent_collection.url }}">{{ parent_collection.title | escape }}</a>
+  {%- endif -%}
+  <span aria-hidden="true">/</span>
+  <span aria-current="page">{{ product.title | escape }}</span>
+</nav>
 
 <section
   class="misc-pdp"

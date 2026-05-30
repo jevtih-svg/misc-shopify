@@ -44,13 +44,10 @@
 <div class="section-{{ section.id }}-padding gradient">
 
   {%- comment -%}
-    MISC: "best on desktop" notice — only visible on mobile via
-    CSS (display:none on >=768px). Dismissible via misc-mobile.js.
+    MISC: the catalog is a first-class mobile experience now, so
+    the old "best experienced on desktop" notice was removed
+    2026-05-30. Do not reintroduce it.
   {%- endcomment -%}
-  <div class="mobile-desktop-notice" data-mobile-notice>
-    <span>Best experienced on desktop</span>
-    <button type="button" class="mobile-desktop-notice__close" data-mobile-notice-close aria-label="Dismiss">&times;</button>
-  </div>
 
   {%- paginate collection.products by per_page -%}
 

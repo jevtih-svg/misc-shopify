@@ -192,6 +192,71 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--space-4); /* keeps a gap between title and Hide/Show toggle when the cell shrinks to auto width */
+}
+
+/* ============================================================
+   COLLAPSIBLE FILTER SIDEBAR (desktop)
+   The "Hide filters" toggle in the filter-bar left cell collapses
+   the sidebar so the table / grid reclaims its full width. The
+   list-view Product column is otherwise squeezed to its 160px
+   minimum by the 320px sidebar on narrow laptops. State lives on
+   <html class="misc-hide-filters"> (first paint in theme.liquid,
+   persisted by misc-view-toggle.js). The toggle sits in the left
+   cell, which is hidden on mobile (<1024px uses the filter drawer),
+   so these are desktop-only controls.
+   ============================================================ */
+.misc-filter-bar__left-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.misc-filters-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: var(--c-ink-mute);
+  font-family: var(--font-sans);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  white-space: nowrap;
+}
+.misc-filters-toggle:hover { color: var(--c-ink); }
+.misc-filters-toggle__chevron { flex: none; transition: transform 150ms ease; }
+/* Icon-only while filters are shown (the sidebar is right there, and a
+   text label would crowd "Clear all" out of the 320px cell). The label
+   appears only when collapsed, where the cell has shrunk to auto width
+   and there is room. Accessible name is held on aria-label either way. */
+.misc-filters-toggle__label { display: none; }
+html.misc-hide-filters .misc-filters-toggle__label { display: inline; }
+html.misc-hide-filters .misc-filters-toggle__chevron { transform: rotate(180deg); }
+
+@media (min-width: 1024px) {
+  html.misc-hide-filters .facets-vertical .facets-wrapper { display: none; }
+  /* Table / grid take the full width once the sidebar is gone. */
+  html.misc-hide-filters .facets-vertical .product-grid-container { width: 100%; }
+  /* Collapse the 320px header cell to its content so the re-open
+     control sits compactly top-left instead of over an empty column. */
+  html.misc-hide-filters .misc-filter-bar__left {
+    flex: 0 0 auto;
+    width: auto;
+  }
+  /* The divider between the filter cell and the controls only made
+     sense when it lined up with the sidebar's right edge. With the
+     sidebar gone it dangles mid-bar, so drop it when collapsed. */
+  html.misc-hide-filters .misc-filter-bar__right { border-left: none; }
+  /* The table's own left frame — it was the sidebar/table boundary
+     line. In LIST view, with no sidebar, it just rules the far-left
+     edge of the table, so drop it and let the rows sit flush. In GRID
+     view the thick line stays: it frames the card grid. */
+  html.misc-hide-filters.misc-prefer-list #ProductGridContainer { border-left: none; }
 }
 
 .misc-filter-bar__right {
@@ -294,6 +359,7 @@
   padding: 0;
   font-family: var(--font-sans);
   cursor: pointer;
+  white-space: nowrap; /* never let "Clear all" wrap to two lines in the 320px cell */
 }
 
 .misc-filter-bar__clear:hover {
@@ -685,11 +751,16 @@
   margin: 0 !important;
   padding: 0 !important;
   list-style: none;
-  /* No border-left here — #ProductGridContainer's border-left
-     already provides the sidebar/grid boundary line. Stacking
-     both produced a doubled 6px line. List view (.product-list)
-     also relies on ProductGridContainer's border-left, so the
-     two views share the same left frame. */
+  /* No border-left/top here. #ProductGridContainer's border-left is
+     the left frame, and the filter bar's 3px bottom border is the top
+     frame. Trade's base leaves a 1px border-top/left on the grid which
+     pushed the first row down 1px — that made the rightmost card's 3px
+     border-right (the right frame) start 1px below the filter bar's
+     bottom border, leaving a 1px notch at the top-right corner. Zero
+     them so the heavy top and right frame lines share the corner.
+     The mobile block re-adds border-top: 3px as the mobile top frame. */
+  border-top: 0;
+  border-left: 0;
 }
 
 .collection .product-grid > li,
@@ -923,8 +994,13 @@
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-lg) !important;
   cursor: text;
-  /* Force the input's intrinsic height to ignore line-height so
-     the flex centering does the actual vertical positioning. */
+  /* Pin line-height to the inner box height (52 outer - 2 * 2 border
+     = 48 px) so the digit sits on the geometric centre line. Flex
+     centering on form controls is unreliable in Safari; line-height
+     gives us a deterministic vertical position. */
+  line-height: 48px !important;
+  padding: 0 !important;
+  height: 100%;
   min-height: 0;
   box-sizing: border-box;
 }
@@ -949,8 +1025,24 @@
   height: 36px;
   border-width: 1.5px;
 }
-.misc-qty-stepper--mini .misc-qty-stepper__btn { font-size: var(--fs-md); }
-.misc-qty-stepper--mini .misc-qty-stepper__input { font-size: var(--fs-md) !important; }
+.misc-qty-stepper--mini .misc-qty-stepper__btn {
+  font-size: var(--fs-md);
+  /* Pin the glyph height so flex centering has a known box. */
+  line-height: 33px;
+}
+.misc-qty-stepper--mini .misc-qty-stepper__input {
+  font-size: var(--fs-md) !important;
+  /* CRITICAL: line-height equals the inner box height (36 outer - 1.5 * 2
+     border = 33 px). For real <input> elements, browsers compute the
+     vertical position of the text from line-height + padding, NOT from
+     the flex `align-items: center` on the input's own display: flex.
+     Safari in particular ignores flex centering on form controls, so
+     the digit appears ~1-2 px low. Setting line-height to the box
+     height forces the glyph onto the geometric centre line. */
+  line-height: 33px !important;
+  padding: 0 !important;
+  height: 100%;
+}
 
 /* ============================================================
    VARIANT ROWS (multi-variant cards)
@@ -964,20 +1056,27 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  /* Gap BETWEEN variant groups (var(--space-3) = 12px) is wider
-     than gap WITHIN a group (2px) so each variant name visually
-     attaches to its own stepper. */
-  gap: var(--space-3);
+  /* Gap BETWEEN variant groups. Kept clearly larger than the gap
+     WITHIN a group (4px below) — roughly 2x — so each name reads as
+     belonging to the stepper directly beneath it, not the one above.
+     Condensed from the old loose rhythm. */
+  gap: var(--space-2);
 }
 
 .misc-variant {
   display: flex;
   flex-direction: column;
-  /* Variant name+state row sits flush against its stepper — 1px
-     gap is the minimum that prevents the text baseline touching
-     the stepper border. */
-  gap: 1px;
+  /* Tight gap between the name+state row and ITS stepper. */
+  gap: var(--space-1);
 }
+
+/* The base .misc-qty-stepper adds margin-top: var(--space-3) for the
+   single-variant card stepper that sits under the price. Inside a
+   variant row that stray 12px stacked on top of the flex gap, making
+   the name-to-own-stepper distance (~13px) almost equal to the
+   between-variant gap — so names looked equidistant between two
+   steppers. Zero it; the flex gaps above own the spacing now. */
+.misc-variant .misc-qty-stepper { margin-top: 0; }
 
 .misc-variant__row {
   display: flex;
@@ -1276,6 +1375,42 @@ html.misc-prefer-grid-5 .product-grid {
 #ProductGridContainer {
   border-left: 3px solid var(--c-ink);
   min-width: 0;
+  /* Query container so the list view can drop low-value columns based
+     on the TABLE's own width, which already reflects whether the
+     filter sidebar is collapsed. Avoids viewport-based guesses that
+     can't see the sidebar state. */
+  container-type: inline-size;
+  container-name: catalogbody;
+}
+
+/* ============================================================
+   RESPONSIVE COLUMN HIDING (list view, desktop)
+   As the table narrows, drop the lowest-value columns in order so
+   the Product column keeps room: HS -> Origin -> UPQ -> RRP. Each
+   rule hides the data cells (by modifier class) and the matching
+   header cell (by position); with both gone the empty grid track
+   collapses to 0 and the Product 1fr track absorbs the width.
+   Thresholds are the table width, not the viewport, so they fire at
+   the right moment whether or not the sidebar is collapsed.
+   ============================================================ */
+/* `.list-row > .list-cell--x` (0,2,0) is needed to beat the later
+   base `.list-cell { display: flex }` (0,1,0); a bare `.list-cell--x`
+   ties on specificity and loses on source order. */
+@container catalogbody (max-width: 1340px) {
+  .list-row > .list-cell--hs,
+  .list-row--head > .list-cell:nth-child(6) { display: none; }
+}
+@container catalogbody (max-width: 1240px) {
+  .list-row > .list-cell--country,
+  .list-row--head > .list-cell:nth-child(7) { display: none; }
+}
+@container catalogbody (max-width: 1120px) {
+  .list-row > .list-cell--upq,
+  .list-row--head > .list-cell:nth-child(5) { display: none; }
+}
+@container catalogbody (max-width: 1020px) {
+  .list-row > .list-cell--rrp,
+  .list-row--head > .list-cell:nth-child(9) { display: none; }
 }
 
 /* ============================================================
@@ -1300,7 +1435,11 @@ html.misc-prefer-grid-5 .product-grid {
   grid-template-columns:
     40px
     max-content
-    minmax(160px, 1fr)
+    /* Product: min 0 (not 160px) so on a narrow laptop with filters
+       open the name truncates gracefully instead of forcing a
+       page-level horizontal scrollbar. 1fr still hands it all the
+       leftover width whenever there is room. */
+    minmax(0, 1fr)
     max-content
     max-content
     max-content
@@ -1332,6 +1471,24 @@ html.misc-prefer-grid-5 .product-grid {
 .list-row > .list-cell--rrp      { grid-column: 9; }
 .list-row > .list-cell--price    { grid-column: 10; }
 .list-row > .list-cell--stepper  { grid-column: 11; }
+
+/* Pin the HEADER cells to explicit columns too. They carry no
+   per-column modifier class, so they were previously auto-placed.
+   Auto-placement breaks the moment a column is hidden (the cells
+   after the hidden one shift left and misalign with the data).
+   Explicit columns make the header robust and let the responsive
+   column-hiding below collapse a column cleanly. */
+.list-row--head > .list-cell:nth-child(1)  { grid-column: 1; }
+.list-row--head > .list-cell:nth-child(2)  { grid-column: 2; }
+.list-row--head > .list-cell:nth-child(3)  { grid-column: 3; }
+.list-row--head > .list-cell:nth-child(4)  { grid-column: 4; }
+.list-row--head > .list-cell:nth-child(5)  { grid-column: 5; }
+.list-row--head > .list-cell:nth-child(6)  { grid-column: 6; }
+.list-row--head > .list-cell:nth-child(7)  { grid-column: 7; }
+.list-row--head > .list-cell:nth-child(8)  { grid-column: 8; }
+.list-row--head > .list-cell:nth-child(9)  { grid-column: 9; }
+.list-row--head > .list-cell:nth-child(10) { grid-column: 10; }
+.list-row--head > .list-cell:nth-child(11) { grid-column: 11; }
 
 .list-cell {
   position: relative;
@@ -1473,8 +1630,16 @@ html.misc-prefer-grid-5 .product-grid {
   justify-content: center;
 }
 .list-cell--stepper {
-  /* Dead center horizontally and vertically. */
+  /* Dead center horizontally and vertically. The column is
+     max-content-sized so the cell shrink-wraps the 130px stepper;
+     that means horizontal position is set by padding, not by
+     justify-content. The :last-child rule forces padding-right to
+     space-5 (24px) while the base .list-cell gives padding-left
+     space-3 (12px), which pushed the stepper ~6px left of centre.
+     Match padding-left to space-5 so left and right are symmetric
+     and the stepper sits dead centre in its column. */
   justify-content: center;
+  padding-left: var(--space-5);
   padding-top: var(--space-1);
   padding-bottom: var(--space-1);
 }
@@ -1484,6 +1649,15 @@ html.misc-prefer-grid-5 .product-grid {
      (32px 1fr 32px) gives the input the middle 66 px for the
      digit, plenty of room. */
   width: 130px;
+  /* The base .misc-qty-stepper rule sets margin-top: var(--space-3)
+     (12px) for the big single-variant card stepper, which sits
+     under the price. The mini variant never reset it, so list-view
+     stepper cells were 12px taller than the "Unavailable"
+     placeholder cells (which have no margin). That made orderable
+     rows ~57px while unavailable rows and the header were ~44px.
+     Zero it here so every list row — header, orderable, and
+     unavailable — shares the same 44px height. */
+  margin-top: 0;
 }
 
 /* Stepper-sized placeholder for out-of-stock rows. Footprint
@@ -1791,23 +1965,108 @@ body.drawer-open { overflow: hidden; }
    - Below 420px  : tighter card padding, smaller image
    ============================================================ */
 
+/* ============================================================
+   MOBILE (tablet + phone, <1024px) — AUTHORITATIVE BLOCK
+   One consistent experience below the desktop breakpoint:
+     - no view choice (Grid 3 / Grid 5 / List toggle removed)
+     - single-column grid of image-left horizontal cards
+     - per-page control removed
+     - filters live in a slide-in drawer opened from a 50/50
+       [ Filter | Sort ] bar
+   This block sits after the earlier responsive blocks, so its
+   rules win ties on source order. Phone-specific refinements
+   (smaller image, larger touch targets) live in the <=767 and
+   <=419 blocks below.
+   ============================================================ */
 @media (max-width: 1023px) {
-  /* Hide the inline sidebar layout cells */
-  .misc-filter-bar__left { display: none; }
-  .misc-filter-bar__right { border-left: 0; flex-wrap: wrap; }
 
-  /* Frame the catalog horizontally on mobile. Filter bar gets
-     left + right borders; grid-wrap's default border-left
-     continues as the left frame line below the filter bar. */
+  /* ---- Filter bar: [ Filter ] | [ Sort by … ] as one row ---- */
   .misc-filter-bar {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    padding: 0;
     border-left: 3px solid var(--c-ink);
     border-right: 3px solid var(--c-ink);
   }
+  .misc-filter-bar__left { display: none; }            /* desktop title cell */
+  .misc-filter-bar__pills { display: none; }           /* active pills move into the drawer summary */
 
-  /* Show the mobile trigger */
-  .filter-bar__mobile-trigger { display: inline-flex; }
+  .filter-bar__mobile-trigger {
+    display: flex;
+    flex: 1 1 50%;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: 56px;
+    border-right: 1px solid var(--c-ink);
+  }
+  .misc-filter-bar__right {
+    flex: 1 1 50%;
+    border-left: 0;
+    flex-wrap: nowrap;
+    padding: 0;          /* base cell has 16px/24px padding; zero it so the bar stays 56px */
+  }
+  .misc-filter-bar__tools {
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0 var(--space-3);
+    min-height: 56px;
+  }
+  .sort-control { justify-content: center; }
+  .sort-control__label,
+  .sort-control__count,
+  .sort-control--per-page { display: none; }
 
-  /* Sidebar becomes drawer */
+  /* No view choice on mobile — single column is the only layout. */
+  .view-toggle { display: none !important; }
+
+  /* ---- Single-column grid, regardless of any toggle state ---- */
+  .collection .product-grid,
+  .collection .product-grid.is-cols-5 {
+    grid-template-columns: 1fr !important;
+    border-left: none;
+    border-top: 3px solid var(--c-ink);
+  }
+  /* List view never shows on mobile (11 B2B columns can't fit). */
+  .product-list { display: none !important; }
+
+  /* ---- Image-left horizontal card ----
+     DOM order is: top-row (brand) · sku · media · body. We place
+     the media in column 1 spanning the rows, and stack brand, sku,
+     and the body (name/pack/price/stock/stepper) in column 2. */
+  .misc-product-card {
+    display: grid !important;
+    grid-template-columns: 132px 1fr;
+    column-gap: var(--space-4);
+    padding: var(--space-4);
+    align-items: start;
+  }
+  .misc-product-card__media {
+    grid-column: 1;
+    grid-row: 1 / span 4;
+    align-self: start;
+    width: 132px;
+    height: 132px;
+    margin: 0;
+    aspect-ratio: auto;
+  }
+  .misc-product-card__image { width: 100%; height: 100%; object-fit: cover; }
+  .misc-product-card__top-row { grid-column: 2; grid-row: 1; padding: 0; font-size: var(--fs-2xs); }
+  .misc-product-card__sku     { grid-column: 2; grid-row: 2; padding: 0; margin: 0; align-self: start; }
+  .misc-product-card__body    { grid-column: 2; grid-row: 3; padding: 0; margin-top: var(--space-1); }
+  .misc-product-card__name    { font-size: var(--fs-sm); -webkit-line-clamp: 2; min-height: auto; }
+  .misc-product-card__price   { font-size: var(--fs-md); }
+  /* Stepper stretches to the full info-column width for an easy tap.
+     Direct child only — the single-variant card stepper. Multi-variant
+     steppers live inside .misc-variant and keep their own tight spacing
+     (see .misc-variant .misc-qty-stepper { margin-top: 0 }). */
+  .misc-product-card__body > .misc-qty-stepper { margin-top: var(--space-3); width: 100%; }
+
+  /* ---- Filter drawer (slides in from the left) ---- */
+  .filter-bar__mobile-trigger { /* shown via display:flex above */ }
   .facets-vertical .facets-wrapper {
     position: fixed;
     top: 0;
@@ -1821,64 +2080,30 @@ body.drawer-open { overflow: hidden; }
     transform: translateX(-100%);
     transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     display: flex;
     flex-direction: column;
     flex: none;
-    max-width: 340px;
   }
   .facets-vertical .facets-wrapper.is-open { transform: translateX(0); }
-
   .sidebar__mobile-header,
   .sidebar__mobile-footer { display: flex; }
-
-  /* Hide list view, Per page, Grid 5 below laptop */
-  .view-toggle__btn[data-view="list"],
-  .view-toggle__btn[data-view="grid-5"] { display: none; }
-  .sort-control--per-page { display: none; }
-
-  /* If user lands on list view at this size, force grid */
-  .product-list { display: none !important; }
 }
 
 @media (max-width: 767px) {
-  /* "Best on desktop" notice visible */
-  .mobile-desktop-notice { display: flex; }
+  /* Phone refinements layered on top of the <1024px mobile layout. */
 
-  /* Mobile filter bar: two equal-width buttons */
-  .misc-filter-bar { padding: 0; }
-  .filter-bar__mobile-trigger { flex: 1 1 50%; justify-content: center; min-height: 56px; }
-  .misc-filter-bar__right { flex: 1 1 50%; padding: 0; justify-content: center; border-left: 0; flex-wrap: nowrap; }
-  .misc-filter-bar__pills { display: none; }
-  .misc-filter-bar__tools { flex: 1; justify-content: center; padding: var(--space-3); min-height: 56px; gap: var(--space-2); }
-  .sort-control__label { display: none; }
-  .sort-control__count { display: none; }
-  .view-toggle { display: none !important; }
-
-  /* Grid: 1 col, horizontal cards */
-  .collection .product-grid { grid-template-columns: 1fr !important; }
-
-  /* Horizontal card layout (image left, info right) */
+  /* Tighter card + slightly smaller image so two lines of product
+     name still fit beside it. */
   .misc-product-card {
-    display: grid !important;
-    grid-template-columns: 120px 1fr;
+    grid-template-columns: 112px 1fr;
     column-gap: var(--space-3);
     padding: var(--space-3);
   }
-  .misc-product-card__media {
-    grid-column: 1;
-    grid-row: 1 / span 3;
-    align-self: start;
-    width: 120px;
-    height: 120px;
-    margin: 0;
-  }
-  .misc-product-card__top-row { grid-column: 2; grid-row: 1; padding: 0; font-size: var(--fs-2xs); }
-  .misc-product-card__sku { grid-column: 2; grid-row: 2; padding: 0; margin: 0; align-self: start; }
-  .misc-product-card__body { grid-column: 2; grid-row: 3; padding: 0; margin-top: var(--space-1); }
-  .misc-product-card__name { font-size: var(--fs-sm); -webkit-line-clamp: 2; min-height: auto; }
-  .misc-product-card__price { font-size: var(--fs-md); }
+  .misc-product-card__media { width: 112px; height: 112px; }
+  .misc-filter-bar__tools { padding: 0 var(--space-2); }
 
-  /* Bigger touch targets on phone (Apple HIG 44 pt minimum). */
+  /* Larger touch targets (Apple HIG 44pt minimum). */
   .misc-qty-stepper {
     grid-template-columns: 44px 1fr 44px;
     height: 48px;
@@ -1887,12 +2112,10 @@ body.drawer-open { overflow: hidden; }
   .misc-qty-stepper__input { font-size: var(--fs-md) !important; }
 
   .misc-qty-stepper--mini {
-    grid-template-columns: 36px 1fr 36px;
-    height: 36px;
+    grid-template-columns: 40px 1fr 40px;
+    height: 44px;
   }
   .misc-qty-stepper--mini .misc-qty-stepper__btn { font-size: var(--fs-md); }
-
-  .facets-vertical .facets-wrapper { width: 100%; max-width: 100%; }
 }
 
 @media (max-width: 419px) {

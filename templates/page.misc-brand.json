@@ -1,0 +1,99 @@
+{
+  "sections": {
+    "main": {
+      "type": "misc-brand-page",
+      "settings": {
+        "eyebrow": "Brand · 日々",
+        "brand_name": "hibi",
+        "force_lowercase": true,
+        "lead": "The incense of Awaji Island and the matches of Harima.",
+        "represented_label": "Represented by",
+        "represented_org": "MISC Distribution",
+        "represented_region": "Netherlands & Germany",
+        "discover_label": "Discover more",
+        "website_label": "hibi-jp.com",
+        "website_url": "https://hibi-jp.com",
+        "tile_ratio": "16 / 9",
+        "rule_weight": 3,
+        "padding_top": 48,
+        "padding_bottom": 64
+      },
+      "blocks": {
+        "fact_1": {
+          "type": "fact",
+          "settings": {
+            "label": "Category",
+            "value": "Incense & design stationery"
+          }
+        },
+        "fact_2": {
+          "type": "fact",
+          "settings": {
+            "label": "Origin",
+            "value": "Awaji Island, Hyogo"
+          }
+        },
+        "fact_3": {
+          "type": "fact",
+          "settings": {
+            "label": "Established",
+            "value": "2011"
+          }
+        },
+        "p_1": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>These two traditional industries of Hyogo Prefecture first encountered each other in 2011. The collaboration started with the idea of an incense that could be lit like striking a match, and was followed by three years of trial and error. An aromatic product with the strength and fragrance to hold together even when struck like a match was the result.</p>"
+          }
+        },
+        "p_2": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>The names of the products and their packaging were developed to convey the sensibility of today’s Japan. All of these things were ‘designs’ created to offer a new way of enjoying fragrance.</p>"
+          }
+        },
+        "p_3": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>The brand name <strong>hibi</strong> means ‘day to day’, or daily, in Japanese. It carries the hope that you keep it close every day and freely enjoy its fragrance, matching each day’s mood or occasion. The logo combines two of the Chinese character ‘日’ (day) set side by side — 日々.</p>"
+          }
+        },
+        "img_1": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/Light-up-hibi-1100x729.jpg?v=1780161350",
+            "alt": "Lighting a hibi match incense"
+          }
+        },
+        "img_2": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/Let-the-flame-go-out-gently--1100x729.jpg?v=1780161349",
+            "alt": "Letting the flame go out gently"
+          }
+        },
+        "img_3": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/Enjoy-the-fragrance_2-1100x729.jpg?v=1780161350",
+            "alt": "Enjoying the fragrance of hibi incense"
+          }
+        }
+      },
+      "block_order": [
+        "fact_1",
+        "fact_2",
+        "fact_3",
+        "p_1",
+        "p_2",
+        "p_3",
+        "img_1",
+        "img_2",
+        "img_3"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

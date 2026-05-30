@@ -1,0 +1,58 @@
+{%- comment -%}
+  MISC brand page — images (body grid)
+  The FIRST image block renders as the hero (row 1, right cell,
+  squarish — it borrows its height from the text column). Every
+  remaining image block renders as a horizontal tile in the rows
+  below. When the number of tiles is odd, the last tile spans the
+  full width so the footer always starts on a clean new row and
+  the centre line stays unbroken.
+
+  Each image block can supply:
+    - image     (Shopify Files image_picker — preferred)
+    - image_url (external URL fallback used by the worked example
+                 template until assets are uploaded to Files)
+    - alt       (a11y; falls back to the brand name)
+
+  Inputs:
+    section: the parent section object
+{%- endcomment -%}
+
+{%- assign image_blocks = section.blocks | where: 'type', 'image' -%}
+{%- assign tile_total = image_blocks.size | minus: 1 -%}
+{%- assign tile_parity = tile_total | modulo: 2 -%}
+
+{%- for block in image_blocks -%}
+  {%- assign alt_text = block.settings.alt | default: section.settings.brand_name -%}
+
+  {%- if forloop.first -%}
+    <figure class="misc-brand-page__hero" {{ block.shopify_attributes }}>
+      {%- if block.settings.image != blank -%}
+        {{ block.settings.image | image_url: width: 1400 | image_tag:
+            loading: 'lazy',
+            widths: '480, 720, 900, 1100, 1400',
+            sizes: '(max-width: 900px) 100vw, 50vw',
+            alt: alt_text
+        }}
+      {%- elsif block.settings.image_url != blank -%}
+        <img src="{{ block.settings.image_url }}" alt="{{ alt_text | escape }}" loading="lazy">
+      {%- endif -%}
+    </figure>
+  {%- else -%}
+    {%- assign tile_class = 'misc-brand-page__tile' -%}
+    {%- if tile_parity == 1 and forloop.last -%}
+      {%- assign tile_class = 'misc-brand-page__tile misc-brand-page__tile--wide' -%}
+    {%- endif -%}
+    <figure class="{{ tile_class }}" {{ block.shopify_attributes }}>
+      {%- if block.settings.image != blank -%}
+        {{ block.settings.image | image_url: width: 1400 | image_tag:
+            loading: 'lazy',
+            widths: '480, 720, 900, 1100, 1400',
+            sizes: '(max-width: 900px) 100vw, 50vw',
+            alt: alt_text
+        }}
+      {%- elsif block.settings.image_url != blank -%}
+        <img src="{{ block.settings.image_url }}" alt="{{ alt_text | escape }}" loading="lazy">
+      {%- endif -%}
+    </figure>
+  {%- endif -%}
+{%- endfor -%}

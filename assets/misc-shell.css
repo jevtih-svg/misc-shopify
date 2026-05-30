@@ -70,12 +70,23 @@
 .misc-site-header__logo:hover { text-decoration: none; }
 .misc-site-header__logo img { max-height: 32px; width: auto; display: block; }
 
-.misc-site-header__search {
+.misc-site-header__search-wrap {
   position: relative;
   width: 100%;
   max-width: 560px;
   justify-self: center;
 }
+
+/* The <predictive-search> / <search-form> custom element and the
+   inner <form> all share .misc-site-header__search so the layout
+   stays a single flex/grid item regardless of the wrapper. */
+.misc-site-header__search {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+predictive-search.misc-site-header__search,
+search-form.misc-site-header__search { display: block; }
 
 .misc-site-header__search input {
   width: 100%;
@@ -109,6 +120,24 @@
   pointer-events: none;
   color: var(--c-ink-mute);
 }
+
+/* Predictive-search results dropdown — sits below the input,
+   absolute-positioned so it doesn't push header height. */
+.misc-site-header__predictive {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--c-bg);
+  border: 1px solid var(--c-line);
+  border-top: 0;
+  max-height: 480px;
+  overflow-y: auto;
+  display: none;
+}
+.misc-site-header__predictive:not(:empty) { display: block; }
+predictive-search[open] .misc-site-header__predictive { display: block; }
 
 /* Account zone */
 .misc-site-header__right {
@@ -289,13 +318,15 @@
 .misc-site-footer__brand-mark .dot { color: var(--c-ink-faint); }
 
 .misc-site-footer__brand-statement {
-  font-size: var(--fs-lg);
+  /* MISC: enlarged to brand anchor after wordmark removal 2026-05-30 */
+  font-family: var(--font-sans);
+  font-size: clamp(1.625rem, 3.2vw, 2.625rem);
   font-weight: var(--fw-regular);
-  line-height: 1.35;
-  letter-spacing: -0.01em;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
   color: var(--c-bg);
   margin: 0;
-  max-width: 22ch;
+  max-width: 16ch;
 }
 
 .misc-site-footer__stamp {

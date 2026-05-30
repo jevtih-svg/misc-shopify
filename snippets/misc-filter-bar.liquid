@@ -62,9 +62,35 @@
         <span class="misc-filter-bar__count">{{ active_count }}</span>
       {%- endif -%}
     </h2>
-    {%- if active_count > 0 -%}
-      <a href="{{ results_url }}" class="misc-filter-bar__clear">Clear all</a>
-    {%- endif -%}
+    <div class="misc-filter-bar__left-actions">
+      {%- if active_count > 0 -%}
+        <a href="{{ results_url }}" class="misc-filter-bar__clear">Clear all</a>
+      {%- endif -%}
+      {%- comment -%}
+        MISC: desktop-only collapse toggle. Hides the filter sidebar so
+        the table / grid reclaims its width (the list-view Product column
+        is squeezed by the 320px sidebar on narrow laptops). State is
+        held on <html class="misc-hide-filters"> and persisted in
+        localStorage (misc_filters_hidden) by misc-view-toggle.js, with a
+        first-paint set in layout/theme.liquid. Label + chevron are driven
+        by the html class so they stay correct after facets.js AJAX swaps.
+      {%- endcomment -%}
+      <button type="button" class="misc-filters-toggle" data-misc-filters-toggle aria-expanded="true" aria-label="Hide filters" title="Hide filters">
+        {%- comment -%}
+          When filters are shown this is an icon-only chevron (the
+          sidebar is right below it, so a text label is redundant and
+          would crowd "Clear all" out of the 320px cell). When the
+          sidebar is collapsed the cell shrinks to auto width, so we
+          reveal the "Show filters" label for discoverability. The
+          accessible name is kept correct in both states via aria-label
+          (synced in misc-view-toggle.js).
+        {%- endcomment -%}
+        <span class="misc-filters-toggle__label">Show filters</span>
+        <svg class="misc-filters-toggle__chevron" width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+          <path d="M6.5 1.5 3 5l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
   </div>
 
   <div class="misc-filter-bar__right">

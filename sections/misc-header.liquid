@@ -14,7 +14,12 @@
   Auth state: rendered server-side from `customer != blank`, no JS.
 {%- endcomment -%}
 
-{%- comment -%} CSS loaded once globally from layout/theme.liquid {%- endcomment -%}
+{%- comment -%} Shell CSS loaded once globally from layout/theme.liquid. {%- endcomment -%}
+{%- comment -%} Trade's predictive-search machinery — JS + CSS loaded here so they only ship when the header is rendered. {%- endcomment -%}
+{{ 'component-search.css' | asset_url | stylesheet_tag }}
+{{ 'component-predictive-search.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'search-form.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'predictive-search.js' | asset_url }}" defer="defer"></script>
 
 {%- liquid
   assign nav_menu = linklists[section.settings.menu]
@@ -22,6 +27,7 @@
   if nav_menu.links.size > 0
     assign has_menu_items = true
   endif
+  assign predictive_on = settings.predictive_search_enabled
 -%}
 
 {%- if section.settings.show_utility_bar -%}
@@ -60,12 +66,48 @@
       {%- endif -%}
     </a>
 
-    <form action="{{ routes.search_url }}" method="get" role="search" class="misc-site-header__search">
-      <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-        <circle cx="8" cy="8" r="6"/><path d="M16 16l-3.5-3.5"/>
-      </svg>
-      <input type="search" name="q" placeholder="{{ section.settings.search_placeholder | default: 'Search products, SKUs, brands' }}" aria-label="Search">
-    </form>
+    <div class="misc-site-header__search-wrap">
+      {%- if predictive_on -%}
+        <predictive-search class="misc-site-header__search" data-loading-text="Loading...">
+      {%- else -%}
+        <search-form class="misc-site-header__search">
+      {%- endif -%}
+        <form action="{{ routes.search_url }}" method="get" role="search" class="misc-site-header__search">
+          <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="8" cy="8" r="6"/><path d="M16 16l-3.5-3.5"/>
+          </svg>
+          <input
+            type="search"
+            name="q"
+            value="{{ search.terms | escape }}"
+            placeholder="{{ section.settings.search_placeholder | default: 'Search products, SKUs, brands' }}"
+            aria-label="Search"
+            {%- if predictive_on %}
+            role="combobox"
+            aria-expanded="false"
+            aria-owns="predictive-search-results"
+            aria-controls="predictive-search-results"
+            aria-haspopup="listbox"
+            aria-autocomplete="list"
+            autocorrect="off"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            {%- endif %}
+          >
+          <input type="hidden" name="options[prefix]" value="last">
+
+          {%- if predictive_on -%}
+            <div class="predictive-search predictive-search--header misc-site-header__predictive" tabindex="-1" data-predictive-search></div>
+            <span class="predictive-search-status visually-hidden" role="status" aria-hidden="true"></span>
+          {%- endif -%}
+        </form>
+      {%- if predictive_on -%}
+        </predictive-search>
+      {%- else -%}
+        </search-form>
+      {%- endif -%}
+    </div>
 
     <div class="misc-site-header__right">
       <div class="misc-site-header__account">

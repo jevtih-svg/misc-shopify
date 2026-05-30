@@ -1,0 +1,295 @@
+/* ============================================================
+   MISC Brand Page (v2 — editorial line grid)
+   Section: sections/misc-brand-page.liquid
+   Snippets: misc-brand-page-prose, misc-brand-page-gallery
+   Template: templates/page.misc-brand.json
+
+   Layout strategy:
+   - One ink frame. Every section sits on a white plate; the
+     frame border and the gaps between plates form a single
+     continuous line grid (the --c-ink background showing
+     through the gaps). No stacked per-cell borders, so corners
+     stay clean and lines never double up.
+   - Three stacked sections: brand name, spec facts, body.
+   - The body is ONE 50/50 grid shared by three rows (text+hero,
+     image pair, footer), so the same vertical line runs straight
+     down through all of them.
+   - Images fill edge to edge with object-fit:cover and overscan
+     2% so a sub-pixel rounding seam never exposes the cell edge.
+
+   Tokens come from misc-tokens.css. The only local additions are
+   the thick rule weight (--misc-brand-rule, set inline from the
+   schema) and an oversized hero type size the global scale tops
+   out below.
+   ============================================================ */
+
+.misc-brand-page {
+  --misc-brand-rule: 3px;
+  --misc-brand-tile-ratio: 16 / 9;
+  --misc-brand-hero-fs: clamp(48px, 9vw, 116px);
+  max-width: var(--max-width-page);
+  margin: 0 auto;
+  padding-left: var(--space-5);
+  padding-right: var(--space-5);
+  color: var(--c-ink);
+}
+
+/* ----- Frame: children are white plates, gaps are the lines ----- */
+
+.misc-brand-page__frame {
+  border: var(--misc-brand-rule) solid var(--c-ink);
+  background: var(--c-ink);
+  display: flex;
+  flex-direction: column;
+  gap: var(--misc-brand-rule);
+}
+
+.misc-brand-page__frame > * {
+  background: var(--c-bg);
+}
+
+/* ----- 1. Brand name ----- */
+
+.misc-brand-page__name {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-7) var(--space-7) var(--space-6);
+}
+
+.misc-brand-page__eyebrow {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--c-ink-mute);
+  font-weight: var(--fw-medium);
+  margin: 0;
+}
+
+.misc-brand-page__title {
+  font-size: var(--misc-brand-hero-fs);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  font-weight: var(--fw-bold);
+  margin: 0;
+}
+
+.misc-brand-page__title--lower {
+  text-transform: lowercase;
+}
+
+/* ----- 2. Spec facts ----- */
+
+.misc-brand-page__meta {
+  display: grid;
+  grid-template-columns: repeat(var(--misc-brand-meta-cols, 3), minmax(0, 1fr));
+  gap: var(--misc-brand-rule);
+  background: var(--c-ink);
+}
+
+.misc-brand-page__meta > * {
+  background: var(--c-bg);
+}
+
+.misc-brand-page__meta-item {
+  padding: var(--space-5) var(--space-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.misc-brand-page__meta-value {
+  margin: 0;
+  font-size: var(--fs-md);
+  font-weight: var(--fw-medium);
+  letter-spacing: -0.01em;
+}
+
+/* ============================================================
+   3. Body grid — one 50/50 split, three rows, one centre line
+   ============================================================ */
+
+.misc-brand-page__body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--misc-brand-rule);
+  background: var(--c-ink);
+}
+
+.misc-brand-page__body > * {
+  background: var(--c-bg);
+}
+
+/* Row 1 — boxed text | squarish hero image */
+
+.misc-brand-page__text {
+  background: var(--c-bg-subtle);
+  padding: var(--space-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.misc-brand-page__text--full {
+  grid-column: 1 / -1;
+}
+
+.misc-brand-page__lead {
+  font-size: var(--fs-xl);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  font-weight: var(--fw-medium);
+  max-width: 24ch;
+  margin: 0 0 var(--space-3);
+}
+
+.misc-brand-page__prose-block,
+.misc-brand-page__prose-block p {
+  font-size: var(--fs-md);
+  line-height: var(--lh-body);
+  color: var(--c-ink);
+  margin: 0;
+}
+
+.misc-brand-page__prose-block p + p {
+  margin-top: var(--space-4);
+}
+
+.misc-brand-page__prose-block strong {
+  font-weight: var(--fw-medium);
+}
+
+.misc-brand-page__prose-block a {
+  color: var(--c-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Hero (row 1, right) + tiles (row 2) share image behaviour */
+
+.misc-brand-page__hero,
+.misc-brand-page__tile {
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  background: var(--c-ink);
+}
+
+.misc-brand-page__hero img,
+.misc-brand-page__tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.02);
+  backface-visibility: hidden;
+  transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.misc-brand-page__hero:hover img,
+.misc-brand-page__tile:hover img {
+  transform: scale(1.06);
+}
+
+/* Hero borrows its height from the text column beside it */
+.misc-brand-page__hero img {
+  position: absolute;
+  inset: 0;
+}
+
+/* Tiles are an explicit horizontal shape */
+.misc-brand-page__tile {
+  aspect-ratio: var(--misc-brand-tile-ratio, 16 / 9);
+}
+
+.misc-brand-page__tile--wide {
+  grid-column: 1 / -1;
+  aspect-ratio: 3 / 1;
+}
+
+/* Row 3 — footer: represented-by | discover */
+
+.misc-brand-page__foot {
+  padding: var(--space-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.misc-brand-page__foot-org {
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.misc-brand-page__foot-region {
+  font-size: var(--fs-md);
+  color: var(--c-ink-mute);
+  margin: 0;
+}
+
+.misc-brand-page__foot-link {
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--c-ink);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: fit-content;
+}
+
+.misc-brand-page__foot-arrow {
+  transition: transform 0.25s ease;
+}
+
+.misc-brand-page__foot-link:hover {
+  color: var(--c-ink-mute);
+  text-decoration: none;
+}
+
+.misc-brand-page__foot-link:hover .misc-brand-page__foot-arrow {
+  transform: translate(3px, -3px);
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+@media (max-width: 900px) {
+  .misc-brand-page__body {
+    grid-template-columns: 1fr;
+  }
+  .misc-brand-page__text--full {
+    grid-column: auto;
+  }
+  .misc-brand-page__hero {
+    height: clamp(280px, 72vw, 460px);
+  }
+  .misc-brand-page__tile--wide {
+    grid-column: auto;
+    aspect-ratio: var(--misc-brand-tile-ratio, 16 / 9);
+  }
+}
+
+@media (max-width: 600px) {
+  .misc-brand-page__meta {
+    grid-template-columns: 1fr;
+  }
+  .misc-brand-page__name {
+    padding: var(--space-6) var(--space-5);
+  }
+  .misc-brand-page__meta-item {
+    padding: var(--space-4) var(--space-5);
+  }
+  .misc-brand-page__text {
+    padding: var(--space-6) var(--space-5);
+  }
+  .misc-brand-page__foot {
+    padding: var(--space-6) var(--space-5);
+  }
+}

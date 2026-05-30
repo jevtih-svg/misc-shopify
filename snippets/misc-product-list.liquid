@@ -158,7 +158,7 @@
             {%- if v_orderable -%}
               <div class="mini-stepper misc-qty-stepper misc-qty-stepper--mini" data-misc-qty-stepper data-variant-id="{{ v.id }}">
                 <button type="button" class="misc-qty-stepper__btn" data-misc-qty="-1" aria-label="Remove one {{ v.title | escape }}">&minus;</button>
-                <input type="number" value="{{ v_cart_qty }}" min="0" step="1" class="misc-qty-stepper__input" data-misc-qty-input readonly>
+                <input type="text" inputmode="numeric" value="{{ v_cart_qty }}" class="misc-qty-stepper__input" data-misc-qty-input readonly>
                 <button type="button" class="misc-qty-stepper__btn" data-misc-qty="+1" aria-label="Add one {{ v.title | escape }}">+</button>
               </div>
             {%- else -%}
@@ -211,7 +211,7 @@
           {%- if sv_orderable -%}
             <div class="mini-stepper misc-qty-stepper misc-qty-stepper--mini" data-misc-qty-stepper data-variant-id="{{ primary_variant.id }}">
               <button type="button" class="misc-qty-stepper__btn" data-misc-qty="-1" aria-label="Remove one from cart">&minus;</button>
-              <input type="number" value="{{ v_cart_qty }}" min="0" step="1" class="misc-qty-stepper__input" data-misc-qty-input readonly>
+              <input type="text" inputmode="numeric" value="{{ v_cart_qty }}" class="misc-qty-stepper__input" data-misc-qty-input readonly>
               <button type="button" class="misc-qty-stepper__btn" data-misc-qty="+1" aria-label="Add one to cart">+</button>
             </div>
           {%- else -%}

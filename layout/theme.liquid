@@ -295,6 +295,11 @@
           if (layout === 'grid-5' || layout === 'list') {
             document.documentElement.classList.add('misc-prefer-' + layout);
           }
+          // MISC: collapsed-filter-sidebar preference (desktop). Applied
+          // before first paint so the table renders full-width with no flash.
+          if (localStorage.getItem('misc_filters_hidden') === '1') {
+            document.documentElement.classList.add('misc-hide-filters');
+          }
         } catch (e) { /* localStorage unavailable; default render */ }
       })();
     </script>

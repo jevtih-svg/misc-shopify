@@ -48,6 +48,8 @@
   --fs-lg:  22px;
   --fs-xl:  28px;
   --fs-2xl: 36px;
+  --fs-3xl: 48px; /* MISC: was referenced (page title, hero) but undefined */
+  --fs-4xl: 64px; /* MISC: was referenced but undefined */
 
   --fw-regular: 400;
   --fw-medium:  500;
@@ -87,6 +89,46 @@
   --grid-product-tablet:      repeat(3, minmax(0, 1fr));
   --grid-product-mobile:      repeat(2, minmax(0, 1fr));
   --grid-gap: 0;
+
+  /* ---------- Trade variable overrides ----------
+     MISC: Trade's default color-scheme-1 fills these with a tinted
+     light-grey (rgb(244,244,244) / #f4f4f4) which bleeds through
+     anywhere a section background is not explicitly set. The MISC
+     design system is pure white. Reassign at :root so every Trade
+     component (.gradient body, color-scheme wrappers, badges) reads
+     white without needing per-selector overrides downstream. */
+  --color-background: 255, 255, 255;
+  --gradient-background: #FFFFFF;
+  --color-foreground: 10, 10, 10;
+  --color-background-contrast: 229, 229, 229;
+
+  /* MISC: Trade's --inputs-radius defaults to 6px; the MISC design
+     system uses 2px (--radius-sm). Realign here so any Trade input
+     that reads var(--inputs-radius) also lands on the design system. */
+  --inputs-radius: 2px;
+  --inputs-radius-outset: 3px;
+  --inputs-border-width: 1px;
+  --inputs-border-opacity: 1;
+  --inputs-shadow-opacity: 0;
+}
+
+/* MISC: also reassign inside every Trade color-scheme wrapper. Trade's
+   loop in layout/theme.liquid emits one .color-scheme-N rule per scheme
+   that resets --color-background and --gradient-background to the
+   scheme's own values. Without these overrides, any section the merchant
+   wraps in a color-scheme div would render with the scheme's tinted
+   background, breaking the monochrome system. */
+.color-scheme-1,
+.color-scheme-2,
+.color-scheme-3,
+.color-scheme-background-1,
+.color-scheme-background-2,
+.color-scheme-background-3,
+.color-background-1,
+.color-background-2,
+.color-background-3 {
+  --color-background: 255, 255, 255;
+  --gradient-background: #FFFFFF;
 }
 
 /* ============================================================
@@ -105,7 +147,13 @@
    :root above; Trade's component CSS reads those variables and
    gets Inter without us needing a per-selector override.
    ============================================================ */
-body {
+body,
+body.gradient {
+  /* MISC: Trade's `.gradient` class (applied to <body> by layout/theme.liquid)
+     sets background to rgb(var(--color-background)) which scheme-1 defines as
+     244,244,244 — a tinted grey. The MISC design system is pure white. Match
+     specificity of Trade's `.gradient` (0,0,1,0) with `body.gradient` (0,0,1,1)
+     so this rule wins regardless of the merchant's color-scheme choice. */
   color: var(--c-ink);
   background: var(--c-bg);
   font-weight: var(--fw-regular);

@@ -117,6 +117,29 @@
     preservePaginationParams();
   }
 
+  /* ---------- Collapse the filter sidebar (desktop) ----------
+     Hides the sidebar so the table / grid reclaims width. State lives
+     on <html class="misc-hide-filters"> (set pre-paint in theme.liquid)
+     and is persisted in localStorage. Label + chevron are CSS-driven by
+     the html class; we only keep aria-expanded in sync here, including
+     after facets.js swaps the filter bar HTML. */
+  function applyFiltersHidden() {
+    var hidden = document.documentElement.classList.contains('misc-hide-filters');
+    var name = hidden ? 'Show filters' : 'Hide filters';
+    $$('[data-misc-filters-toggle]').forEach(function (b) {
+      b.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+      // Icon-only when shown, so the accessible name + tooltip live here.
+      b.setAttribute('aria-label', name);
+      b.setAttribute('title', name);
+    });
+  }
+  function setFiltersHidden(hidden) {
+    document.documentElement.classList.toggle('misc-hide-filters', hidden);
+    if (hidden) { lsSet('misc_filters_hidden', '1'); }
+    else { lsRemove('misc_filters_hidden'); }
+    applyFiltersHidden();
+  }
+
   /* ---------- Per-page via Shopify template variant (?view=per-N) ---------- */
 
   function currentPerPage() {
@@ -232,6 +255,13 @@
     document._miscViewToggleBound = true;
 
     document.addEventListener('click', function (e) {
+      // Filter sidebar collapse toggle (desktop)
+      var ft = e.target.closest('[data-misc-filters-toggle]');
+      if (ft) {
+        setFiltersHidden(!document.documentElement.classList.contains('misc-hide-filters'));
+        return;
+      }
+
       // Layout toggle buttons
       var btn = e.target.closest('.view-toggle__btn');
       if (btn) {
@@ -280,7 +310,38 @@
     });
   }
 
+  /* ---------- Non-catalog page guard ----------
+     This script's URL params (layout / view=per-N) and its redirect
+     in ensurePerPagePreference() only make sense on the catalog. On
+     non-catalog pages (Contact, About, brand pages, etc.) the redirect
+     would send ?view=per-N which Shopify resolves against page.per-N.json,
+     falling back to the Trade default page.json — replacing our custom
+     section with Trade's centred page header. Bail out and strip the
+     polluting params so a back-button visit lands cleanly. */
+  function isCatalogPage() {
+    return !!document.querySelector('#ProductGridContainer, .product-grid, .product-list');
+  }
+
+  function stripCatalogParams() {
+    var params = new URLSearchParams(window.location.search);
+    var changed = false;
+    if (params.has('layout')) { params.delete('layout'); changed = true; }
+    if (params.has('view') && /^per-(24|48|72|96)$/.test(params.get('view'))) {
+      params.delete('view'); changed = true;
+    }
+    if (changed) {
+      var url = new URL(window.location);
+      url.search = params.toString();
+      window.history.replaceState({}, '', url.toString());
+    }
+  }
+
   function init() {
+    if (!isCatalogPage()) {
+      stripCatalogParams();
+      return;
+    }
+
     // Mobile coerce: list view doesn't fit small viewports
     if (window.matchMedia('(max-width: 1023px)').matches && currentLayout() === 'list') {
       setLayout('grid-3');
@@ -303,6 +364,14 @@
 
     applyLayout(layout);
     preservePaginationParams();
+    applyFiltersHidden();
+
+    // Keep the collapse toggle's aria-expanded correct after facets.js
+    // swaps the filter bar HTML on every AJAX filter change.
+    var fbar = document.querySelector('.misc-filter-bar');
+    if (fbar && window.MutationObserver) {
+      new MutationObserver(applyFiltersHidden).observe(fbar, { childList: true, subtree: true });
+    }
 
     // Per-page redirect: if localStorage prefers a non-default
     // template but the URL is on the default, redirect once.

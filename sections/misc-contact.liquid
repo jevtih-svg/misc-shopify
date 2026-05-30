@@ -1,0 +1,690 @@
+{%- comment -%}
+  MISC contact page section
+  -------------------------
+  Full contact page replacement. Mirrors Mockups/misc-contact-mockup.html.
+
+  Layout:
+    1. Page header (breadcrumb + title + lede)
+    2. Two-column body:
+       - Left: register CTA / channels / address + hours (info column)
+       - Right: contact form using Shopify {% form 'contact' %}
+
+  All channels and opening-hour rows are blocks so the merchant can add,
+  remove and reorder them in the Theme Editor. Subject options are hard-
+  coded to keep the contact-form schema constant for routing.
+
+  Tokens come from assets/misc-tokens.css (loaded globally in theme.liquid).
+{%- endcomment -%}
+
+{{ 'misc-contact.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign reg_url     = section.settings.register_url
+  if reg_url == blank
+    assign reg_url = routes.account_register_url
+  endif
+
+  assign signin_url  = section.settings.signin_url
+  if signin_url == blank
+    assign signin_url = routes.account_login_url
+  endif
+
+  assign privacy_url = section.settings.privacy_url
+  if privacy_url == blank
+    assign privacy_url = shop.privacy_policy.url
+  endif
+  if privacy_url == blank
+    assign privacy_url = '/policies/privacy-policy'
+  endif
+
+  assign page_title  = page.title
+  if page_title == blank
+    assign page_title = section.settings.page_title_fallback
+  endif
+-%}
+
+{%- comment -%} ============================================================
+  PAGE HEADER
+============================================================ {%- endcomment -%}
+<section class="misc-contact-page-header" aria-label="Contact page header">
+  {%- if section.settings.show_breadcrumb -%}
+    <nav class="misc-contact-page-header__breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ page_title }}</span>
+    </nav>
+  {%- endif -%}
+  <div class="misc-contact-page-header__row">
+    <h1 class="misc-contact-page-header__title">{{ page_title }}</h1>
+    {%- if section.settings.lede != blank -%}
+      <p class="misc-contact-page-header__lede">{{ section.settings.lede }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{%- comment -%} ============================================================
+  BODY: info column + form column
+============================================================ {%- endcomment -%}
+<section class="misc-contact" aria-label="Contact options">
+
+  {%- comment -%} ===== LEFT: info column ===== {%- endcomment -%}
+  <aside class="misc-contact__info">
+
+    {%- comment -%} 1. Register CTA block {%- endcomment -%}
+    {%- if section.settings.show_register_block -%}
+      <div class="misc-contact__block misc-contact__register">
+        {%- if section.settings.register_eyebrow != blank -%}
+          <div class="misc-contact__eyebrow">{{ section.settings.register_eyebrow }}</div>
+        {%- endif -%}
+        {%- if section.settings.register_heading != blank -%}
+          <h2 class="misc-contact__heading">{{ section.settings.register_heading }}</h2>
+        {%- endif -%}
+        {%- if section.settings.register_body != blank -%}
+          <div class="misc-contact__body">{{ section.settings.register_body }}</div>
+        {%- endif -%}
+        <div class="misc-contact__register-actions">
+          <a href="{{ reg_url }}" class="misc-contact__btn-primary">
+            {{ section.settings.register_cta_label | default: 'Register account' }}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          {%- if section.settings.signin_cta_label != blank -%}
+            <a href="{{ signin_url }}" class="misc-contact__btn-secondary">{{ section.settings.signin_cta_label }}</a>
+          {%- endif -%}
+        </div>
+        {%- if section.settings.register_note != blank -%}
+          <span class="misc-contact__register-note">{{ section.settings.register_note }}</span>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} 2. Channels block — populated from blocks of type "channel" {%- endcomment -%}
+    {%- assign channels = section.blocks | where: 'type', 'channel' -%}
+    {%- if channels.size > 0 -%}
+      <div class="misc-contact__block">
+        {%- if section.settings.channels_eyebrow != blank -%}
+          <div class="misc-contact__eyebrow">{{ section.settings.channels_eyebrow }}</div>
+        {%- endif -%}
+        {%- if section.settings.channels_heading != blank -%}
+          <h2 class="misc-contact__heading">{{ section.settings.channels_heading }}</h2>
+        {%- endif -%}
+        <ul class="misc-contact__channels">
+          {%- for block in channels -%}
+            <li {{ block.shopify_attributes }}>
+              <span class="misc-contact__channel-icon" aria-hidden="true">
+                {%- case block.settings.icon -%}
+                  {%- when 'email' -%}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7l9 6 9-6M3 7v10a1 1 0 001 1h16a1 1 0 001-1V7M3 7l9-4 9 4"/></svg>
+                  {%- when 'phone' -%}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.37 1.9.72 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0122 16.92z"/></svg>
+                  {%- when 'instagram' -%}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+                  {%- when 'location' -%}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-7.58 8-13a8 8 0 10-16 0c0 5.42 8 13 8 13z"/><circle cx="12" cy="9" r="3"/></svg>
+                  {%- else -%}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                {%- endcase -%}
+              </span>
+              <span>
+                {%- if block.settings.meta_label != blank -%}
+                  <span class="misc-contact__channel-meta">{{ block.settings.meta_label }}</span>
+                {%- endif -%}
+                <span class="misc-contact__channel-value">
+                  {%- if block.settings.value_url != blank -%}
+                    <a href="{{ block.settings.value_url }}"{% if block.settings.icon == 'instagram' %} target="_blank" rel="noopener"{% endif %}>{{ block.settings.value_label }}</a>
+                  {%- else -%}
+                    {{ block.settings.value_label }}
+                  {%- endif -%}
+                </span>
+                {%- if block.settings.sub_text != blank -%}
+                  <span class="misc-contact__channel-sub">{{ block.settings.sub_text }}</span>
+                {%- endif -%}
+              </span>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} 3. Address + hours block {%- endcomment -%}
+    {%- if section.settings.show_address_block -%}
+      <div class="misc-contact__block">
+        {%- if section.settings.address_eyebrow != blank -%}
+          <div class="misc-contact__eyebrow">{{ section.settings.address_eyebrow }}</div>
+        {%- endif -%}
+        {%- if section.settings.address_heading != blank -%}
+          <h2 class="misc-contact__heading">{{ section.settings.address_heading }}</h2>
+        {%- endif -%}
+        {%- if section.settings.address_richtext != blank -%}
+          <address class="misc-contact__address">{{ section.settings.address_richtext }}</address>
+        {%- endif -%}
+
+        {%- assign hours = section.blocks | where: 'type', 'hour' -%}
+        {%- if hours.size > 0 -%}
+          <dl class="misc-contact__hours">
+            {%- for block in hours -%}
+              <dt {{ block.shopify_attributes }}>{{ block.settings.day_label }}</dt>
+              <dd>{{ block.settings.hours_value }}</dd>
+            {%- endfor -%}
+          </dl>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+  </aside>
+
+  {%- comment -%} ===== RIGHT: form column ===== {%- endcomment -%}
+  <div class="misc-contact__form-col">
+    {%- form 'contact', id: 'MiscContactForm', class: 'misc-contact-form' -%}
+
+      <div class="misc-contact-form__header">
+        {%- if section.settings.form_eyebrow != blank -%}
+          <div class="misc-contact__eyebrow">{{ section.settings.form_eyebrow }}</div>
+        {%- endif -%}
+        {%- if section.settings.form_heading != blank -%}
+          <h2 class="misc-contact__heading">{{ section.settings.form_heading }}</h2>
+        {%- endif -%}
+        {%- if section.settings.form_intro != blank -%}
+          <div class="misc-contact__body">{{ section.settings.form_intro }}</div>
+        {%- endif -%}
+
+        {%- if form.posted_successfully? -%}
+          <div class="misc-contact-form__message misc-contact-form__message--success" role="status" tabindex="-1" autofocus>
+            <strong>Message sent.</strong> Thanks for getting in touch — we'll reply within one business day.
+          </div>
+        {%- elsif form.errors -%}
+          <div class="misc-contact-form__message misc-contact-form__message--error" role="alert" tabindex="-1" autofocus>
+            <strong>We couldn't send your message.</strong>
+            <ul>
+              {%- for field in form.errors -%}
+                <li>{{ form.errors.translated_fields[field] | capitalize }} {{ form.errors.messages[field] }}</li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div class="misc-contact-form__body">
+
+        <div class="misc-contact-form__field">
+          <label class="misc-contact-form__label" for="MiscContactForm-subject">
+            What is this about?
+            <span class="misc-contact-form__label-required">Required</span>
+          </label>
+          <select class="misc-contact-form__select" id="MiscContactForm-subject" name="contact[subject]" required>
+            <option value="" disabled {% if form.subject == blank %}selected{% endif %}>Select a topic</option>
+            <option value="Become our customer" {% if form.subject == 'Become our customer' %}selected{% endif %}>Become our customer</option>
+            <option value="Product enquiry" {% if form.subject == 'Product enquiry' %}selected{% endif %}>Product enquiry</option>
+            <option value="Order, shipping or returns" {% if form.subject == 'Order, shipping or returns' %}selected{% endif %}>Order, shipping or returns</option>
+            <option value="Press &amp; collaborations" {% if form.subject == 'Press &amp; collaborations' %}selected{% endif %}>Press &amp; collaborations</option>
+            <option value="Something else" {% if form.subject == 'Something else' %}selected{% endif %}>Something else</option>
+          </select>
+        </div>
+
+        <div class="misc-contact-form__field-grid">
+          <div class="misc-contact-form__field">
+            <label class="misc-contact-form__label" for="MiscContactForm-name">
+              Your name
+              <span class="misc-contact-form__label-required">Required</span>
+            </label>
+            <input
+              class="misc-contact-form__input"
+              type="text"
+              id="MiscContactForm-name"
+              name="contact[Name]"
+              autocomplete="name"
+              placeholder="First and last name"
+              value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}"
+              required
+            >
+          </div>
+          <div class="misc-contact-form__field">
+            <label class="misc-contact-form__label" for="MiscContactForm-company">Company</label>
+            <input
+              class="misc-contact-form__input"
+              type="text"
+              id="MiscContactForm-company"
+              name="contact[Company]"
+              autocomplete="organization"
+              placeholder="Shop, studio or brand"
+            >
+          </div>
+        </div>
+
+        <div class="misc-contact-form__field-grid">
+          <div class="misc-contact-form__field {% if form.errors contains 'email' %}misc-contact-form__field--has-error{% endif %}">
+            <label class="misc-contact-form__label" for="MiscContactForm-email">
+              Email
+              <span class="misc-contact-form__label-required">Required</span>
+            </label>
+            <input
+              class="misc-contact-form__input"
+              type="email"
+              id="MiscContactForm-email"
+              name="contact[email]"
+              autocomplete="email"
+              spellcheck="false"
+              autocapitalize="off"
+              placeholder="you@yourbusiness.com"
+              value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}"
+              aria-required="true"
+              {% if form.errors contains 'email' %}aria-invalid="true" aria-describedby="MiscContactForm-email-error"{% endif %}
+              required
+            >
+            {%- if form.errors contains 'email' -%}
+              <span class="misc-contact-form__field-error" id="MiscContactForm-email-error">
+                {{ form.errors.translated_fields.email | capitalize }} {{ form.errors.messages.email }}
+              </span>
+            {%- endif -%}
+          </div>
+          <div class="misc-contact-form__field">
+            <label class="misc-contact-form__label" for="MiscContactForm-phone">Phone</label>
+            <input
+              class="misc-contact-form__input"
+              type="tel"
+              id="MiscContactForm-phone"
+              name="contact[Phone]"
+              autocomplete="tel"
+              placeholder="+31 20 261 38 66"
+              value="{% if form.phone %}{{ form.phone }}{% elsif customer %}{{ customer.phone }}{% endif %}"
+            >
+          </div>
+        </div>
+
+        <div class="misc-contact-form__field-grid">
+          <div class="misc-contact-form__field">
+            <label class="misc-contact-form__label" for="MiscContactForm-country">Country</label>
+            <select class="misc-contact-form__select" id="MiscContactForm-country" name="contact[Country]" autocomplete="country">
+              <option value="" disabled selected>Where are you based</option>
+              {% render 'misc-contact-countries' %}
+            </select>
+          </div>
+          <div class="misc-contact-form__field">
+            <label class="misc-contact-form__label" for="MiscContactForm-business-type">Business type</label>
+            <select class="misc-contact-form__select" id="MiscContactForm-business-type" name="contact[Business type]">
+              <option value="" disabled selected>Optional</option>
+              <option>Independent retailer</option>
+              <option>Concept / department store</option>
+              <option>Online retailer</option>
+              <option>Studio / designer</option>
+              <option>Press / media</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="misc-contact-form__field">
+          <label class="misc-contact-form__label" for="MiscContactForm-body">
+            Message
+            <span class="misc-contact-form__label-required">Required</span>
+          </label>
+          <textarea
+            class="misc-contact-form__textarea"
+            id="MiscContactForm-body"
+            name="contact[body]"
+            rows="6"
+            placeholder="Brands you're interested in, products, timeframes — anything that helps us reply faster."
+            maxlength="2000"
+            required
+          >{{ form.body }}</textarea>
+          <span class="misc-contact-form__hint">Plain text, up to 2,000 characters.</span>
+        </div>
+
+        {%- if section.settings.show_consent -%}
+          <label class="misc-contact-form__consent">
+            <input type="checkbox" name="contact[Consent]" value="yes" required>
+            <span>
+              {{ section.settings.consent_prefix | default: 'I agree that Misc. Distribution may contact me about this enquiry and store the details I provide. See our' }}
+              <a href="{{ privacy_url }}">{{ section.settings.privacy_link_label | default: 'Privacy Policy' }}</a>
+              {{ section.settings.consent_suffix | default: 'for more.' }}
+            </span>
+          </label>
+        {%- endif -%}
+
+        <div class="misc-contact-form__actions">
+          <button type="submit" class="misc-contact__btn-primary">
+            {{ section.settings.submit_label | default: 'Send message' }}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          {%- if section.settings.response_note != blank -%}
+            <span class="misc-contact-form__actions-note">{{ section.settings.response_note }}</span>
+          {%- endif -%}
+        </div>
+
+      </div>
+    {%- endform -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "MISC Contact",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Page header"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_breadcrumb",
+      "label": "Show breadcrumb",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "page_title_fallback",
+      "label": "Title fallback",
+      "info": "Used when the Shopify page title is blank.",
+      "default": "Get in touch."
+    },
+    {
+      "type": "textarea",
+      "id": "lede",
+      "label": "Lede paragraph",
+      "default": "We answer every wholesale enquiry, usually within one business day. Already our customer? Sign in to place orders, check stock and see incoming shipments."
+    },
+
+    {
+      "type": "header",
+      "content": "Register CTA block"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_register_block",
+      "label": "Show register block",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "register_eyebrow",
+      "label": "Eyebrow",
+      "default": "New to Misc"
+    },
+    {
+      "type": "text",
+      "id": "register_heading",
+      "label": "Heading",
+      "default": "Become our customer."
+    },
+    {
+      "type": "richtext",
+      "id": "register_body",
+      "label": "Body",
+      "default": "<p>Wholesale prices, credit terms and the full catalogue unlock once your shop is approved. Approval usually takes one business day.</p>"
+    },
+    {
+      "type": "text",
+      "id": "register_cta_label",
+      "label": "Primary CTA label",
+      "default": "Register account"
+    },
+    {
+      "type": "url",
+      "id": "register_url",
+      "label": "Register URL (override)",
+      "info": "Leave blank to use the default Shopify account-create URL."
+    },
+    {
+      "type": "text",
+      "id": "signin_cta_label",
+      "label": "Secondary CTA label",
+      "default": "Sign in"
+    },
+    {
+      "type": "url",
+      "id": "signin_url",
+      "label": "Sign-in URL (override)",
+      "info": "Leave blank to use the default Shopify account-login URL."
+    },
+    {
+      "type": "text",
+      "id": "register_note",
+      "label": "Note text (with green dot)",
+      "default": "Approval typically within 1 business day"
+    },
+
+    {
+      "type": "header",
+      "content": "Channels block"
+    },
+    {
+      "type": "text",
+      "id": "channels_eyebrow",
+      "label": "Eyebrow",
+      "default": "Direct lines"
+    },
+    {
+      "type": "text",
+      "id": "channels_heading",
+      "label": "Heading",
+      "default": "Talk to a person."
+    },
+
+    {
+      "type": "header",
+      "content": "Address block"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_address_block",
+      "label": "Show address block",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "address_eyebrow",
+      "label": "Eyebrow",
+      "default": "Find us"
+    },
+    {
+      "type": "text",
+      "id": "address_heading",
+      "label": "Heading",
+      "default": "Amsterdam warehouse & office."
+    },
+    {
+      "type": "richtext",
+      "id": "address_richtext",
+      "label": "Address",
+      "default": "<p><strong>Misc. Distribution B.V.</strong>Keienbergweg 77<br>1101 GE Amsterdam Zuidoost<br>The Netherlands</p>"
+    },
+
+    {
+      "type": "header",
+      "content": "Form block"
+    },
+    {
+      "type": "text",
+      "id": "form_eyebrow",
+      "label": "Eyebrow",
+      "default": "Send us a message"
+    },
+    {
+      "type": "text",
+      "id": "form_heading",
+      "label": "Heading",
+      "default": "Tell us what you need."
+    },
+    {
+      "type": "richtext",
+      "id": "form_intro",
+      "label": "Intro paragraph",
+      "default": "<p>A short note helps us route your message to the right person — sales, ops, or a brand specialist.</p>"
+    },
+    {
+      "type": "text",
+      "id": "submit_label",
+      "label": "Submit button label",
+      "default": "Send message"
+    },
+    {
+      "type": "text",
+      "id": "response_note",
+      "label": "Response-time note (next to submit)",
+      "default": "We reply within 1 business day"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_consent",
+      "label": "Show consent checkbox",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "consent_prefix",
+      "label": "Consent text (before privacy link)",
+      "default": "I agree that Misc. Distribution may contact me about this enquiry and store the details I provide. See our"
+    },
+    {
+      "type": "text",
+      "id": "privacy_link_label",
+      "label": "Privacy link label",
+      "default": "Privacy Policy"
+    },
+    {
+      "type": "text",
+      "id": "consent_suffix",
+      "label": "Consent text (after privacy link)",
+      "default": "for more."
+    },
+    {
+      "type": "url",
+      "id": "privacy_url",
+      "label": "Privacy URL (override)",
+      "info": "Leave blank to use the default Shopify policies URL."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "channel",
+      "name": "Contact channel",
+      "limit": 6,
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "email",     "label": "Email" },
+            { "value": "phone",     "label": "Phone" },
+            { "value": "instagram", "label": "Instagram" },
+            { "value": "location",  "label": "Location" },
+            { "value": "other",     "label": "Other (clock)" }
+          ],
+          "default": "email"
+        },
+        {
+          "type": "text",
+          "id": "meta_label",
+          "label": "Meta label (small caps above the value)",
+          "default": "Email · general"
+        },
+        {
+          "type": "text",
+          "id": "value_label",
+          "label": "Value",
+          "default": "hello@misc-distribution.com"
+        },
+        {
+          "type": "url",
+          "id": "value_url",
+          "label": "Value link (optional)",
+          "info": "Use mailto:, tel:, https://, etc. Leave blank to render value as plain text."
+        },
+        {
+          "type": "text",
+          "id": "sub_text",
+          "label": "Sub-line (optional)",
+          "default": "Sales enquiries, press, partnerships"
+        }
+      ]
+    },
+    {
+      "type": "hour",
+      "name": "Opening hour row",
+      "limit": 7,
+      "settings": [
+        {
+          "type": "text",
+          "id": "day_label",
+          "label": "Day label",
+          "default": "Mon – Thu"
+        },
+        {
+          "type": "text",
+          "id": "hours_value",
+          "label": "Hours",
+          "default": "09:00 – 17:30"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "MISC Contact",
+      "blocks": [
+        {
+          "type": "channel",
+          "settings": {
+            "icon": "email",
+            "meta_label": "Email · general",
+            "value_label": "hello@misc-distribution.com",
+            "value_url": "mailto:hello@misc-distribution.com",
+            "sub_text": "Sales enquiries, press, partnerships"
+          }
+        },
+        {
+          "type": "channel",
+          "settings": {
+            "icon": "email",
+            "meta_label": "Email · orders",
+            "value_label": "orders@misc-distribution.com",
+            "value_url": "mailto:orders@misc-distribution.com",
+            "sub_text": "For existing customers, order changes and returns"
+          }
+        },
+        {
+          "type": "channel",
+          "settings": {
+            "icon": "phone",
+            "meta_label": "Phone",
+            "value_label": "+31 20 261 38 66",
+            "value_url": "tel:+31202613866",
+            "sub_text": "Mon to Fri · 09:00 to 17:30 CET"
+          }
+        },
+        {
+          "type": "channel",
+          "settings": {
+            "icon": "instagram",
+            "meta_label": "Instagram",
+            "value_label": "@misc.distribution",
+            "value_url": "https://instagram.com/misc.distribution",
+            "sub_text": "New arrivals and behind-the-scenes"
+          }
+        },
+        {
+          "type": "hour",
+          "settings": {
+            "day_label": "Mon – Thu",
+            "hours_value": "09:00 – 17:30"
+          }
+        },
+        {
+          "type": "hour",
+          "settings": {
+            "day_label": "Friday",
+            "hours_value": "09:00 – 16:00"
+          }
+        },
+        {
+          "type": "hour",
+          "settings": {
+            "day_label": "Sat – Sun",
+            "hours_value": "Closed"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

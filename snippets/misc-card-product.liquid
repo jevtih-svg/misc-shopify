@@ -280,7 +280,7 @@
                   data-variant-id="{{ v.id }}"
                 >
                   <button type="button" class="misc-qty-stepper__btn" data-misc-qty="-1" aria-label="Remove one {{ v.title | escape }} from cart">&minus;</button>
-                  <input type="number" value="{{ v_cart_qty }}" min="0" step="1" class="misc-qty-stepper__input" aria-label="Quantity of {{ v.title | escape }} in cart" data-misc-qty-input readonly>
+                  <input type="text" inputmode="numeric" value="{{ v_cart_qty }}" class="misc-qty-stepper__input" aria-label="Quantity of {{ v.title | escape }} in cart" data-misc-qty-input readonly>
                   <button type="button" class="misc-qty-stepper__btn" data-misc-qty="+1" aria-label="Add one {{ v.title | escape }} to cart">+</button>
                 </div>
               </li>
@@ -342,10 +342,9 @@
               &minus;
             </button>
             <input
-              type="number"
+              type="text"
+              inputmode="numeric"
               value="{{ sv_cart_qty }}"
-              min="0"
-              step="1"
               class="misc-qty-stepper__input"
               aria-label="Quantity in cart"
               data-misc-qty-input

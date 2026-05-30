@@ -53,7 +53,13 @@
   assign show_more_threshold = 8
 -%}
 
-<facet-filters-form class="facets misc-sidebar small-hide" data-id="{{ section.id }}">
+{%- comment -%}
+  MISC: no Trade `small-hide` here. Our filter sidebar IS the mobile
+  drawer (the whole .facets-wrapper slides in on <1024px), so the
+  facet form must stay visible on phones too. Trade's `small-hide`
+  set display:none below 749px, which left the drawer body empty.
+{%- endcomment -%}
+<facet-filters-form class="facets misc-sidebar" data-id="{{ section.id }}">
   <form
     id="FacetFiltersForm"
     class="misc-sidebar__form"

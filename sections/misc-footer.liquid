@@ -33,10 +33,7 @@
 
     {%- comment -%} 1. Brand statement {%- endcomment -%}
     <div class="misc-site-footer__col">
-      <div class="misc-site-footer__brand-mark">
-        {%- assign mark = section.settings.brand_mark | default: 'Misc.Distribution' -%}
-        {{ mark | replace: '.', '<span class="dot">.</span>' }}
-      </div>
+      {%- comment -%} MISC: wordmark removed 2026-05-30 — brand statement is now the large anchor (see misc-shell.css .misc-site-footer__brand-statement) {%- endcomment -%}
       <p class="misc-site-footer__brand-statement">{{ section.settings.brand_statement | default: 'Distributing design stationery across Europe.' }}</p>
       <div class="misc-site-footer__stamp">
         <div class="misc-site-footer__stamp-block">

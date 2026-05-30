@@ -1,0 +1,26 @@
+{%- comment -%}
+  MISC brand page — boxed text panel (body grid, row 1, left cell)
+  Renders the optional lead sentence followed by every "paragraph"
+  block in section order. Sits in the left half of the body grid
+  beside the hero image; spans the full width when there is no
+  hero image to pair with.
+
+  Inputs:
+    section:  the parent section object
+    has_hero: boolean — true when an image block exists to sit
+              in the right cell
+{%- endcomment -%}
+
+{%- assign prose_blocks = section.blocks | where: 'type', 'paragraph' -%}
+
+<div class="misc-brand-page__text{% unless has_hero %} misc-brand-page__text--full{% endunless %}">
+  {%- if section.settings.lead != blank -%}
+    <p class="misc-brand-page__lead">{{ section.settings.lead }}</p>
+  {%- endif -%}
+
+  {%- for block in prose_blocks -%}
+    <div class="misc-brand-page__prose-block" {{ block.shopify_attributes }}>
+      {{ block.settings.text }}
+    </div>
+  {%- endfor -%}
+</div>

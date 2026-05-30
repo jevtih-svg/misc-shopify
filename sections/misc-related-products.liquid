@@ -37,12 +37,29 @@
   .misc-related-{{ section.id }} {
     padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
     padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+    /* Show the element as a block (custom elements default to
+       inline) so padding takes effect. */
+    display: block;
   }
   @media screen and (min-width: 750px) {
     .misc-related-{{ section.id }} {
       padding-top: {{ section.settings.padding_top }}px;
       padding-bottom: {{ section.settings.padding_bottom }}px;
     }
+  }
+
+  /* Collapse the entire section (including its padding) when
+     there are no recommendations to show. Two states match:
+       1. Initial server render before Shopify's product-
+          recommendations AJAX has populated the element.
+       2. AJAX completed but the recommendations API returned
+          zero products.
+
+     We use :has() so the section auto-shows again the moment
+     the grid appears in the DOM. Browser support: Chrome 105+,
+     Firefox 121+, Safari 15.4+ (all current at this point). */
+  .misc-related-{{ section.id }}:not(:has(.misc-related__grid)) {
+    display: none !important;
   }
   .misc-related-{{ section.id }} .misc-related__heading {
     margin: 0 var(--space-5) var(--space-4);

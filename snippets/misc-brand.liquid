@@ -1,0 +1,52 @@
+{%- comment -%}
+  ============================================================
+  MISC brand resolver
+  ------------------------------------------------------------
+  Returns the correct brand name for a product as plain text.
+
+  product.vendor is "Misc. Distribution" for every product on
+  this store because the Stok.ly import set vendor to the
+  distributor's name. The real brand lives in metafields. This
+  snippet centralises the fallback chain previously inlined in
+  snippets/misc-card-product.liquid so other surfaces (cart
+  ledger, list view, etc.) can call it.
+
+  Usage:
+    {%- capture misc_brand -%}
+      {%- render 'misc-brand', product: item.product -%}
+    {%- endcapture -%}
+
+  Inputs:
+    product: a product object (e.g. item.product, card_product)
+
+  Fallback chain (first non-blank wins):
+    1. metafields.custom.Manufacturer
+    2. metafields.shopify.brand
+    3. metafields.custom.brand
+    4. metafields.custom.manufacturer
+    5. product.vendor (only if != "Misc. Distribution")
+    6. product.type
+    7. product.vendor (last resort)
+  ============================================================
+{%- endcomment -%}
+
+{%- assign misc_brand_resolved = product.metafields.custom.Manufacturer.value -%}
+{%- if misc_brand_resolved == blank -%}
+  {%- assign misc_brand_resolved = product.metafields.shopify.brand.value -%}
+{%- endif -%}
+{%- if misc_brand_resolved == blank -%}
+  {%- assign misc_brand_resolved = product.metafields.custom.brand.value -%}
+{%- endif -%}
+{%- if misc_brand_resolved == blank -%}
+  {%- assign misc_brand_resolved = product.metafields.custom.manufacturer.value -%}
+{%- endif -%}
+{%- if misc_brand_resolved == blank and product.vendor != 'Misc. Distribution' -%}
+  {%- assign misc_brand_resolved = product.vendor -%}
+{%- endif -%}
+{%- if misc_brand_resolved == blank -%}
+  {%- assign misc_brand_resolved = product.type -%}
+{%- endif -%}
+{%- if misc_brand_resolved == blank -%}
+  {%- assign misc_brand_resolved = product.vendor -%}
+{%- endif -%}
+{{- misc_brand_resolved -}}

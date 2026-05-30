@@ -40,7 +40,9 @@
 {%- assign open_invoices_cents = customer.metafields.account.open_invoices_total | default: 0 -%}
 {%- assign open_invoices_count = customer.metafields.account.open_invoices_count | default: 0 -%}
 
-<main class="misc-cart-ledger" data-section-id="{{ section.id }}">
+<main class="misc-cart-ledger"
+      data-section-id="{{ section.id }}"
+      data-currency-symbol="{{ cart.currency.symbol }}">
 
   {%- if cart == empty -%}
 
@@ -110,14 +112,21 @@
 
       {%- assign unit_cents = item.variant.price -%}
 
+      {%- comment -%}
+        Liquid filter precedence: `a | plus: b | times: c` evaluates
+        left to right as `(a + b) * c`. To get `a + (b * c)` we must
+        compute the multiplication into a separate variable first.
+      {%- endcomment -%}
       {%- if ready > 0 -%}
         {%- assign cart_ready_qty = cart_ready_qty | plus: ready -%}
-        {%- assign cart_ready_amount = cart_ready_amount | plus: ready | times: unit_cents -%}
+        {%- assign ready_line_cents = ready | times: unit_cents -%}
+        {%- assign cart_ready_amount = cart_ready_amount | plus: ready_line_cents -%}
         {%- assign products_with_ready = products_with_ready | plus: 1 -%}
       {%- endif -%}
       {%- if coming > 0 -%}
         {%- assign cart_inbound_qty = cart_inbound_qty | plus: coming -%}
-        {%- assign cart_inbound_amount = cart_inbound_amount | plus: coming | times: unit_cents -%}
+        {%- assign inbound_line_cents = coming | times: unit_cents -%}
+        {%- assign cart_inbound_amount = cart_inbound_amount | plus: inbound_line_cents -%}
         {%- assign products_with_inbound = products_with_inbound | plus: 1 -%}
         {%- if eta_var != blank -%}
           {%- assign eta_str = eta_var | date: '%Y-%m-%d' -%}
@@ -126,11 +135,19 @@
       {%- endif -%}
       {%- if bo > 0 -%}
         {%- assign cart_backorder_qty = cart_backorder_qty | plus: bo -%}
-        {%- assign cart_backorder_amount = cart_backorder_amount | plus: bo | times: unit_cents -%}
+        {%- assign bo_line_cents = bo | times: unit_cents -%}
+        {%- assign cart_backorder_amount = cart_backorder_amount | plus: bo_line_cents -%}
         {%- assign products_with_backorder = products_with_backorder | plus: 1 -%}
       {%- endif -%}
 
-      {%- assign brand_lc = item.product.vendor | strip -%}
+      {%- comment -%}
+        product.vendor is "Misc. Distribution" for every product on
+        this store. The real brand lives in metafields. misc-brand
+        snippet centralises the fallback chain used everywhere brand
+        is shown (see snippets/misc-card-product.liquid).
+      {%- endcomment -%}
+      {%- capture brand_resolved -%}{%- render 'misc-brand', product: item.product -%}{%- endcapture -%}
+      {%- assign brand_lc = brand_resolved | strip -%}
       {%- if brand_lc != '' -%}
         {%- assign brands_pipe = brands_pipe | append: brand_lc | append: '|' -%}
       {%- endif -%}
@@ -231,10 +248,17 @@
         <span class="misc-cart-ledger__section-sub">{{ cart.item_count }} {{ cart.item_count | pluralize: 'product', 'products' }} &middot; {{ unique_brands.size }} {{ unique_brands.size | pluralize: 'brand', 'brands' }}</span>
       </div>
 
-      {%- comment -%} Filter + sort UI. JS attaches interactions. {%- endcomment -%}
-      <section class="misc-cart-ledger__filters" aria-label="Filter and sort the cart">
+      {%- comment -%} Filter + sort + view UI. JS attaches interactions. {%- endcomment -%}
+      <section class="misc-cart-ledger__filters" aria-label="View, filter and sort the cart">
         <div class="misc-cart-ledger__filter-row">
-          <span class="misc-cart-ledger__filter-label">Show</span>
+          <span class="misc-cart-ledger__filter-label">View</span>
+          <div class="misc-cart-ledger__filter-options">
+            <button type="button" class="misc-cart-ledger__chip" data-view="table">Table</button>
+            <button type="button" class="misc-cart-ledger__chip is-active" data-view="images">Images</button>
+          </div>
+        </div>
+        <div class="misc-cart-ledger__filter-row">
+          <span class="misc-cart-ledger__filter-label">Status</span>
           <div class="misc-cart-ledger__filter-options">
             <button type="button" class="misc-cart-ledger__chip is-active" data-bucket="in">
               <span class="misc-cart-ledger__chip-dot misc-cart-ledger__chip-dot--in"></span>
@@ -258,7 +282,9 @@
               {%- if brand != '' -%}
                 {%- assign brand_count = 0 -%}
                 {%- for item in cart.items -%}
-                  {%- if item.product.vendor == brand -%}{%- assign brand_count = brand_count | plus: 1 -%}{%- endif -%}
+                  {%- capture item_brand -%}{%- render 'misc-brand', product: item.product -%}{%- endcapture -%}
+                  {%- assign item_brand = item_brand | strip -%}
+                  {%- if item_brand == brand -%}{%- assign brand_count = brand_count | plus: 1 -%}{%- endif -%}
                 {%- endfor -%}
                 <button type="button" class="misc-cart-ledger__chip is-active" data-brand="{{ brand | escape }}">
                   {{ brand }} <span class="misc-cart-ledger__chip-count">({{ brand_count }})</span>
@@ -279,9 +305,22 @@
         </div>
       </section>
 
-      {%- comment -%} The items table itself. {%- endcomment -%}
+      {%- comment -%} The items table itself.
+
+           NOTE: the table is wrapped in the form so that quantity
+           inputs (name="updates[<variant>]") AND the order-reference
+           attribute inputs (form="misc-cart-ledger-form") all submit
+           together when the buyer hits Confirm. The images view
+           below is rendered OUTSIDE the form, but its visible state
+           uses .is-hidden — only one of the two views is shown at
+           any time, and the qty stepper on either side fires the
+           same /cart/change.js calls via JS.
+
+           Default view (Images) is set by adding .is-hidden to the
+           items table here; the View row in the filters above
+           toggles it off when Table is picked. {%- endcomment -%}
       <form action="{{ routes.cart_url }}" method="post" id="misc-cart-ledger-form" novalidate>
-        <table class="misc-cart-ledger__items">
+        <table class="misc-cart-ledger__items is-hidden">
           <colgroup>
             <col class="misc-cart-ledger__col-num">
             <col class="misc-cart-ledger__col-sku">
@@ -326,10 +365,13 @@
               {%- assign coming_amount_cents = coming | times: item.variant.price -%}
               {%- assign bo_amount_cents = bo | times: item.variant.price -%}
 
+              {%- capture row_brand -%}{%- render 'misc-brand', product: item.product -%}{%- endcapture -%}
+              {%- assign row_brand = row_brand | strip -%}
+
               <tr class="misc-cart-ledger__product-row"
                   data-line="{{ forloop.index }}"
                   data-variant-id="{{ item.variant.id }}"
-                  data-brand="{{ item.product.vendor | escape }}"
+                  data-brand="{{ row_brand | escape }}"
                   data-total-amount-cents="{{ line_amount_cents }}"
                   data-total-qty="{{ requested }}"
                   data-ready-qty="{{ ready }}"
@@ -338,7 +380,7 @@
                 <td class="misc-cart-ledger__col-num">{{ forloop.index }}</td>
                 <td class="misc-cart-ledger__col-sku">{{ item.variant.sku | default: '&mdash;' }}</td>
                 <td class="misc-cart-ledger__col-product">
-                  <span class="misc-cart-ledger__brand">{{ item.product.vendor }}</span>
+                  <span class="misc-cart-ledger__brand">{{ row_brand }}</span>
                   &middot; <a href="{{ item.url }}" class="misc-cart-ledger__name">{{ item.product.title }}</a>
                   {%- unless item.product.has_only_default_variant -%}
                     <span class="misc-cart-ledger__variant"> &middot; {{ item.variant.title }}</span>
@@ -436,6 +478,157 @@
         </table>
       </form>
 
+      {%- comment -%}
+        ===== IMAGES VIEW =====
+        Classical e-commerce row layout: 160px thumbnail, brand /
+        product name / pack / SKU stack in the middle, qty stepper +
+        line total in the right column, and a tinted band of stock-
+        breakdown rows under each item. Default view (no .is-hidden
+        on this container, .is-hidden ON the table above).
+
+        Lives OUTSIDE the form on purpose: image-view steppers post
+        to /cart/change.js via JS, never via form submit. Putting
+        them inside the form would duplicate the updates[<id>] input
+        names against the table view.
+      {%- endcomment -%}
+      <div class="misc-cart-ledger__images">
+        {%- for item in cart.items -%}
+          {%- comment -%} Recompute buckets per line (same math as the table above). {%- endcomment -%}
+          {%- assign requested_i = item.quantity | default: 0 -%}
+          {%- assign stock_i = item.variant.inventory_quantity | default: 0 -%}
+          {%- if stock_i < 0 -%}{%- assign stock_i = 0 -%}{%- endif -%}
+          {%- assign incoming_var_i = item.variant.metafields.custom.incoming_qty.value | default: 0 -%}
+          {%- assign eta_var_i = item.variant.metafields.custom.incoming_eta.value -%}
+          {%- if stock_i >= requested_i -%}{%- assign ready_i = requested_i -%}{%- else -%}{%- assign ready_i = stock_i -%}{%- endif -%}
+          {%- assign remaining_i = requested_i | minus: ready_i -%}
+          {%- if incoming_var_i >= remaining_i -%}{%- assign coming_i = remaining_i -%}{%- else -%}{%- assign coming_i = incoming_var_i -%}{%- endif -%}
+          {%- assign bo_i = remaining_i | minus: coming_i -%}
+
+          {%- assign case_pack_i = item.variant.metafields.custom.case_pack.value | default: 1 -%}
+          {%- if case_pack_i > 1 -%}
+            {%- assign pack_label_i = 'Pack of ' | append: case_pack_i -%}
+          {%- else -%}
+            {%- assign pack_label_i = 'Single unit' -%}
+          {%- endif -%}
+
+          {%- assign line_amount_i = item.final_line_price -%}
+          {%- assign ready_amount_i = ready_i | times: item.variant.price -%}
+          {%- assign coming_amount_i = coming_i | times: item.variant.price -%}
+          {%- assign bo_amount_i = bo_i | times: item.variant.price -%}
+
+          {%- comment -%} Pre-compute the avail-band condition. Liquid has no
+            operator precedence and no parens in if-tags, so the old
+            `a and b > 0 or c > 0 or d > 0` evaluated wrong. {%- endcomment -%}
+          {%- assign has_buckets = false -%}
+          {%- if ready_i > 0 or coming_i > 0 or bo_i > 0 -%}{%- assign has_buckets = true -%}{%- endif -%}
+
+          {%- capture row_brand_i -%}{%- render 'misc-brand', product: item.product -%}{%- endcapture -%}
+          {%- assign row_brand_i = row_brand_i | strip -%}
+
+          <div class="misc-cart-ledger__image-item"
+               data-line="{{ forloop.index }}"
+               data-variant-id="{{ item.variant.id }}"
+               data-brand="{{ row_brand_i | escape }}"
+               data-total-amount-cents="{{ line_amount_i }}"
+               data-total-qty="{{ requested_i }}"
+               data-ready-qty="{{ ready_i }}"
+               data-inbound-qty="{{ coming_i }}"
+               data-backorder-qty="{{ bo_i }}">
+
+            <div class="misc-cart-ledger__image-media">
+              {%- if item.image -%}
+                <a href="{{ item.url }}" tabindex="-1" aria-hidden="true">
+                  <img src="{{ item.image | image_url: width: 320 }}"
+                       alt="{{ item.image.alt | default: item.product.title | escape }}"
+                       loading="lazy"
+                       width="160"
+                       height="160">
+                </a>
+              {%- endif -%}
+            </div>
+
+            <div class="misc-cart-ledger__image-info">
+              <span class="misc-cart-ledger__image-brand">{{ row_brand_i }}</span>
+              <a href="{{ item.url }}" class="misc-cart-ledger__image-name">{{ item.product.title }}</a>
+              {%- unless item.product.has_only_default_variant -%}
+                <span class="misc-cart-ledger__image-variant">{{ item.variant.title }}</span>
+              {%- endunless -%}
+              <span class="misc-cart-ledger__image-meta">{{ pack_label_i }} &middot; {{ item.variant.sku | default: '—' }}</span>
+              <div class="misc-cart-ledger__image-price-row">
+                <strong>{{ item.variant.price | money }}</strong>/unit
+                {%- if item.variant.compare_at_price > 0 -%}
+                  <span class="misc-cart-ledger__image-price-rrp">RRP {{ item.variant.compare_at_price | money }}</span>
+                {%- endif -%}
+              </div>
+            </div>
+
+            <div class="misc-cart-ledger__image-actions">
+              <span class="misc-cart-ledger__stepper" aria-label="Quantity">
+                <button type="button" class="misc-cart-ledger__step-btn" data-step="-1" aria-label="Decrease quantity">&minus;</button>
+                <input type="number"
+                       class="misc-cart-ledger__qty-input"
+                       value="{{ item.quantity }}"
+                       min="0"
+                       data-variant-id="{{ item.variant.id }}"
+                       data-line="{{ forloop.index }}"
+                       aria-label="Quantity for {{ item.product.title | escape }}">
+                <button type="button" class="misc-cart-ledger__step-btn" data-step="1" aria-label="Increase quantity">+</button>
+              </span>
+              <span class="misc-cart-ledger__image-total">
+                <span class="misc-cart-ledger__image-total-amount" data-line-amount>{{ line_amount_i | money }}</span>
+                <span class="misc-cart-ledger__image-total-units" data-line-units>{{ requested_i }} units</span>
+              </span>
+              <button type="button" class="misc-cart-ledger__image-remove" data-variant-id="{{ item.variant.id }}" aria-label="Remove {{ item.product.title | escape }}">Remove</button>
+            </div>
+
+            {%- if has_buckets -%}
+              <div class="misc-cart-ledger__image-avails">
+                {%- if ready_i > 0 -%}
+                  <div class="misc-cart-ledger__image-avail misc-cart-ledger__image-avail--in" data-bucket="in">
+                    <span class="misc-cart-ledger__image-avail-dot"></span>
+                    <span><span class="misc-cart-ledger__image-avail-state">Ready to ship</span><span class="misc-cart-ledger__image-avail-detail">&mdash; from current stock</span></span>
+                    <span class="misc-cart-ledger__image-avail-qty">{{ ready_i }} units</span>
+                    <span class="misc-cart-ledger__image-avail-amount">{{ ready_amount_i | money }}</span>
+                  </div>
+                {%- endif -%}
+                {%- if coming_i > 0 -%}
+                  <div class="misc-cart-ledger__image-avail misc-cart-ledger__image-avail--inbound" data-bucket="inbound">
+                    <span class="misc-cart-ledger__image-avail-dot"></span>
+                    <span><span class="misc-cart-ledger__image-avail-state">Incoming</span><span class="misc-cart-ledger__image-avail-detail">
+                      {%- if eta_var_i != blank -%}&mdash; arrives at warehouse {{ eta_var_i | date: '%-d %b %Y' }}{%- else -%}&mdash; arrival date to be confirmed{%- endif -%}
+                    </span></span>
+                    <span class="misc-cart-ledger__image-avail-qty">{{ coming_i }} units</span>
+                    <span class="misc-cart-ledger__image-avail-amount">{{ coming_amount_i | money }}</span>
+                  </div>
+                {%- endif -%}
+                {%- if bo_i > 0 -%}
+                  <div class="misc-cart-ledger__image-avail misc-cart-ledger__image-avail--backorder" data-bucket="backorder">
+                    <span class="misc-cart-ledger__image-avail-dot"></span>
+                    <span><span class="misc-cart-ledger__image-avail-state">Backorder</span><span class="misc-cart-ledger__image-avail-detail">&mdash; lead time to be confirmed by account manager</span></span>
+                    <span class="misc-cart-ledger__image-avail-qty">{{ bo_i }} units</span>
+                    <span class="misc-cart-ledger__image-avail-amount">{{ bo_amount_i | money }}</span>
+                  </div>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+
+          </div>
+        {%- endfor -%}
+
+        <div class="misc-cart-ledger__images-foot">
+          <div class="misc-cart-ledger__images-foot-row misc-cart-ledger__images-foot-row--filtered" hidden data-images-filtered-foot>
+            <span class="misc-cart-ledger__images-foot-label">Filtered items subtotal</span>
+            <span class="misc-cart-ledger__images-foot-qty" data-images-filtered-qty>0 units</span>
+            <span class="misc-cart-ledger__images-foot-amount" data-images-filtered-amount>{{ 0 | money }}</span>
+          </div>
+          <div class="misc-cart-ledger__images-foot-row misc-cart-ledger__images-foot-row--total">
+            <span class="misc-cart-ledger__images-foot-label">Items subtotal</span>
+            <span class="misc-cart-ledger__images-foot-qty">{{ cart.item_count }} units</span>
+            <span class="misc-cart-ledger__images-foot-amount">{{ cart.total_price | money }}</span>
+          </div>
+        </div>
+      </div>
+
       {%- comment -%} ===== 3-COLUMN PRE-CONFIRM ROW ===== {%- endcomment -%}
       <section class="misc-cart-ledger__pre-confirm">
 
@@ -515,7 +708,8 @@
                           {%- if incoming2 >= remaining2 -%}{%- assign coming2 = remaining2 -%}{%- else -%}{%- assign coming2 = incoming2 -%}{%- endif -%}
                           {%- if coming2 > 0 -%}
                             {%- assign eta_units = eta_units | plus: coming2 -%}
-                            {%- assign eta_amount = eta_amount | plus: coming2 | times: item.variant.price -%}
+                            {%- assign eta_line_cents = coming2 | times: item.variant.price -%}
+                            {%- assign eta_amount = eta_amount | plus: eta_line_cents -%}
                             {%- assign eta_products = eta_products | plus: 1 -%}
                           {%- endif -%}
                         {%- endif -%}
@@ -625,23 +819,71 @@
       <div class="misc-cart-ledger__section-head">
         <h2 class="misc-cart-ledger__section-title">Order reference</h2>
       </div>
+      {%- comment -%}
+        Order reference — PO number + freeform notes.
+
+        Best-practice notes for B2B cart attributes:
+
+        1. NAMED inputs (`attributes[<key>]`) so the value submits
+           with the cart form to /cart. Shopify treats these as
+           cart attributes natively. The form= attribute links the
+           inputs to the main cart form even though the markup is
+           positioned outside it (so visual layout and form scope
+           are independent).
+        2. AJAX persistence on input/blur via /cart/update.js so
+           the value survives page refresh and is captured even
+           if the buyer never clicks Confirm.
+        3. Visible "Saved" feedback so the buyer trusts that the
+           value persisted without needing to refresh.
+        4. autocomplete="off" on the PO field — buyer PO numbers
+           are session-specific and we don't want the browser
+           offering past entries.
+        5. maxlength caps to keep cart-attribute payload sane
+           and prevent abuse (Shopify silently truncates anyway,
+           but client-side hint is friendlier).
+        6. aria-describedby links each input to its hint text so
+           screen readers announce the help text in context.
+        7. spellcheck="false" on PO (it's an alphanumeric code).
+      {%- endcomment -%}
       <div class="misc-cart-ledger__order-ref">
         <div class="misc-cart-ledger__field">
-          <label class="misc-cart-ledger__field-label" for="misc-cart-po-number">Your PO number / order reference</label>
+          <label class="misc-cart-ledger__field-label" for="misc-cart-po-number">
+            Your PO number / order reference
+            <span class="misc-cart-ledger__field-saved" data-saved-indicator hidden aria-live="polite">Saved</span>
+          </label>
           <input type="text"
                  id="misc-cart-po-number"
                  class="misc-cart-ledger__field-input"
-                 placeholder="e.g. PO-2026-0612"
+                 name="attributes[po_number]"
+                 form="misc-cart-ledger-form"
                  value="{{ po_number | escape }}"
-                 data-cart-attribute="po_number">
-          <span class="misc-cart-ledger__field-hint">Appears on the invoice, packing slips and any related shipment communication.</span>
+                 placeholder="e.g. PO-2026-0612"
+                 maxlength="80"
+                 autocomplete="off"
+                 spellcheck="false"
+                 data-cart-attribute="po_number"
+                 aria-describedby="misc-cart-po-number-hint">
+          <span class="misc-cart-ledger__field-hint" id="misc-cart-po-number-hint">
+            Appears on the invoice, packing slips and any related shipment communication.
+          </span>
         </div>
         <div class="misc-cart-ledger__field">
-          <label class="misc-cart-ledger__field-label" for="misc-cart-order-notes">Notes for this order</label>
+          <label class="misc-cart-ledger__field-label" for="misc-cart-order-notes">
+            Notes for this order
+            <span class="misc-cart-ledger__field-saved" data-saved-indicator hidden aria-live="polite">Saved</span>
+          </label>
           <textarea id="misc-cart-order-notes"
                     class="misc-cart-ledger__field-textarea"
+                    name="attributes[order_notes]"
+                    form="misc-cart-ledger-form"
+                    rows="3"
+                    maxlength="2000"
                     placeholder="Delivery instructions, attention-to, hold dates, special requests..."
-                    data-cart-attribute="order_notes">{{ order_notes | escape }}</textarea>
+                    data-cart-attribute="order_notes"
+                    aria-describedby="misc-cart-order-notes-hint">{{ order_notes | escape }}</textarea>
+          <span class="misc-cart-ledger__field-hint" id="misc-cart-order-notes-hint">
+            Reaches your account manager. Up to 2,000 characters.
+          </span>
         </div>
       </div>
 

@@ -1,43 +1,109 @@
 {
   "sections": {
     "main": {
-      "type": "main-page",
-      "disabled": true,
+      "type": "misc-contact",
       "settings": {
-        "padding_top": 36,
-        "padding_bottom": 36
-      }
-    },
-    "image_banner": {
-      "type": "image-banner",
-      "settings": {
-        "image": "shopify://shop_images/Image_banner_2x_8.png",
-        "image_overlay_opacity": 20,
-        "image_height": "adapt",
-        "desktop_content_position": "middle-left",
-        "show_text_box": false,
-        "desktop_content_alignment": "left",
-        "color_scheme": "",
-        "image_behavior": "none",
-        "mobile_content_alignment": "center",
-        "stack_images_on_mobile": true,
-        "show_text_below": true
-      }
-    },
-    "form": {
-      "type": "contact-form",
-      "settings": {
-        "heading": "Questions or comments? Get in touch and we'll be happy to help.",
-        "heading_size": "h2",
-        "color_scheme": "scheme-1",
-        "padding_top": 36,
-        "padding_bottom": 36
-      }
+        "show_breadcrumb": true,
+        "page_title_fallback": "Get in touch.",
+        "lede": "We answer every wholesale enquiry, usually within one business day. Already our customer? Sign in to place orders, check stock and see incoming shipments.",
+        "show_register_block": true,
+        "register_eyebrow": "New to Misc",
+        "register_heading": "Become our customer.",
+        "register_body": "<p>Wholesale prices, credit terms and the full catalogue unlock once your shop is approved. Approval usually takes one business day.</p>",
+        "register_cta_label": "Register account",
+        "signin_cta_label": "Sign in",
+        "register_note": "Approval typically within 1 business day",
+        "channels_eyebrow": "Direct lines",
+        "channels_heading": "Talk to a person.",
+        "show_address_block": true,
+        "address_eyebrow": "Find us",
+        "address_heading": "Amsterdam warehouse & office.",
+        "address_richtext": "<p><strong>Misc. Distribution B.V.</strong>Keienbergweg 77<br>1101 GE Amsterdam Zuidoost<br>The Netherlands</p>",
+        "form_eyebrow": "Send us a message",
+        "form_heading": "Tell us what you need.",
+        "form_intro": "<p>A short note helps us route your message to the right person — sales, ops, or a brand specialist.</p>",
+        "submit_label": "Send message",
+        "response_note": "We reply within 1 business day",
+        "show_consent": true,
+        "consent_prefix": "I agree that Misc. Distribution may contact me about this enquiry and store the details I provide. See our",
+        "privacy_link_label": "Privacy Policy",
+        "consent_suffix": "for more."
+      },
+      "blocks": {
+        "channel_general": {
+          "type": "channel",
+          "settings": {
+            "icon": "email",
+            "meta_label": "Email · general",
+            "value_label": "hello@misc-distribution.com",
+            "value_url": "mailto:hello@misc-distribution.com",
+            "sub_text": "Sales enquiries, press, partnerships"
+          }
+        },
+        "channel_orders": {
+          "type": "channel",
+          "settings": {
+            "icon": "email",
+            "meta_label": "Email · orders",
+            "value_label": "orders@misc-distribution.com",
+            "value_url": "mailto:orders@misc-distribution.com",
+            "sub_text": "For existing customers, order changes and returns"
+          }
+        },
+        "channel_phone": {
+          "type": "channel",
+          "settings": {
+            "icon": "phone",
+            "meta_label": "Phone",
+            "value_label": "+31 20 261 38 66",
+            "value_url": "tel:+31202613866",
+            "sub_text": "Mon to Fri · 09:00 to 17:30 CET"
+          }
+        },
+        "channel_instagram": {
+          "type": "channel",
+          "settings": {
+            "icon": "instagram",
+            "meta_label": "Instagram",
+            "value_label": "@misc.distribution",
+            "value_url": "https://instagram.com/misc.distribution",
+            "sub_text": "New arrivals and behind-the-scenes"
+          }
+        },
+        "hour_mon_thu": {
+          "type": "hour",
+          "settings": {
+            "day_label": "Mon – Thu",
+            "hours_value": "09:00 – 17:30"
+          }
+        },
+        "hour_fri": {
+          "type": "hour",
+          "settings": {
+            "day_label": "Friday",
+            "hours_value": "09:00 – 16:00"
+          }
+        },
+        "hour_sat_sun": {
+          "type": "hour",
+          "settings": {
+            "day_label": "Sat – Sun",
+            "hours_value": "Closed"
+          }
+        }
+      },
+      "block_order": [
+        "channel_general",
+        "channel_orders",
+        "channel_phone",
+        "channel_instagram",
+        "hour_mon_thu",
+        "hour_fri",
+        "hour_sat_sun"
+      ]
     }
   },
   "order": [
-    "main",
-    "image_banner",
-    "form"
+    "main"
   ]
 }
