@@ -303,7 +303,18 @@
                         assign current_qty_for_volume_pricing = cart_qty | plus: product.selected_or_first_available_variant.quantity_rule.increment
                       endif
                     -%}
-                    {%- if product.quantity_price_breaks_configured? -%}
+                    {%- comment -%}
+                      MISC: gate volume pricing block on logged-in customer.
+                      Applies to Trade's default product template only.
+                      The MISC PDP template (product.misc-pdp.json) uses
+                      sections/misc-main-product.liquid which doesn't
+                      render this block at all.
+                      Liquid doesn't support parens in `if`, so resolve the
+                      gate to a boolean variable first.
+                    {%- endcomment -%}
+                    {%- assign misc_show_price = false -%}
+                    {%- if customer != blank or settings.misc_dev_show_price -%}{%- assign misc_show_price = true -%}{%- endif -%}
+                    {%- if product.quantity_price_breaks_configured? and misc_show_price -%}
                       <price-per-item
                         id="Price-Per-Item-{{ section.id }}"
                         data-section-id="{{ section.id }}"

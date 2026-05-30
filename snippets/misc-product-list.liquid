@@ -1,0 +1,252 @@
+{%- comment -%}
+  ============================================================
+  MISC product list — condensed table-style view for mass buyers.
+
+  11 columns:
+    1. Preview icon (hover reveals image popover)
+    2. Brand
+    3. Product name
+    4. SKU
+    5. UPQ (case pack)
+    6. HS code
+    7. Origin (country)
+    8. Stock state
+    9. RRP
+    10. Price
+    11. Mini-stepper
+
+  Structure: single .product-list grid container with each row
+  as <li class="list-row"> using `display: contents` so cells
+  become direct grid items. Auto-sizes columns to widest content
+  across all rows and aligns them.
+
+  Multi-variant products render as a parent row (brand + name
+  only) followed by one child row per variant.
+
+  All prices, RRPs, and stock figures are gated behind a logged-
+  in customer. Logged-out visitors see a "Log in to see pricing"
+  CTA in the price slot.
+
+  Inputs:
+    - collection   : the collection object
+    - active_view  : current view (so we know whether to render hidden or not)
+  ============================================================
+{%- endcomment -%}
+
+{%- comment -%}
+  Price gate — same pattern as misc-card-product.liquid.
+  Reads settings.misc_dev_show_price (default FALSE on production).
+  Toggle locally via ./scripts/misc-preview.sh.
+{%- endcomment -%}
+{%- assign misc_show_price = false -%}
+{%- if customer != blank or settings.misc_dev_show_price -%}
+  {%- assign misc_show_price = true -%}
+{%- endif -%}
+
+<ul class="product-list" {% if active_view != 'list' %}hidden{% endif %}>
+
+  <li class="list-row list-row--head">
+    <span class="list-cell"></span>
+    <span class="list-cell">Brand</span>
+    <span class="list-cell">Product</span>
+    <span class="list-cell">SKU</span>
+    <span class="list-cell">UPQ</span>
+    <span class="list-cell">HS</span>
+    <span class="list-cell">Origin</span>
+    <span class="list-cell">Stock</span>
+    <span class="list-cell">RRP</span>
+    <span class="list-cell">Price</span>
+    <span class="list-cell"></span>
+  </li>
+
+  {%- for product in collection.products -%}
+    {%- liquid
+      assign primary_variant = product.selected_or_first_available_variant
+      assign variant_count = product.variants.size
+
+      # Brand resolution: custom.Manufacturer first, then fallbacks
+      assign brand = product.metafields.custom.Manufacturer.value
+      if brand == blank
+        assign brand = product.metafields.shopify.brand.value
+      endif
+      if brand == blank and product.vendor != 'Misc. Distribution'
+        assign brand = product.vendor
+      endif
+      if brand == blank
+        assign brand = product.type
+      endif
+
+      # Stock state for single-variant products
+      assign inv = primary_variant.inventory_quantity | default: 0
+      assign inc_qty = primary_variant.metafields.custom.incoming_qty.value | default: 0 | plus: 0
+      assign inc_eta = primary_variant.metafields.custom.incoming_eta.value
+
+      # HS code and origin from product / variant metafields
+      assign hs_code = product.metafields.custom.hs_code.value | default: product.metafields.custom.HS.value
+      assign origin = product.metafields.custom.country_of_origin.value | default: product.metafields.custom.origin.value
+
+      # UPQ (case pack) from variant metafield
+      assign upq = primary_variant.metafields.custom.case_pack.value | default: 1
+
+      # RRP from variant metafield
+      assign rrp = primary_variant.metafields.custom.rrp.value | default: primary_variant.metafields.custom.RRP.value
+    -%}
+
+    {%- if variant_count > 1 -%}
+      {%- comment -%}
+        Multi-variant: parent row + one row per variant.
+        Parent row has exactly 3 cells. The name cell spans
+        cols 3 to -1 (last) explicitly so no auto-placement
+        ambiguity. An auto-placed empty trailing cell can be
+        bumped to the NEXT row by grid auto-flow under certain
+        edge cases, which then shifts every subsequent row's
+        cells by one column.
+      {%- endcomment -%}
+      <li class="list-row list-row--parent">
+        <span class="list-cell list-cell--preview">
+          {% render 'misc-list-preview-icon', product: product %}
+        </span>
+        <span class="list-cell list-cell--brand">{{ brand | default: '' }}</span>
+        <a href="{{ product.url }}" class="list-cell list-cell--name">
+          {{ product.title | escape }}
+          <span class="list-cell__hint">{{ variant_count }} variants</span>
+        </a>
+      </li>
+
+      {%- for v in product.variants -%}
+        {%- liquid
+          assign v_inv = v.inventory_quantity | default: 0
+          assign v_inc = v.metafields.custom.incoming_qty.value | default: 0 | plus: 0
+          assign v_eta = v.metafields.custom.incoming_eta.value
+          assign v_upq = v.metafields.custom.case_pack.value | default: 1
+          assign v_rrp = v.metafields.custom.rrp.value | default: v.metafields.custom.RRP.value
+
+          # Orderable means there's stock, incoming, or an active backorder
+          # policy. True "out of stock" (variant.available == false AND no
+          # stock AND no incoming) gets no stepper.
+          assign v_orderable = false
+          if v_inv > 0 or v_inc > 0 or v.available
+            assign v_orderable = true
+          endif
+
+          assign v_cart_qty = 0
+          for line_item in cart.items
+            if line_item.variant_id == v.id
+              assign v_cart_qty = line_item.quantity
+              break
+            endif
+          endfor
+
+          assign is_last_variant = false
+          if forloop.last
+            assign is_last_variant = true
+          endif
+        -%}
+        <li class="list-row list-row--variant{% if is_last_variant %} list-row--variant-last{% endif %}">
+          <span class="list-cell list-cell--preview">
+            {% render 'misc-list-preview-icon', product: product, variant: v %}
+          </span>
+          <span class="list-cell list-cell--brand"></span>
+          <a href="{{ v.url | default: product.url }}" class="list-cell list-cell--name">{{ v.title | escape }}</a>
+          <span class="list-cell list-cell--sku">{{ v.sku | escape }}</span>
+          <span class="list-cell list-cell--upq">{{ v_upq }}</span>
+          <span class="list-cell list-cell--hs">{{ hs_code | default: '' }}</span>
+          <span class="list-cell list-cell--country">{{ origin | default: '' }}</span>
+          <span class="list-cell list-cell--stock">
+            {%- if v_inv > 0 and v_inc > 0 -%}
+              <span class="list-cell--stock-in">In stock {{ v_inv }}</span>
+              <span class="list-cell--stock-inbound">{{ v_inc }} incoming{% if v_eta != blank %} {{ v_eta | date: '%-d %b' }}{% endif %}</span>
+            {%- elsif v_inv > 0 -%}
+              <span class="list-cell--stock-in">In stock {{ v_inv }}</span>
+            {%- elsif v_inc > 0 -%}
+              <span class="list-cell--stock-inbound">{{ v_inc }} incoming{% if v_eta != blank %} {{ v_eta | date: '%-d %b' }}{% endif %}</span>
+            {%- elsif v.available -%}
+              <span class="list-cell--stock-backorder">On backorder</span>
+            {%- else -%}
+              <span class="list-cell--stock-oos">Out of stock</span>
+            {%- endif -%}
+          </span>
+          {%- if misc_show_price -%}
+            <span class="list-cell list-cell--rrp">{% if v_rrp != blank %}{{ v_rrp | money }}{% endif %}</span>
+            <span class="list-cell list-cell--price">{{ v.price | money }}</span>
+            <div class="list-cell list-cell--stepper">
+              {%- if v_orderable -%}
+                <div class="mini-stepper misc-qty-stepper misc-qty-stepper--mini" data-misc-qty-stepper data-variant-id="{{ v.id }}">
+                  <button type="button" class="misc-qty-stepper__btn" data-misc-qty="-1" aria-label="Remove one {{ v.title | escape }}">&minus;</button>
+                  <input type="number" value="{{ v_cart_qty }}" min="0" step="1" class="misc-qty-stepper__input" data-misc-qty-input readonly>
+                  <button type="button" class="misc-qty-stepper__btn" data-misc-qty="+1" aria-label="Add one {{ v.title | escape }}">+</button>
+                </div>
+              {%- else -%}
+                <span class="misc-stepper-placeholder" aria-label="Out of stock, not available for purchase">Unavailable</span>
+              {%- endif -%}
+            </div>
+          {%- else -%}
+            <span class="list-cell list-cell--rrp"></span>
+            <span class="list-cell list-cell--price">{%- render 'misc-price-cta', block_modifier: 'small' -%}</span>
+            <span class="list-cell"></span>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+
+    {%- else -%}
+      {%- comment -%} Single-variant row. {%- endcomment -%}
+      {%- assign v_cart_qty = 0 -%}
+      {%- for line_item in cart.items -%}
+        {%- if line_item.variant_id == primary_variant.id -%}
+          {%- assign v_cart_qty = line_item.quantity -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- assign sv_orderable = false -%}
+      {%- if inv > 0 or inc_qty > 0 or primary_variant.available -%}
+        {%- assign sv_orderable = true -%}
+      {%- endif -%}
+      <li class="list-row">
+        <span class="list-cell list-cell--preview">
+          {% render 'misc-list-preview-icon', product: product %}
+        </span>
+        <span class="list-cell list-cell--brand">{{ brand | default: '' }}</span>
+        <a href="{{ product.url }}" class="list-cell list-cell--name">{{ product.title | escape }}</a>
+        <span class="list-cell list-cell--sku">{{ primary_variant.sku | escape }}</span>
+        <span class="list-cell list-cell--upq">{{ upq }}</span>
+        <span class="list-cell list-cell--hs">{{ hs_code | default: '' }}</span>
+        <span class="list-cell list-cell--country">{{ origin | default: '' }}</span>
+        <span class="list-cell list-cell--stock">
+          {%- if inv > 0 and inc_qty > 0 -%}
+            <span class="list-cell--stock-in">In stock {{ inv }}</span>
+            <span class="list-cell--stock-inbound">{{ inc_qty }} incoming{% if inc_eta != blank %} {{ inc_eta | date: '%-d %b' }}{% endif %}</span>
+          {%- elsif inv > 0 -%}
+            <span class="list-cell--stock-in">In stock {{ inv }}</span>
+          {%- elsif inc_qty > 0 -%}
+            <span class="list-cell--stock-inbound">{{ inc_qty }} incoming{% if inc_eta != blank %} {{ inc_eta | date: '%-d %b' }}{% endif %}</span>
+          {%- elsif primary_variant.available -%}
+            <span class="list-cell--stock-backorder">On backorder</span>
+          {%- else -%}
+            <span class="list-cell--stock-oos">Out of stock</span>
+          {%- endif -%}
+        </span>
+        {%- if misc_show_price -%}
+          <span class="list-cell list-cell--rrp">{% if rrp != blank %}{{ rrp | money }}{% endif %}</span>
+          <span class="list-cell list-cell--price">{{ primary_variant.price | money }}</span>
+          <div class="list-cell list-cell--stepper">
+            {%- if sv_orderable -%}
+              <div class="mini-stepper misc-qty-stepper misc-qty-stepper--mini" data-misc-qty-stepper data-variant-id="{{ primary_variant.id }}">
+                <button type="button" class="misc-qty-stepper__btn" data-misc-qty="-1" aria-label="Remove one from cart">&minus;</button>
+                <input type="number" value="{{ v_cart_qty }}" min="0" step="1" class="misc-qty-stepper__input" data-misc-qty-input readonly>
+                <button type="button" class="misc-qty-stepper__btn" data-misc-qty="+1" aria-label="Add one to cart">+</button>
+              </div>
+            {%- else -%}
+              <span class="misc-stepper-placeholder" aria-label="Out of stock, not available for purchase">Unavailable</span>
+            {%- endif -%}
+          </div>
+        {%- else -%}
+          <span class="list-cell list-cell--rrp"></span>
+          <span class="list-cell list-cell--price">{%- render 'misc-price-cta', block_modifier: 'small' -%}</span>
+          <span class="list-cell"></span>
+        {%- endif -%}
+      </li>
+    {%- endif -%}
+
+  {%- endfor -%}
+
+</ul>

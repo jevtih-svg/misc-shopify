@@ -1,0 +1,1973 @@
+/* ============================================================
+   MISC CATALOG PAGE
+   Used together with:
+     - snippets/misc-card-product.liquid
+     - snippets/misc-facets.liquid  (when the section is forked)
+     - sections/misc-main-collection-product-grid.liquid (forked
+       from Trade for the top filter-bar row layout)
+
+   This file is the implementation of the design in
+   /Cowork/30 Projects/Misc/Mockups/misc-sidebar-mockup.html.
+   The mockup is the canonical reference — open it side-by-side
+   when reviewing changes here.
+
+   Scope: collection / search / catalog grids served by Trade's
+   main-collection-product-grid section.
+   ============================================================ */
+
+/* --- Widen the catalog container to edge-to-edge --- */
+.collection.page-width,
+.facets-vertical.page-width {
+  max-width: 100% !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* ============================================================
+   FORCE WHITE BACKGROUNDS ON THE CATALOG SURFACE ONLY
+   Narrowly target the catalog containers — never the header,
+   footer, or announcement bar (those stay dark — see below).
+   ============================================================ */
+.collection-hero,
+.collection-hero.gradient,
+.facets-vertical-sort,
+.facets-vertical,
+.product-grid-container,
+.collection {
+  background: var(--c-bg) !important;
+  background-image: none !important;
+}
+
+/* ============================================================
+   COLLAPSE TRADE'S SECTION-PADDING GAPS ON THE CATALOG PAGE
+   Trade wraps every section in `<div class="section-{id}-padding
+   gradient color-scheme-X">` and that wrapper has 36-48px of
+   padding-top + padding-bottom from the section settings. That
+   creates a visible gap between our collection-hero (Products
+   title) and the misc-filter-bar below.
+   Zero out the padding on the two section wrappers that hold the
+   catalog (banner + product grid), force them to white background.
+   `:has()` is supported across all modern browsers (Chrome 105+,
+   Safari 15.4+, Firefox 121+).
+   ============================================================ */
+[class*="-padding"]:has(> .collection-hero),
+[class*="-padding"]:has(.collection-hero),
+[class*="-padding"]:has(.misc-filter-bar) {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  background: var(--c-bg) !important;
+  background-image: none !important;
+}
+
+/* ============================================================
+   HEADER + FOOTER + ANNOUNCEMENT BAR — INK BLACK
+   Forced to black with white text, overriding whatever colour
+   scheme is set in Shopify admin. The catalog design treats
+   these as the dark frame around the white grid.
+   ============================================================ */
+.shopify-section-header,
+.header-wrapper,
+.shopify-section-group-header-group {
+  background: var(--c-ink) !important;
+  background-image: none !important;
+  color: var(--c-bg) !important;
+}
+
+.shopify-section-header a,
+.shopify-section-header span,
+.shopify-section-header .header__heading-logo,
+.shopify-section-header .header__menu-item,
+.shopify-section-header .header__icon,
+.shopify-section-header .header__active-menu-item,
+.header-wrapper a,
+.header-wrapper span,
+.header-wrapper svg {
+  color: var(--c-bg) !important;
+  fill: var(--c-bg);
+}
+
+.shopify-section-group-footer-group,
+.shopify-section-footer-group,
+.shopify-section-footer,
+.site-footer,
+.footer,
+[class*="shopify-section-footer"] {
+  background: var(--c-ink) !important;
+  background-image: none !important;
+  color: var(--c-bg) !important;
+}
+
+.shopify-section-group-footer-group a,
+.shopify-section-footer-group a,
+.shopify-section-footer a,
+.site-footer a,
+.footer a,
+[class*="shopify-section-footer"] a,
+[class*="shopify-section-footer"] span,
+[class*="shopify-section-footer"] p {
+  color: var(--c-bg) !important;
+}
+
+/* Announcement bar stays dark */
+.utility-bar,
+.announcement-bar,
+[class*="shopify-section-announcement"],
+[class*="announcement-bar-section"] {
+  background: var(--c-ink) !important;
+  background-image: none !important;
+  color: var(--c-bg) !important;
+}
+
+.utility-bar a,
+.announcement-bar a,
+[class*="shopify-section-announcement"] a,
+[class*="shopify-section-announcement"] span {
+  color: var(--c-bg) !important;
+}
+
+/* ============================================================
+   COLLECTION HERO (page title region)
+   No border-bottom — the misc-filter-bar below already has
+   border-top: 3px ink, which serves as the dividing line.
+   Stacking both produced a 6px-thick double line.
+   ============================================================ */
+.collection-hero {
+  background: var(--c-bg);
+}
+
+.collection-hero__inner {
+  padding: var(--space-5);
+  max-width: 100%;
+}
+
+.collection-hero__title {
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.01em;
+  color: var(--c-ink);
+  margin: 0;
+  line-height: var(--lh-heading);
+}
+
+.collection-hero__description {
+  font-size: var(--fs-sm);
+  color: var(--c-ink-mute);
+  margin-top: var(--space-2);
+}
+
+/* ============================================================
+   HIDE TRADE'S ORIGINAL SORT ROW
+   Sort + product count are now rendered inside the
+   misc-filter-bar (single row). Hide the original location.
+   ============================================================ */
+.facets-vertical-sort,
+.facets-vertical-sort.page-width {
+  display: none !important;
+}
+
+/* ============================================================
+   FILTER BAR (full-width row above the catalog body)
+   Rendered by snippets/misc-filter-bar.liquid.
+
+   Two cells aligned with the catalog body below:
+     [320px LEFT] aligns with the sidebar column
+     [rest]       aligns with the grid column
+   The vertical 3px ink line in the middle is the same line as
+   the grid-wrap's border-left (which continues below).
+   ============================================================ */
+
+.misc-filter-bar {
+  display: flex;
+  align-items: stretch;
+  border-top: 3px solid var(--c-ink);
+  border-bottom: 3px solid var(--c-ink);
+  background: var(--c-bg);
+  min-height: 56px;
+}
+
+.misc-filter-bar__left {
+  flex: 0 0 320px;
+  width: 320px;
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.misc-filter-bar__right {
+  flex: 1;
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: nowrap;
+  border-left: 3px solid var(--c-ink);
+}
+
+.misc-filter-bar__pills {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Right-cell tools cluster: sort + per-page + count + view toggle.
+   `margin-left: auto` pins it to the right edge of the filter bar
+   regardless of whether any pills are rendered (when pills is empty,
+   the empty div has 0 width and `flex: 1` doesn't always grow it
+   reliably across browsers; margin-left:auto is the bulletproof way
+   to push a flex item to the end). */
+.misc-filter-bar__tools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-shrink: 0;
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.sort-control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.sort-control__label {
+  color: var(--c-ink-mute);
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-sm);
+}
+.sort-control__select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0 var(--space-4) 0 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--c-ink);
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpolyline points='3,5 6,8 9,5' fill='none' stroke='%230A0A0A' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: 12px 12px;
+}
+.sort-control__select:focus { outline: none; }
+.sort-control__count {
+  color: var(--c-ink-mute);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.misc-filter-bar__sort {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+}
+
+.misc-sort__label {
+  color: var(--c-ink-mute);
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-sm);
+}
+
+.misc-sort__select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0 var(--space-4) 0 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--c-ink);
+  cursor: pointer;
+  /* Caret chevron rendered via background SVG since we removed
+     Trade's wrapper that previously housed the icon. */
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpolyline points='3,5 6,8 9,5' fill='none' stroke='%230A0A0A' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: 12px 12px;
+}
+
+.misc-sort__select:focus {
+  outline: none;
+}
+
+.misc-sort__count {
+  color: var(--c-ink-mute);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-regular);
+  font-variant-numeric: tabular-nums;
+}
+
+.misc-filter-bar__title {
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  margin: 0;
+  color: var(--c-ink);
+}
+
+.misc-filter-bar__count {
+  display: inline-block;
+  margin-left: var(--space-2);
+  background: var(--c-ink);
+  color: var(--c-bg);
+  font-size: var(--fs-2xs);
+  font-variant-numeric: tabular-nums;
+  padding: 1px 6px;
+  letter-spacing: 0;
+}
+
+.misc-filter-bar__clear {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  color: var(--c-ink-mute);
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-family: var(--font-sans);
+  cursor: pointer;
+}
+
+.misc-filter-bar__clear:hover {
+  color: var(--c-ink);
+  text-decoration: underline;
+}
+
+.misc-filter-bar__label {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--c-ink-mute);
+  margin-right: var(--space-2);
+}
+
+.misc-applied-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--c-ink);
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  background: var(--c-bg);
+  color: var(--c-ink);
+  text-decoration: none;
+  font-weight: var(--fw-medium);
+}
+
+.misc-applied-pill:hover {
+  background: var(--c-ink);
+  color: var(--c-bg);
+}
+
+.misc-applied-pill__close {
+  font-weight: var(--fw-bold);
+  line-height: 1;
+}
+
+/* ============================================================
+   SIDEBAR (rendered by snippets/misc-facets.liquid)
+   The full sidebar markup is now ours — clean class names, no
+   need to fight Trade's component-facets.css.
+   ============================================================ */
+
+.misc-sidebar {
+  display: block;
+  background: var(--c-bg);
+}
+
+.misc-sidebar__form {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+}
+
+/* Each filter group is a bounded block separated by 3px ink lines */
+.misc-filter-group {
+  border-top: 3px solid var(--c-ink);
+  padding: var(--space-5);
+  margin: 0;
+  background: var(--c-bg);
+}
+
+.misc-filter-group:first-child {
+  border-top: none;
+}
+
+.misc-filter-group__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  list-style: none;
+  cursor: default;
+  margin: 0 0 var(--space-3) 0;
+  padding: 0;
+}
+
+.misc-filter-group__summary::-webkit-details-marker,
+.misc-filter-group__summary::marker {
+  display: none;
+}
+
+.misc-filter-group__title {
+  font-size: var(--fs-2xs) !important;
+  font-weight: var(--fw-medium) !important;
+  text-transform: uppercase !important;
+  letter-spacing: var(--ls-caps) !important;
+  color: var(--c-ink) !important;
+  line-height: var(--lh-body) !important;
+}
+
+.misc-filter-group__badge {
+  display: inline-block;
+  background: var(--c-ink) !important;
+  color: var(--c-bg) !important;
+  font-size: var(--fs-2xs) !important;
+  font-variant-numeric: tabular-nums;
+  padding: 1px 6px !important;
+  letter-spacing: 0 !important;
+  font-weight: var(--fw-medium) !important;
+  text-transform: none !important;
+}
+
+/* Force every group open regardless of <details open> state */
+.misc-filter-group > *:not(summary) {
+  display: block !important;
+}
+
+/* Option list */
+.misc-filter-group__options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.misc-filter-option-row {
+  margin: 0;
+  padding: 0;
+}
+
+.misc-filter-option-row.misc-filter-option--hidden {
+  display: none;
+}
+
+.misc-filter-option-row.is-revealed {
+  display: list-item;
+}
+
+.misc-filter-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+  user-select: none;
+  padding: var(--space-1) 0;
+}
+
+.misc-filter-option:hover .misc-filter-option__label {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Custom monochrome checkbox with white SVG tick on check */
+.misc-filter-option__check {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--c-ink);
+  background: var(--c-bg);
+  margin: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  border-radius: 0;
+  display: inline-block;
+  vertical-align: middle;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: 12px 12px;
+  transition: background-color 80ms ease;
+  box-shadow: none;
+}
+
+.misc-filter-option__check:checked {
+  background-color: var(--c-ink);
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpolyline points='2,6.5 5,9 10,3' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E");
+}
+
+.misc-filter-option__check:focus-visible {
+  outline: 2px solid var(--c-ink);
+  outline-offset: 2px;
+}
+
+.misc-filter-option__check:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.misc-filter-option__label {
+  flex: 1;
+  font-size: var(--fs-sm) !important;
+  font-weight: var(--fw-regular) !important;
+  color: var(--c-ink) !important;
+  line-height: var(--lh-body) !important;
+}
+
+.misc-filter-option__count {
+  font-size: var(--fs-2xs) !important;
+  color: var(--c-ink-mute) !important;
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-regular) !important;
+}
+
+/* Price range inputs */
+.misc-price-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.misc-price-input-wrap {
+  display: flex;
+  align-items: stretch;
+  height: 36px;
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-sm);
+  background: var(--c-bg);
+  overflow: hidden;
+  transition: border-color 120ms ease;
+}
+
+.misc-price-input-wrap:focus-within {
+  border-color: var(--c-ink);
+}
+
+.misc-price-input-prefix {
+  width: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-sm);
+  color: var(--c-ink-mute);
+  background: var(--c-bg);
+  border-right: 1px solid var(--c-line);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.misc-price-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  padding: 0 var(--space-2);
+  border: none;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  color: var(--c-ink);
+  width: 100%;
+  -moz-appearance: textfield;
+}
+
+.misc-price-input::-webkit-outer-spin-button,
+.misc-price-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.misc-price-input:focus {
+  outline: none;
+}
+
+.misc-filter-group__hint {
+  font-size: var(--fs-2xs);
+  color: var(--c-ink-mute);
+  margin: var(--space-2) 0 0;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+}
+
+/* "Show N more" button under long filter lists */
+.misc-filter-more {
+  display: block;
+  margin-top: var(--space-3);
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  font-weight: var(--fw-medium);
+  color: var(--c-ink-mute);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: var(--font-sans);
+}
+
+.misc-filter-more:hover {
+  color: var(--c-ink);
+  text-decoration: underline;
+}
+
+.misc-sidebar__noscript {
+  padding: var(--space-4) var(--space-5);
+  border-top: 3px solid var(--c-ink);
+}
+
+.misc-sidebar__submit {
+  width: 100%;
+  height: 44px;
+  background: var(--c-ink);
+  color: var(--c-bg);
+  border: none;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+}
+
+/* ============================================================
+   CATALOG BODY (sidebar + grid side by side)
+   The .facets-vertical wrapper is Trade's two-column row.
+   ============================================================ */
+
+.facets-vertical {
+  display: flex;
+  align-items: stretch;
+  /* No border-top here — the misc-filter-bar above already has
+     border-bottom: 3px ink which serves as the dividing line
+     between filter-bar and catalog body. Stacking both would
+     produce a 6px-thick band. */
+  border-bottom: 3px solid var(--c-ink);
+}
+
+/* ============================================================
+   FILTER SIDEBAR
+   320px wide. Each filter group is a bounded block separated
+   by 3px ink lines. All groups expanded by default (per design
+   system: no accordions for B2B fast-scanning).
+   The grid's border-left draws the sidebar's right edge — the
+   sidebar itself does not draw a right border (avoids the
+   doubled line we had before).
+   ============================================================ */
+.facets-vertical .facets-wrapper {
+  flex: 0 0 320px;
+  max-width: 320px;
+  padding: 0;
+  position: relative;
+  border-right: none;
+  background: var(--c-bg);
+}
+
+/* The inner content of the aside is rendered by snippets/misc-facets.liquid
+   (a fork of Trade's facets.liquid). All sidebar typography, spacing,
+   borders, and accordion behaviour are styled against our own class names
+   (.misc-filter-group, .misc-filter-option, .misc-price-input, etc.).
+   See the SIDEBAR section below the filter-bar block above. */
+
+/* Custom checkbox treatment: monochrome square that fills black
+   when checked, with a white SVG tick. Reskins Trade's native
+   <input type="checkbox"> wherever it appears in the filter list. */
+.facets-vertical .facets-wrapper input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--c-ink);
+  background: var(--c-bg);
+  margin: 0 var(--space-2) 0 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  border-radius: 0;
+  display: inline-block;
+  vertical-align: middle;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: 12px 12px;
+  transition: background-color 80ms ease;
+}
+
+.facets-vertical .facets-wrapper input[type="checkbox"]:checked {
+  background-color: var(--c-ink);
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpolyline points='2,6.5 5,9 10,3' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E");
+}
+
+.facets-vertical .facets-wrapper input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--c-ink);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   PRODUCT GRID
+   Default 3 columns on desktop. Switchable to 5 via the view
+   toggle (adds .is-cols-5 class; rule lives further down in
+   the VIEW TOGGLE section).
+   ============================================================ */
+.collection .product-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none;
+  /* No border-left here — #ProductGridContainer's border-left
+     already provides the sidebar/grid boundary line. Stacking
+     both produced a doubled 6px line. List view (.product-list)
+     also relies on ProductGridContainer's border-left, so the
+     two views share the same left frame. */
+}
+
+.collection .product-grid > li,
+.collection .product-grid .grid__item {
+  border-right: 3px solid var(--c-ink);
+  border-bottom: 3px solid var(--c-ink);
+  padding: 0 !important;
+  margin: 0 !important;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* ============================================================
+   MISC PRODUCT CARD
+   ============================================================ */
+.misc-product-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex: 1 1 auto;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-family: var(--font-sans);
+}
+
+/* Top row: vendor caps only (no stock state here — that lives below price) */
+.misc-product-card__top-row {
+  padding: var(--space-3) var(--space-4) 0;
+}
+
+.misc-product-card__vendor {
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--c-ink);
+}
+
+.misc-product-card__sku {
+  padding: 0 var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  color: var(--c-ink-mute);
+  margin-top: var(--space-1);
+}
+
+/* Image area: square, fills the cell width */
+.misc-product-card__media {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  background: var(--c-bg);
+  overflow: hidden;
+  text-decoration: none;
+  margin-top: var(--space-2);
+}
+
+.misc-product-card__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: var(--c-bg);
+  transition: transform 200ms ease;
+}
+
+.misc-product-card__media:hover .misc-product-card__image {
+  transform: scale(1.02);
+}
+
+.misc-product-card__image--placeholder svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--c-ink-faint);
+}
+
+/* Card body: name, pack, price, stock, stepper / variants */
+.misc-product-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+
+.misc-product-card__name {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-regular);
+  line-height: 1.35;
+  color: var(--c-ink);
+  text-decoration: none;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.7em;
+}
+
+.misc-product-card__name:hover {
+  text-decoration: underline;
+}
+
+.misc-product-card__pack {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  color: var(--c-ink-mute);
+}
+
+.misc-product-card__price-row {
+  margin-top: var(--space-2);
+}
+
+.misc-product-card__price {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-medium);
+  font-variant-numeric: tabular-nums;
+  color: var(--c-ink);
+}
+
+.misc-product-card__price-cta,
+.misc-price-cta {
+  display: inline-block;
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-weight: var(--fw-medium);
+  color: var(--c-ink);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 2px;
+}
+
+.misc-product-card__price-cta:hover,
+.misc-price-cta:hover {
+  color: var(--c-ink-mute);
+}
+
+.misc-price-cta--small {
+  font-size: var(--fs-2xs);
+}
+
+/* Stock state line (always sits below the price) */
+.misc-product-card__stock {
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+
+.misc-product-card__stock--in        { color: var(--c-state-instock); }
+.misc-product-card__stock--inbound   { color: var(--c-state-inbound); }
+.misc-product-card__stock--backorder { color: var(--c-state-backorder); }
+.misc-product-card__stock--neutral   { color: var(--c-ink-mute); }
+.misc-product-card__stock--oos       { color: var(--c-ink-mute); }
+
+/* ============================================================
+   QUANTITY STEPPER (main, full-width below the card body)
+   Big, ink-bordered, hover invert. Acts as the primary CTA.
+
+   Trade's quick-add.css targets `.quick-add-modal` descendants —
+   it doesn't touch our `.misc-qty-stepper*` classes. Trade's
+   base.css has no generic `button` or `input[type="number"]`
+   rules (only `.quantity__*` classes we don't use). So our
+   custom classes win cleanly without !important.
+   ============================================================ */
+.misc-qty-stepper {
+  display: flex;
+  align-items: stretch;
+  height: 52px;
+  /* 2px instead of 1.5px so the border renders consistently — sub-pixel
+     values round down to 1px on standard-density displays. */
+  border: 2px solid var(--c-ink);
+  border-radius: var(--radius-sm);
+  margin-top: var(--space-3);
+  overflow: hidden;
+  background: var(--c-bg);
+  box-sizing: border-box;
+}
+
+.misc-qty-stepper__btn {
+  flex: 0 0 48px;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  border: none;
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-medium);
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  transition: background 100ms ease, color 100ms ease;
+  box-shadow: none;
+  border-radius: 0;
+  /* Flex-center the +/- glyph in the button so it lands at the
+     geometric centre of the box. Otherwise UA stylesheets place
+     text on the baseline and the +/− sit slightly low. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.misc-qty-stepper__btn:hover {
+  background: var(--c-ink);
+  color: var(--c-bg);
+}
+
+.misc-qty-stepper__btn[disabled] {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.misc-qty-stepper__input {
+  /* The stepper renders as a single bordered rectangle with
+     [−, value, +] inside. The input itself has NO borders — not
+     even left/right dividers. The visible rectangle is solely
+     drawn by the wrapper's `.misc-qty-stepper { border: 2px }`.
+
+     Full appearance reset so the browser stops drawing its native
+     input chrome (gray inset border, default padding, narrow font).
+     !important on font-size, border, appearance because some
+     browsers' UA stylesheets treat input defaults as higher
+     specificity than class rules in edge cases. */
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: textfield;
+
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+
+  /* Centring: line-height: 1 sizes the line-box to font-size,
+     then equal top+bottom padding centres the em-box inside the
+     48px stepper inner area. This gives geometric centring rather
+     than the baseline-biased centring you get with line-height
+     matching the container height (the "0" was reading low).
+     22px font + 13px × 2 padding + box-sizing border-box = 48px. */
+  text-align: center !important;
+  text-indent: 0 !important;
+  vertical-align: middle !important;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-lg) !important;
+  font-weight: var(--fw-medium) !important;
+  line-height: 1 !important;
+  height: 48px !important;
+  padding: 13px 0 !important;
+  box-sizing: border-box !important;
+  color: var(--c-ink);
+  background: var(--c-bg);
+
+  padding: 0;
+  margin: 0;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Suppress Trade's global focus outline on this input — we already
+   give visual feedback via the stepper border colour. */
+.misc-qty-stepper__input:focus,
+.misc-qty-stepper__input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.misc-qty-stepper__input::-webkit-outer-spin-button,
+.misc-qty-stepper__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.misc-qty-stepper__input:focus {
+  outline: none;
+}
+
+/* Pending sync / in-flight visual states (set by misc-quick-add.js) */
+.misc-qty-stepper.is-dirty {
+  border-color: var(--c-ink);
+}
+
+.misc-qty-stepper.is-syncing .misc-qty-stepper__input {
+  color: var(--c-ink-mute);
+}
+
+/* Mini-stepper variant (used inside variant rows). Smaller height,
+   thinner border, same hover-invert behaviour. */
+.misc-qty-stepper--mini {
+  height: 32px;
+  border-width: 1.5px;
+}
+
+.misc-qty-stepper--mini .misc-qty-stepper__btn {
+  flex: 0 0 32px;
+  font-size: var(--fs-md);
+}
+
+.misc-qty-stepper--mini .misc-qty-stepper__input {
+  /* Same centring trick as main stepper:
+     18px font + 5.5px × 2 padding = 29px (mini inner height). */
+  font-size: var(--fs-md) !important;
+  line-height: 1 !important;
+  height: 29px !important;
+  padding: 5.5px 0 !important;
+}
+
+/* ============================================================
+   VARIANT ROWS (multi-variant cards)
+   Two-line variant block: name + state on top, full-width
+   mini-stepper below. The mini-steppers align column-right
+   across every variant because the stepper spans the full row.
+   ============================================================ */
+.misc-product-card__variants {
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  /* Gap BETWEEN variant groups (var(--space-3) = 12px) is wider
+     than gap WITHIN a group (2px) so each variant name visually
+     attaches to its own stepper. */
+  gap: var(--space-3);
+}
+
+.misc-variant {
+  display: flex;
+  flex-direction: column;
+  /* Variant name+state row sits flush against its stepper — 1px
+     gap is the minimum that prevents the text baseline touching
+     the stepper border. */
+  gap: 1px;
+}
+
+.misc-variant__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.misc-variant__name {
+  font-size: var(--fs-sm);
+  color: var(--c-ink);
+  font-weight: var(--fw-medium);
+  flex-shrink: 0;
+}
+
+.misc-variant__state {
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.misc-variant__state--in        { color: var(--c-state-instock); }
+.misc-variant__state--inbound   { color: var(--c-state-inbound); }
+.misc-variant__state--backorder { color: var(--c-state-backorder); }
+
+/* ============================================================
+   OUT-OF-STOCK VARIANTS — compact muted list at bottom of card
+   Orderable variants render above with steppers; OOS variants
+   collapse into a single line so a card with mixed availability
+   doesn't waste vertical space on rows the buyer can't act on.
+   ============================================================ */
+.misc-product-card__oos-list {
+  margin: var(--space-2) 0 0 0;
+  padding-top: var(--space-2);
+  border-top: 1px dashed var(--c-line);
+  font-size: var(--fs-2xs);
+  color: var(--c-ink-mute);
+  line-height: var(--lh-body);
+}
+
+.misc-product-card__oos-label {
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  font-weight: var(--fw-medium);
+  margin-right: var(--space-1);
+}
+
+/* If a product has NO orderable variants at all, the <ul> would
+   be empty — hide it so we don't render an empty list. */
+.misc-product-card__variants:empty {
+  display: none;
+}
+
+/* ============================================================
+   PAGINATION
+   Bigger, more readable, with generous margin above the products
+   grid so it doesn't feel cramped.
+   Trade renders pagination via snippets/pagination.liquid using
+   classes .pagination-wrapper / .pagination / .pagination__list /
+   .pagination__item and .pagination__item--current.
+   ============================================================ */
+.pagination-wrapper {
+  margin-top: var(--space-7) !important;
+  padding: var(--space-5) 0 var(--space-7) !important;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+}
+
+.pagination__list {
+  display: flex;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+}
+
+.pagination__item {
+  font-size: var(--fs-md) !important;
+  font-weight: var(--fw-medium) !important;
+  font-family: var(--font-sans) !important;
+  color: var(--c-ink) !important;
+  text-decoration: none !important;
+  padding: var(--space-2) var(--space-3) !important;
+  min-width: 36px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+.pagination__item:hover {
+  text-decoration: underline !important;
+  text-underline-offset: 4px;
+}
+
+.pagination__item--current {
+  color: var(--c-ink) !important;
+  font-weight: var(--fw-bold) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 6px !important;
+  text-decoration-thickness: 2px !important;
+}
+
+.pagination__item-arrow {
+  font-size: var(--fs-lg) !important;
+}
+
+/* ============================================================
+   RESPONSIVE
+   Breakpoints chosen for B2B usage:
+     >=1280  desktop      : 320px sidebar, 5-col grid
+     1024-1279 large tab  : 280px sidebar, 4-col grid
+     900-1023  tablet     : 260px sidebar, 3-col grid
+     600-899   small tab  : sidebar stacks above grid, 2-col grid
+     <600      phone      : tighter card padding, simplified header
+   ============================================================ */
+
+@media (max-width: 1279px) {
+  .facets-vertical .facets-wrapper {
+    flex: 0 0 280px;
+    max-width: 280px;
+  }
+  /* No column override at this width — let the view toggle apply
+     (3 default, 5 if user clicked Grid 5). */
+}
+
+@media (max-width: 1023px) {
+  .facets-vertical .facets-wrapper {
+    flex: 0 0 260px;
+    max-width: 260px;
+  }
+  /* Force 3 cols below laptop regardless of toggle (Grid 5 button
+     is hidden in the mobile responsive block below). */
+  .collection .product-grid,
+  .collection .product-grid.is-cols-5 {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+@media (max-width: 899px) {
+  /* Filter-bar stacks vertically below 900px */
+  .misc-filter-bar {
+    flex-direction: column;
+  }
+  .misc-filter-bar__left {
+    flex: 1 1 100%;
+    width: 100%;
+    border-bottom: 3px solid var(--c-ink);
+  }
+  .misc-filter-bar__right {
+    flex: 1 1 100%;
+    width: 100%;
+    border-left: none;
+  }
+
+  .facets-vertical {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .facets-vertical .facets-wrapper {
+    flex: 1 1 100%;
+    max-width: 100%;
+    padding-right: 0;
+  }
+  .collection .product-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    border-left: none;
+    border-top: 3px solid var(--c-ink);
+  }
+  .collection-hero {
+    padding: 0;
+  }
+  .collection-hero__inner {
+    padding: var(--space-4);
+  }
+  .collection-hero__title {
+    font-size: var(--fs-xl);
+  }
+}
+
+@media (max-width: 599px) {
+  .misc-product-card__top-row,
+  .misc-product-card__sku {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+  .misc-product-card__body {
+    padding: var(--space-3);
+  }
+  .misc-product-card__name {
+    font-size: var(--fs-sm);
+  }
+  .misc-product-card__price {
+    font-size: var(--fs-md);
+  }
+  .misc-qty-stepper {
+    height: 44px;
+  }
+  .misc-qty-stepper__btn {
+    flex: 0 0 40px;
+    font-size: var(--fs-lg);
+  }
+  .misc-qty-stepper__input {
+    font-size: var(--fs-md);
+  }
+  .misc-qty-stepper--mini {
+    height: 28px;
+  }
+  .misc-qty-stepper--mini .misc-qty-stepper__btn {
+    flex: 0 0 28px;
+    font-size: var(--fs-sm);
+  }
+}
+
+/* ============================================================
+   VIEW TOGGLE (Grid 3 / Grid 5 / List)
+   Inside the filter bar's right tools cluster.
+   ============================================================ */
+.view-toggle {
+  display: inline-flex;
+  border: 1.5px solid var(--c-ink);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.view-toggle__btn {
+  appearance: none;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  border: 0;
+  border-right: 1px solid var(--c-ink);
+  padding: 6px var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+}
+.view-toggle__btn:last-child { border-right: 0; }
+.view-toggle__btn.is-active {
+  background: var(--c-ink);
+  color: var(--c-bg);
+}
+.view-toggle__btn:hover:not(.is-active) { background: var(--c-bg-subtle); }
+
+.sort-control--per-page { /* same styles as .sort-control */ }
+
+/* When the list view is active, hide the grid. The grid carries
+   `display: grid` from its own rule, which beats the [hidden]
+   UA stylesheet. Force display: none. Same for the list when grid
+   view is active. */
+.product-grid[hidden],
+.product-list[hidden] { display: none !important; }
+
+/* Grid 5 column variant */
+.collection .product-grid.is-cols-5 {
+  grid-template-columns: repeat(5, 1fr) !important;
+}
+
+/* ============================================================
+   LAYOUT PREFERENCE FROM <html> CLASS
+
+   The inline head script in theme.liquid reads the buyer's saved
+   layout from URL or localStorage and adds one of these classes
+   to <html> BEFORE the body parses. These rules then apply
+   immediately on first paint, eliminating the flash where the
+   grid would render first and JS would later swap it to list.
+
+   IMPORTANT: scoped to desktop only (>=1024px). On narrow
+   viewports the list view can't fit (11 columns of B2B detail);
+   the mobile responsive block below forces grid view regardless.
+   Without this media query, the !important `display: grid` rule
+   here would override the mobile hide-list rule and make the
+   table overflow horizontally at tablet/phone widths.
+   ============================================================ */
+@media (min-width: 1024px) {
+  html.misc-prefer-list .product-grid {
+    display: none !important;
+  }
+  html.misc-prefer-list .product-list {
+    display: grid !important;
+  }
+}
+html.misc-prefer-grid-5 .product-grid {
+  grid-template-columns: repeat(5, 1fr) !important;
+}
+
+/* Left frame line for the catalog body. Separates sidebar from
+   product grid / list. Was on .grid-wrap before but the live
+   theme uses #ProductGridContainer directly so the border needs
+   to live there. */
+#ProductGridContainer {
+  border-left: 3px solid var(--c-ink);
+  min-width: 0;
+}
+
+/* ============================================================
+   LIST VIEW (condensed table-style row layout)
+
+   Single grid container (.product-list) holds every cell. Each
+   row (.list-row) uses `display: contents` so its children
+   become direct grid items of the outer grid. Columns auto-size
+   to their widest content ACROSS ALL ROWS and align perfectly.
+   ============================================================ */
+.product-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--c-bg);
+  /* No right border — horizontal row lines extend to the viewport
+     edge naturally. A right vertical line would feel excessive
+     against the wide table. */
+
+  display: grid;
+  /* Preview | Brand | Name | SKU | UPQ | HS | Origin | Stock | RRP | Price | Stepper */
+  grid-template-columns:
+    40px
+    max-content
+    minmax(160px, 1fr)
+    max-content
+    max-content
+    max-content
+    max-content
+    minmax(140px, max-content)
+    max-content
+    max-content
+    max-content;
+}
+
+.list-row { display: contents; }
+
+/* Pin every cell to its column explicitly. Without this, CSS Grid
+   auto-flow walks through items in document order and places them
+   in the next available cell. With an empty stepper cell on OOS
+   rows the auto-flow algorithm can collapse the cell to zero width
+   and then mis-place subsequent rows, cascading column shifts
+   through the table. Explicit grid-column eliminates all auto-flow
+   ambiguity — each cell lands in its assigned column regardless
+   of content. */
+.list-row > .list-cell--preview  { grid-column: 1; }
+.list-row > .list-cell--brand    { grid-column: 2; }
+.list-row > .list-cell--name     { grid-column: 3; }
+.list-row > .list-cell--sku      { grid-column: 4; }
+.list-row > .list-cell--upq      { grid-column: 5; }
+.list-row > .list-cell--hs       { grid-column: 6; }
+.list-row > .list-cell--country  { grid-column: 7; }
+.list-row > .list-cell--stock    { grid-column: 8; }
+.list-row > .list-cell--rrp      { grid-column: 9; }
+.list-row > .list-cell--price    { grid-column: 10; }
+.list-row > .list-cell--stepper  { grid-column: 11; }
+
+.list-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: var(--space-3);
+  border-bottom: 3px solid var(--c-ink);
+  background: var(--c-bg);
+  font-size: var(--fs-xs);
+  color: var(--c-ink);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lh-body);
+  min-width: 0;
+  white-space: nowrap;
+}
+
+/* Inset grey vertical divider via pseudo-element so it sits BEHIND
+   the heavy 3px row borders instead of cutting through them. */
+.list-row > .list-cell:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--c-line);
+  pointer-events: none;
+}
+.list-row > .list-cell:first-child { padding-left: var(--space-5); }
+.list-row > .list-cell:last-child  { padding-right: var(--space-5); }
+
+/* Header row */
+.list-row--head .list-cell {
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--c-ink-mute);
+}
+/* Header alignment per column (preview=1, brand=2, name=3, sku=4,
+   upq=5, hs=6, origin=7, stock=8, rrp=9, price=10, stepper=11). */
+.list-row--head > .list-cell:nth-child(5),
+.list-row--head > .list-cell:nth-child(6),
+.list-row--head > .list-cell:nth-child(7),
+.list-row--head > .list-cell:nth-child(8),
+.list-row--head > .list-cell:nth-child(9),
+.list-row--head > .list-cell:nth-child(10) {
+  justify-content: center !important;
+}
+
+/* Cell type modifiers */
+.list-cell--brand {
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-2xs);
+  padding-right: var(--space-5);
+}
+.list-cell--name {
+  font-size: var(--fs-sm);
+  color: var(--c-ink);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.list-cell--name:hover { text-decoration: underline; }
+.list-cell--sku, .list-cell--hs {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  color: var(--c-ink-mute);
+}
+.list-cell--hs { justify-content: center; }
+.list-cell--upq, .list-cell--country {
+  justify-content: center;
+  font-size: var(--fs-xs);
+  color: var(--c-ink-mute);
+}
+
+/* Stock cell: column flex so multiple states stack on multiple
+   lines. Sentence case (no uppercase). */
+.list-cell--stock {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0;
+  text-transform: none;
+  gap: 2px;
+  white-space: normal;
+}
+.list-cell--stock-in        { color: var(--c-state-instock); }
+.list-cell--stock-inbound   { color: var(--c-state-inbound); }
+.list-cell--stock-backorder { color: var(--c-state-backorder); }
+.list-cell--stock-oos       { color: var(--c-ink-mute); }
+
+.list-cell--rrp {
+  color: var(--c-ink-mute);
+  font-size: var(--fs-2xs);
+  justify-content: center;
+}
+.list-cell--price {
+  font-weight: var(--fw-medium);
+  font-size: var(--fs-md);
+  justify-content: center;
+}
+.list-cell--stepper {
+  justify-content: flex-end;
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+.list-cell--stepper .mini-stepper {
+  width: 130px;
+  height: 36px;
+  border: 1.5px solid var(--c-ink);
+}
+
+/* Stepper-sized placeholder for out-of-stock rows. Same footprint
+   as the mini-stepper so the right edge of the table stays aligned
+   between orderable and OOS rows. Muted ink-faint border + text
+   reads as "not interactive" without a button affordance. */
+.misc-stepper-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 130px;
+  height: 36px;
+  border: 1.5px dashed var(--c-ink-faint);
+  border-radius: var(--radius-sm);
+  background: var(--c-bg-subtle);
+  color: var(--c-ink-mute);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+}
+.list-row--variant .misc-stepper-placeholder {
+  width: 110px;
+  height: 28px;
+  font-size: 11px;
+}
+
+/* Multi-variant in list view */
+.list-row--parent .list-cell {
+  background: var(--c-bg-subtle);
+  border-bottom: 1px solid var(--c-line);
+}
+.list-row--parent .list-cell--name {
+  /* Span from col 3 to the end of the grid (-1 = last grid line).
+     Snippet renders only 3 cells (preview, brand, name) so this
+     name cell covers the entire remaining width with no auto-
+     placed trailing cell. */
+  grid-column: 3 / -1;
+  font-weight: var(--fw-medium);
+  font-size: var(--fs-sm);
+  color: var(--c-ink);
+}
+.list-row--parent .list-cell--name::after { display: none; }
+.list-cell__hint {
+  margin-left: var(--space-3);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-regular);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  color: var(--c-ink-mute);
+}
+.list-row--variant .list-cell {
+  border-bottom: 1px solid var(--c-line);
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+  font-size: var(--fs-2xs);
+}
+.list-row--variant .list-cell--stepper {
+  padding-top: var(--space-1);
+  padding-bottom: var(--space-1);
+}
+.list-row--variant .list-cell--stepper .mini-stepper {
+  height: 28px;
+  width: 110px;
+}
+.list-row--variant .list-cell--name {
+  padding-left: 28px;
+  position: relative;
+  font-size: var(--fs-xs);
+  color: var(--c-ink);
+}
+.list-row--variant .list-cell--name::before {
+  content: "";
+  position: absolute;
+  left: var(--space-3);
+  top: 50%;
+  width: 10px;
+  height: 1px;
+  background: var(--c-ink-mute);
+}
+.list-row--variant-last .list-cell { border-bottom: 3px solid var(--c-ink); }
+
+/* Filtered-out rows (search) */
+.list-row.is-hidden,
+.product-grid > li.is-hidden { display: none !important; }
+
+/* ============================================================
+   LIST VIEW IMAGE PREVIEW POPOVER
+   Hover the eye/photo icon to reveal a 260px floating popover
+   with the product image. 150ms delay to suppress flicker on
+   cursor sweeps.
+   ============================================================ */
+.list-cell--preview {
+  padding: var(--space-2) 0 !important;
+  justify-content: center;
+}
+.preview-trigger {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--c-ink-mute);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: color 100ms ease, background 100ms ease;
+}
+.preview-trigger:hover,
+.preview-trigger:focus-visible {
+  color: var(--c-ink);
+  background: var(--c-bg-subtle);
+  outline: none;
+}
+.preview-trigger svg { width: 18px; height: 18px; display: block; }
+
+.preview-popover {
+  position: absolute;
+  left: calc(100% + var(--space-2));
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  width: 260px;
+  background: var(--c-bg);
+  border: 3px solid var(--c-ink);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.10);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 120ms ease, visibility 120ms ease;
+}
+.list-cell--preview:hover .preview-popover,
+.preview-trigger:focus-visible ~ .preview-popover {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 150ms;
+  pointer-events: auto;
+}
+.preview-popover__image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--c-bg-subtle);
+}
+.preview-popover__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.preview-popover__caption {
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  border-top: 1px solid var(--c-line);
+  font-size: var(--fs-2xs);
+  white-space: normal;
+}
+.preview-popover__name {
+  display: block;
+  font-weight: var(--fw-medium);
+  color: var(--c-ink);
+  font-size: var(--fs-xs);
+  line-height: 1.3;
+}
+.preview-popover__sku {
+  display: block;
+  font-family: var(--font-mono);
+  color: var(--c-ink-mute);
+  margin-top: 2px;
+}
+
+/* ============================================================
+   MOBILE-ONLY CHROME (Phase 10)
+   - "Best on desktop" notice banner
+   - Mobile filter trigger button in filter bar
+   - Sidebar drawer header/footer
+   ============================================================ */
+.mobile-desktop-notice {
+  display: none;
+  position: relative;
+  background: var(--c-bg-subtle);
+  border-bottom: 1px solid var(--c-line);
+  padding: var(--space-2) 36px var(--space-2) var(--space-4);
+  font-size: var(--fs-2xs);
+  color: var(--c-ink-mute);
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}
+.mobile-desktop-notice.is-dismissed { display: none !important; }
+.mobile-desktop-notice__close {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 6px 10px;
+  color: var(--c-ink-mute);
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.filter-bar__mobile-trigger {
+  display: none;
+  appearance: none;
+  background: var(--c-bg);
+  border: 0;
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-sans);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  color: var(--c-ink);
+  cursor: pointer;
+  align-items: center;
+  gap: var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  border-right: 3px solid var(--c-ink);
+  flex: 1 1 auto;
+  min-height: 48px;
+}
+.filter-bar__mobile-trigger svg { width: 18px; height: 18px; }
+.filter-bar__mobile-trigger:hover { background: var(--c-bg-subtle); }
+.filter-bar__mobile-trigger .misc-filter-bar__count { margin-left: auto; }
+
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+.sidebar-backdrop.is-open {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+.sidebar__mobile-header,
+.sidebar__mobile-footer { display: none; }
+.sidebar__mobile-header {
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 3px solid var(--c-ink);
+  background: var(--c-bg);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.sidebar__mobile-title {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+.sidebar__mobile-close {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: var(--space-2);
+  color: var(--c-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sidebar__mobile-close svg { width: 22px; height: 22px; }
+.sidebar__mobile-footer {
+  padding: var(--space-3) var(--space-4);
+  border-top: 3px solid var(--c-ink);
+  background: var(--c-bg);
+  position: sticky;
+  bottom: 0;
+}
+.sidebar__mobile-apply {
+  appearance: none;
+  width: 100%;
+  background: var(--c-ink);
+  color: var(--c-bg);
+  border: 0;
+  padding: var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  min-height: 48px;
+}
+body.drawer-open { overflow: hidden; }
+
+/* ============================================================
+   RESPONSIVE BREAKPOINTS (Phase 10)
+   - Below 1024px : sidebar becomes drawer, list view hidden
+   - Below 768px  : 1-col horizontal cards, mobile filter bar
+   - Below 420px  : tighter card padding, smaller image
+   ============================================================ */
+
+@media (max-width: 1023px) {
+  /* Hide the inline sidebar layout cells */
+  .misc-filter-bar__left { display: none; }
+  .misc-filter-bar__right { border-left: 0; flex-wrap: wrap; }
+
+  /* Frame the catalog horizontally on mobile. Filter bar gets
+     left + right borders; grid-wrap's default border-left
+     continues as the left frame line below the filter bar. */
+  .misc-filter-bar {
+    border-left: 3px solid var(--c-ink);
+    border-right: 3px solid var(--c-ink);
+  }
+
+  /* Show the mobile trigger */
+  .filter-bar__mobile-trigger { display: inline-flex; }
+
+  /* Sidebar becomes drawer */
+  .facets-vertical .facets-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 340px;
+    max-width: 90vw;
+    z-index: 999;
+    background: var(--c-bg);
+    border-right: 3px solid var(--c-ink);
+    transform: translateX(-100%);
+    transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    flex: none;
+    max-width: 340px;
+  }
+  .facets-vertical .facets-wrapper.is-open { transform: translateX(0); }
+
+  .sidebar__mobile-header,
+  .sidebar__mobile-footer { display: flex; }
+
+  /* Hide list view, Per page, Grid 5 below laptop */
+  .view-toggle__btn[data-view="list"],
+  .view-toggle__btn[data-view="grid-5"] { display: none; }
+  .sort-control--per-page { display: none; }
+
+  /* If user lands on list view at this size, force grid */
+  .product-list { display: none !important; }
+}
+
+@media (max-width: 767px) {
+  /* "Best on desktop" notice visible */
+  .mobile-desktop-notice { display: flex; }
+
+  /* Mobile filter bar: two equal-width buttons */
+  .misc-filter-bar { padding: 0; }
+  .filter-bar__mobile-trigger { flex: 1 1 50%; justify-content: center; min-height: 56px; }
+  .misc-filter-bar__right { flex: 1 1 50%; padding: 0; justify-content: center; border-left: 0; flex-wrap: nowrap; }
+  .misc-filter-bar__pills { display: none; }
+  .misc-filter-bar__tools { flex: 1; justify-content: center; padding: var(--space-3); min-height: 56px; gap: var(--space-2); }
+  .sort-control__label { display: none; }
+  .sort-control__count { display: none; }
+  .view-toggle { display: none !important; }
+
+  /* Grid: 1 col, horizontal cards */
+  .collection .product-grid { grid-template-columns: 1fr !important; }
+
+  /* Horizontal card layout (image left, info right) */
+  .misc-product-card {
+    display: grid !important;
+    grid-template-columns: 120px 1fr;
+    column-gap: var(--space-3);
+    padding: var(--space-3);
+  }
+  .misc-product-card__media {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    align-self: start;
+    width: 120px;
+    height: 120px;
+    margin: 0;
+  }
+  .misc-product-card__top-row { grid-column: 2; grid-row: 1; padding: 0; font-size: var(--fs-2xs); }
+  .misc-product-card__sku { grid-column: 2; grid-row: 2; padding: 0; margin: 0; align-self: start; }
+  .misc-product-card__body { grid-column: 2; grid-row: 3; padding: 0; margin-top: var(--space-1); }
+  .misc-product-card__name { font-size: var(--fs-sm); -webkit-line-clamp: 2; min-height: auto; }
+  .misc-product-card__price { font-size: var(--fs-md); }
+
+  /* Bigger touch targets */
+  .misc-qty-stepper { height: 48px; }
+  .misc-qty-stepper__btn { flex: 0 0 44px; font-size: var(--fs-lg); }
+  .misc-qty-stepper__input { font-size: var(--fs-md); height: 44px !important; padding: 10px 0 !important; }
+  .misc-qty-stepper--mini { height: 36px; }
+  .misc-qty-stepper--mini .misc-qty-stepper__btn { flex: 0 0 36px; font-size: var(--fs-md); }
+
+  .facets-vertical .facets-wrapper { width: 100%; max-width: 100%; }
+}
+
+@media (max-width: 419px) {
+  .misc-product-card {
+    grid-template-columns: 96px 1fr;
+    column-gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+  }
+  .misc-product-card__media { width: 96px; height: 96px; }
+  .misc-product-card__name { font-size: var(--fs-xs); }
+  .misc-product-card__rrp,
+  .misc-product-card__price-row .misc-product-card__rrp { display: none; }
+}
+

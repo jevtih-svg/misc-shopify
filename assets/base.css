@@ -238,6 +238,19 @@ body:has(.section-header .drawer-menu) .announcement-bar-section .page-width {
   background-color: rgba(var(--color-foreground), 0.2);
 }
 
+/* MISC: form elements inherit font-family from their parent. Without
+   this reset, the browser's UA stylesheet uses its own default
+   (often a system serif on legacy browsers, -apple-system on macOS)
+   for <input> / <select> / <textarea> / <button>, which means our
+   stepper input's "0" rendered in a different font from the page body.
+   Now everything in the page reads in Inter via inheritance. */
+input,
+select,
+textarea,
+button {
+  font-family: inherit;
+}
+
 .text-body {
   font-size: 1.5rem;
   letter-spacing: 0.06rem;

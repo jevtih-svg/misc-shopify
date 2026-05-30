@@ -1,0 +1,241 @@
+{%- comment -%}
+  ============================================================
+  MISC PDP — single-file replacement for Trade's main-product.
+
+  Built fresh against /Cowork/30 Projects/Misc/Mockups/misc-pdp-mockup.html
+  (the source of truth). Does NOT fork Trade's main-product.liquid
+  (that file is 2268 lines, ~95% of which is colour-scheme, sticky-
+  scroll, swatch, video, share, and accordion plumbing we don't use).
+
+  Layout (desktop ≥1024px):
+    [Gallery left (sticky)  |  Info right (sections separated by 3px ink lines)]
+
+  Layout (mobile <1024px):
+    [Gallery on top  |  Info stacked below]
+
+  Section schema exposes only MISC blocks (no Trade title / share /
+  swatches / accordion). Merchandisers can reorder description /
+  specs / variant-table / notice via the Theme Editor.
+
+  Used by: templates/product.misc-pdp.json
+  Refs: MISC_PDP_Implementation_Decisions.md (D1, D2, D4, D7, D11)
+  ============================================================
+{%- endcomment -%}
+
+{{ 'misc-pdp.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'misc-pdp.js' | asset_url }}" defer="defer"></script>
+
+{%- comment -%}
+  Price gate flag — same convention as misc-card-product.liquid.
+  Reads the theme setting + customer state.
+{%- endcomment -%}
+{%- assign misc_show_price = false -%}
+{%- if customer != blank or settings.misc_dev_show_price -%}
+  {%- assign misc_show_price = true -%}
+{%- endif -%}
+
+{%- liquid
+  assign primary_variant = product.selected_or_first_available_variant
+  assign variant_count = product.variants.size
+-%}
+
+<section
+  class="misc-pdp"
+  data-section-id="{{ section.id }}"
+  data-product-id="{{ product.id }}"
+  data-product-handle="{{ product.handle }}"
+>
+
+  {%- comment -%} ============================================================
+    LEFT COLUMN: gallery (sticky)
+  ============================================================ {%- endcomment -%}
+  <div class="misc-pdp__gallery-col">
+    <div class="misc-pdp__gallery-inner">
+      {%- render 'misc-pdp-gallery',
+         product: product,
+         primary_variant: primary_variant
+      -%}
+    </div>
+  </div>
+
+  {%- comment -%} ============================================================
+    RIGHT COLUMN: info
+    Each section is bounded by a 3px ink line at the bottom. The
+    last section drops its border. Blocks render in section.blocks
+    order so merchandisers can reorder via Theme Editor.
+  ============================================================ {%- endcomment -%}
+  <div class="misc-pdp__info-col">
+
+    {%- comment -%}
+      HEAD always renders first (not a block). Brand / name / SKU /
+      country / HS / tags. Merchandisers don't need to reorder this
+      — it's the product identity.
+    {%- endcomment -%}
+    <section class="misc-pdp__section">
+      {%- render 'misc-pdp-head', product: product, primary_variant: primary_variant -%}
+    </section>
+
+    {%- comment -%}
+      PRICE + STOCK STATE always renders second. The price slot is
+      gated; the stock state always renders (per D1: "stock should
+      be seen, rest hidden" for logged-out visitors).
+    {%- endcomment -%}
+    <section class="misc-pdp__section">
+      {%- render 'misc-pdp-price',
+         product: product,
+         primary_variant: primary_variant,
+         variant_count: variant_count,
+         misc_show_price: misc_show_price
+      -%}
+
+      {%- comment -%}
+        Stock state line. For single-variant products: the four
+        states from the design system. For multi-variant: the
+        neutral summary line.
+      {%- endcomment -%}
+      {%- render 'misc-pdp-stock-state',
+         product: product,
+         primary_variant: primary_variant,
+         variant_count: variant_count
+      -%}
+
+      {%- comment -%}
+        Stepper (single-variant) OR variant table (multi-variant)
+        OR CTA (logged-out).
+      {%- endcomment -%}
+      {%- if misc_show_price -%}
+        {%- if variant_count > 1 -%}
+          {%- render 'misc-pdp-variant-table',
+             product: product
+          -%}
+        {%- else -%}
+          {%- comment -%}
+            Orderable = has stock OR has incoming OR variant.available
+            (backorderable). True OOS variants (no stock, no incoming,
+            policy=deny) get the Unavailable placeholder instead of
+            a stepper, so they can't be added to the cart.
+          {%- endcomment -%}
+          {%- assign sv_inv = primary_variant.inventory_quantity | default: 0 -%}
+          {%- assign sv_inc = primary_variant.metafields.custom.incoming_qty.value | default: 0 | plus: 0 -%}
+          {%- assign sv_orderable = false -%}
+          {%- if sv_inv > 0 or sv_inc > 0 or primary_variant.available -%}
+            {%- assign sv_orderable = true -%}
+          {%- endif -%}
+
+          {%- if sv_orderable -%}
+            {%- assign sv_cart_qty = 0 -%}
+            {%- for line_item in cart.items -%}
+              {%- if line_item.variant_id == primary_variant.id -%}
+                {%- assign sv_cart_qty = line_item.quantity -%}
+                {%- break -%}
+              {%- endif -%}
+            {%- endfor -%}
+            <div
+              class="misc-qty-stepper misc-pdp__buy-stepper"
+              data-misc-qty-stepper
+              data-variant-id="{{ primary_variant.id }}"
+            >
+              <button type="button" class="misc-qty-stepper__btn" data-misc-qty="-1" aria-label="Remove one from cart">&minus;</button>
+              <input type="number" value="{{ sv_cart_qty }}" min="0" step="1" class="misc-qty-stepper__input" aria-label="Quantity in cart" data-misc-qty-input>
+              <button type="button" class="misc-qty-stepper__btn" data-misc-qty="+1" aria-label="Add one to cart">+</button>
+            </div>
+          {%- else -%}
+            <div class="misc-pdp__unavailable-slot" aria-disabled="true">
+              <span class="misc-pdp__unavailable-label">Unavailable</span>
+            </div>
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- comment -%}
+          Notice block — split-shipment / incoming / backorder.
+          Renders only when a notice condition fires.
+        {%- endcomment -%}
+        {%- render 'misc-pdp-notice', product: product, primary_variant: primary_variant -%}
+      {%- else -%}
+        {%- comment -%}
+          Logged-out: render a second CTA in the purchase slot per
+          D1. Same wording as the price CTA.
+        {%- endcomment -%}
+        <div class="misc-pdp__buy-gate">
+          {%- render 'misc-price-cta' -%}
+        </div>
+      {%- endif -%}
+    </section>
+
+    {%- comment -%} ============================================================
+      OPTIONAL SECTIONS (merchandiser-controlled order via Theme Editor)
+    ============================================================ {%- endcomment -%}
+    {%- for block in section.blocks -%}
+      {%- case block.type -%}
+
+        {%- when 'specs' -%}
+          <section class="misc-pdp__section" {{ block.shopify_attributes }}>
+            {%- render 'misc-pdp-specs', product: product, primary_variant: primary_variant, variant_count: variant_count, misc_show_price: misc_show_price -%}
+          </section>
+
+        {%- when 'description' -%}
+          <section class="misc-pdp__section" {{ block.shopify_attributes }}>
+            {%- render 'misc-pdp-description', product: product -%}
+          </section>
+
+      {%- endcase -%}
+    {%- endfor -%}
+
+  </div>
+</section>
+
+{%- comment -%} Zoom overlay (rendered once, shared across the page) {%- endcomment -%}
+<div class="misc-zoom-overlay" data-misc-zoom-overlay aria-hidden="true">
+  <button type="button" class="misc-zoom-overlay__close" data-misc-zoom-close aria-label="Close zoom">&times;</button>
+  <img src="" alt="" data-misc-zoom-img>
+</div>
+
+{%- comment -%} Toast (rendered once) {%- endcomment -%}
+<div class="misc-toast" data-misc-toast role="status" aria-live="polite"></div>
+
+{% schema %}
+{
+  "name": "MISC PDP",
+  "tag": "section",
+  "class": "misc-pdp-wrap",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Edit the product information sections below. Gallery, brand/title, price/stock, and the variant table render in fixed order; specs and description can be reordered."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "specs",
+      "name": "Product specifications",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Renders the 6-field spec table (Brand, SKU, UPQ, RRP, HS Code, Country of Origin). Field values pull from product metafields. Empty fields hide automatically."
+        }
+      ]
+    },
+    {
+      "type": "description",
+      "name": "Description",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Renders product.description with a Copy all action. Used by buyers re-selling in their own stores."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "MISC PDP",
+      "blocks": [
+        { "type": "specs" },
+        { "type": "description" }
+      ]
+    }
+  ]
+}
+{% endschema %}

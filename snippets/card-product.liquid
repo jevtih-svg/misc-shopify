@@ -259,7 +259,21 @@
                   >
                     {{- 'icon-close.svg' | inline_asset_content -}}
                   </button>
-                  {%- if card_product.selected_or_first_available_variant.quantity_price_breaks.size > 0 -%}
+                  {%- comment -%}
+                    MISC: gate volume pricing block on logged-in customer.
+                    Volume pricing exposes per-quantity money values that
+                    must not leak to logged-out visitors. The settings
+                    flag covers dev preview.
+
+                    Pre-assigned variable because Shopify Liquid rejects
+                    parens inside if conditions: `if A and (B or C)`
+                    throws "Expected dotdot but found comparison".
+                  {%- endcomment -%}
+                  {%- assign misc_show_price = false -%}
+                  {%- if customer != blank or settings.misc_dev_show_price -%}
+                    {%- assign misc_show_price = true -%}
+                  {%- endif -%}
+                  {%- if card_product.selected_or_first_available_variant.quantity_price_breaks.size > 0 and misc_show_price -%}
                     <volume-pricing class="parent-display">
                       <ul class="list-unstyled">
                         <li>

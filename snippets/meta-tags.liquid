@@ -26,7 +26,20 @@
   <meta property="og:image:height" content="{{ page_image.height }}">
 {%- endif -%}
 
-{%- if request.page_type == 'product' -%}
+{%- comment -%}
+  MISC: gate og:price meta tags on logged-in customer (D7).
+  Scrapers + Open Graph readers should not see prices for a
+  B2B-only catalog. Trade-off accepted: no Google rich-result
+  price snippets.
+
+  Pre-assigned variable because Shopify Liquid rejects parens
+  inside if conditions ("Expected dotdot but found comparison").
+{%- endcomment -%}
+{%- assign misc_show_price = false -%}
+{%- if customer != blank or settings.misc_dev_show_price -%}
+  {%- assign misc_show_price = true -%}
+{%- endif -%}
+{%- if request.page_type == 'product' and misc_show_price -%}
   <meta property="og:price:amount" content="{{ product.price | money_without_currency | strip_html }}">
   <meta property="og:price:currency" content="{{ cart.currency.iso_code }}">
 {%- endif -%}

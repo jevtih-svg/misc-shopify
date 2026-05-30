@@ -1,0 +1,129 @@
+{%- comment -%}
+  ============================================================
+  MISC PDP gallery.
+
+  Always renders ALL product media (parent + every variant-
+  linked image) in one thumb strip. The thumb strip never
+  rebuilds — clicking a variant in the variant table just
+  activates that variant's primary thumb (jump-to behaviour),
+  it does NOT replace the gallery.
+
+  Multi-image: vertical thumb strip on the left of the main
+  image (desktop) / horizontal scroll strip below (mobile).
+
+  Single-image: collapses the strip and shows the main image
+  full-width via .is-single.
+
+  "Click to zoom" badge on the main image opens the shared
+  zoom overlay (rendered once at the section level).
+
+  "Download all" pulls every product media item (server-side
+  list, no client double-counting). Count is hidden per Jeff's
+  spec — the button reads just "Download all".
+
+  Inputs:
+    - product
+    - primary_variant
+
+  Data attributes:
+    [data-all-images]      pipe-separated list of all 1200w URLs,
+                           used by misc-pdp.js for download
+    [data-variant-images]  JSON map of variant_id → image URL,
+                           used to activate the matching thumb
+                           when a variant row is clicked
+  ============================================================
+{%- endcomment -%}
+
+{%- liquid
+  # Collect ALL product media URLs. product.media is the canonical
+  # full set (variant.image references items already in media).
+  assign image_urls = ''
+  for media in product.media
+    assign url = media | image_url: width: 1200
+    unless image_urls contains url
+      if image_urls == ''
+        assign image_urls = url
+      else
+        assign image_urls = image_urls | append: '||' | append: url
+      endif
+    endunless
+  endfor
+  assign images = image_urls | split: '||'
+  assign images_count = images.size
+
+  # Build a "variant_id:image_url" map so JS can jump to the
+  # matching thumb when a variant row is clicked. Each entry
+  # uses 1200w URL to match the thumb data-img value exactly.
+  assign variant_map = ''
+  for v in product.variants
+    if v.image != blank
+      assign v_url = v.image | image_url: width: 1200
+      if variant_map != ''
+        assign variant_map = variant_map | append: ','
+      endif
+      assign variant_map = variant_map | append: v.id | append: ':' | append: v_url
+    endif
+  endfor
+-%}
+
+<div
+  class="misc-pdp__gallery{% if images_count <= 1 %} is-single{% endif %}"
+  data-misc-pdp-gallery
+  data-all-images="{{ image_urls }}"
+  data-variant-images="{{ variant_map | escape }}"
+>
+  {%- if images_count > 1 -%}
+    <div class="misc-pdp__gallery-thumbs" data-misc-pdp-thumbs>
+      {%- for url in images -%}
+        <button
+          type="button"
+          class="misc-pdp__gallery-thumb{% if forloop.first %} is-active{% endif %}"
+          data-img="{{ url }}"
+          aria-label="View image {{ forloop.index }}"
+        >
+          <img src="{{ url | replace: 'width=1200', 'width=160' }}" alt="" loading="lazy">
+        </button>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+  <div class="misc-pdp__gallery-main" data-misc-pdp-main>
+    {%- if images_count > 0 -%}
+      <button
+        type="button"
+        class="misc-pdp__gallery-zoom-trigger"
+        data-misc-zoom-trigger
+        aria-label="Zoom image"
+      >
+        <img
+          src="{{ images.first }}"
+          alt="{{ product.featured_media.alt | default: product.title | escape }}"
+          data-misc-pdp-main-img
+          width="800"
+          height="800"
+        >
+        <span class="misc-pdp__gallery-zoom-badge" aria-hidden="true">Click to zoom</span>
+      </button>
+    {%- else -%}
+      <div class="misc-pdp__gallery-placeholder misc-pdp__gallery-placeholder--unavailable">
+        <span class="misc-pdp__unavailable-label">Unavailable</span>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+<div class="misc-pdp__gallery-actions">
+  <span class="misc-pdp__gallery-actions-label">Product images</span>
+  <button
+    type="button"
+    class="misc-pdp__gallery-download"
+    data-misc-download-images
+  >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+    Download all
+  </button>
+</div>

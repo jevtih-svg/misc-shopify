@@ -1,0 +1,89 @@
+{%- comment -%}
+  ============================================================
+  MISC PDP head: brand caps, H1 product name, sub-line
+  (SKU · Country · HS), tags row.
+
+  Inputs:
+    - product
+    - primary_variant
+
+  Brand resolution mirrors snippets/misc-card-product.liquid:
+    1. custom.Manufacturer (the store's primary key, capital M)
+    2. shopify.brand
+    3. custom.brand
+    4. custom.manufacturer
+    5. product.vendor (skip if = "Misc. Distribution")
+    6. product.type
+    7. product.vendor (last resort)
+
+  Tags filter: only tags prefixed with `show:` render. The
+  prefix is stripped on display. See MISC_PDP_Implementation_Decisions
+  D4.
+  ============================================================
+{%- endcomment -%}
+
+{%- liquid
+  assign misc_brand = product.metafields.custom.Manufacturer.value
+  if misc_brand == blank
+    assign misc_brand = product.metafields.shopify.brand.value
+  endif
+  if misc_brand == blank
+    assign misc_brand = product.metafields.custom.brand.value
+  endif
+  if misc_brand == blank
+    assign misc_brand = product.metafields.custom.manufacturer.value
+  endif
+  if misc_brand == blank and product.vendor != 'Misc. Distribution'
+    assign misc_brand = product.vendor
+  endif
+  if misc_brand == blank
+    assign misc_brand = product.type
+  endif
+  if misc_brand == blank
+    assign misc_brand = product.vendor
+  endif
+
+  assign hs_code = product.metafields.custom.hs_code.value | default: product.metafields.custom.HS.value
+  assign origin = product.metafields.custom.country_of_origin.value | default: product.metafields.custom.origin.value
+-%}
+
+{%- if misc_brand != blank -%}
+  <span class="misc-pdp__brand">{{ misc_brand | escape }}</span>
+{%- endif -%}
+
+<h1 class="misc-pdp__name">{{ product.title | escape }}</h1>
+
+{%- if primary_variant.sku != blank or origin != blank or hs_code != blank -%}
+  <div class="misc-pdp__sub">
+    {%- if primary_variant.sku != blank -%}
+      <span class="misc-pdp__sub-item">{{ primary_variant.sku | escape }}</span>
+    {%- endif -%}
+    {%- if origin != blank -%}
+      <span class="misc-pdp__sub-sep" aria-hidden="true">&middot;</span>
+      <span class="misc-pdp__sub-item">{{ origin | escape }}</span>
+    {%- endif -%}
+    {%- if hs_code != blank -%}
+      <span class="misc-pdp__sub-sep" aria-hidden="true">&middot;</span>
+      <span class="misc-pdp__sub-item">HS {{ hs_code | escape }}</span>
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+{%- comment -%} Tags row — only show: prefixed tags. {%- endcomment -%}
+{%- assign has_tags = false -%}
+{%- for tag in product.tags -%}
+  {%- if tag contains 'show:' -%}
+    {%- assign has_tags = true -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- if has_tags -%}
+  <div class="misc-pdp__tags">
+    {%- for tag in product.tags -%}
+      {%- if tag contains 'show:' -%}
+        {%- assign label = tag | remove_first: 'show:' | strip -%}
+        <a class="misc-pdp__tag" href="{{ routes.collections_url }}/all?filter.p.tag={{ tag | url_encode }}">{{ label | escape }}</a>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+{%- endif -%}

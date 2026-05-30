@@ -1,0 +1,144 @@
+{%- comment -%}
+  ============================================================
+  MISC PDP variant table (multi-variant only).
+
+  Each row:
+    [thumb] [name + SKU] [stock state] [price + RRP] [stepper]
+
+  Rows are clickable. Clicking a row activates it (highlight +
+  gallery image swap via misc-pdp.js). Steppers are independent;
+  +/- on a stepper IS the cart action (no separate Add button).
+
+  Variant images:
+    Each variant's image set is exposed via data-images on the row.
+    A variant with its own image(s) gets them; variants without
+    images fall back to the product's featured image.
+
+  Inputs:
+    - product
+
+  This snippet only renders when misc_show_price is TRUE (the
+  caller guards). Logged-out visitors see the price-gate CTA in
+  the buy slot instead.
+  ============================================================
+{%- endcomment -%}
+
+<div class="misc-pdp__variants" data-misc-pdp-variants>
+  <div class="misc-pdp__variants-head">
+    <h2 class="misc-pdp__variants-title">
+      Choose variants
+      <span class="misc-pdp__variants-count">{{ product.variants.size }}</span>
+    </h2>
+  </div>
+
+  <ul class="misc-pdp__variant-list">
+    {%- assign first_active = true -%}
+    {%- assign sort_phases = 'in_stock,incoming,backorder,oos' | split: ',' -%}
+    {%- for sort_phase in sort_phases -%}
+      {%- for v in product.variants -%}
+        {%- liquid
+          assign v_inv = v.inventory_quantity | default: 0
+          assign v_inc = v.metafields.custom.incoming_qty.value | default: 0 | plus: 0
+          assign v_eta = v.metafields.custom.incoming_eta.value
+          assign v_rrp = v.metafields.custom.rrp.value | default: v.metafields.custom.RRP.value
+
+          assign v_phase = 'oos'
+          if v_inv > 0
+            assign v_phase = 'in_stock'
+          elsif v_inc > 0
+            assign v_phase = 'incoming'
+          elsif v.available
+            assign v_phase = 'backorder'
+          endif
+        -%}
+        {%- if v_phase != sort_phase -%}{%- continue -%}{%- endif -%}
+
+        {%- comment -%} Cart qty for this variant {%- endcomment -%}
+        {%- assign v_cart_qty = 0 -%}
+        {%- for line_item in cart.items -%}
+          {%- if line_item.variant_id == v.id -%}
+            {%- assign v_cart_qty = line_item.quantity -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- comment -%}
+          Collect variant image URLs (primary + any extras).
+          Variant.image is the variant-specific image; fall back
+          to the product's featured image if none.
+        {%- endcomment -%}
+        {%- assign v_image_urls = '' -%}
+        {%- if v.image != blank -%}
+          {%- assign v_image_urls = v.image | image_url: width: 1200 -%}
+        {%- elsif product.featured_media != blank -%}
+          {%- assign v_image_urls = product.featured_media | image_url: width: 1200 -%}
+        {%- endif -%}
+
+        {%- assign is_orderable = false -%}
+        {%- if v_inv > 0 or v_inc > 0 or v.available -%}
+          {%- assign is_orderable = true -%}
+        {%- endif -%}
+
+        <li
+          class="misc-pdp__variant-row{% if first_active %} is-active{% endif %}"
+          data-misc-pdp-variant
+          data-variant-id="{{ v.id }}"
+          data-images="{{ v_image_urls }}"
+        >
+          <div class="misc-pdp__variant-thumb">
+            {%- if v.image != blank -%}
+              <img src="{{ v.image | image_url: width: 96 }}" alt="{{ v.title | escape }}" loading="lazy" width="48" height="48">
+            {%- elsif product.featured_media != blank -%}
+              <img src="{{ product.featured_media | image_url: width: 96 }}" alt="{{ product.title | escape }}" loading="lazy" width="48" height="48">
+            {%- endif -%}
+          </div>
+
+          <div class="misc-pdp__variant-meta">
+            <span class="misc-pdp__variant-name">{{ v.title | escape }}</span>
+            {%- if v.sku != blank -%}
+              <span class="misc-pdp__variant-sku">{{ v.sku | escape }}</span>
+            {%- endif -%}
+          </div>
+
+          <span class="misc-pdp__variant-stock misc-pdp__variant-stock--{{ v_phase | replace: '_', '-' }}">
+            <span class="misc-pdp__variant-stock-dot" aria-hidden="true"></span>
+            {%- case v_phase -%}
+              {%- when 'in_stock' -%}In stock {{ v_inv }}
+              {%- when 'incoming' -%}{{ v_inc }} incoming{% if v_eta != blank %} {{ v_eta | date: '%-d %b' }}{% endif %}
+              {%- when 'backorder' -%}On backorder
+              {%- when 'oos' -%}Out of stock
+            {%- endcase -%}
+          </span>
+
+          <span class="misc-pdp__variant-price">
+            {{ v.price | money }}
+            {%- if v_rrp != blank -%}
+              <small>RRP {{ v_rrp | money }}</small>
+            {%- endif -%}
+          </span>
+
+          <div class="misc-pdp__variant-stepper-cell">
+            {%- if is_orderable -%}
+              <div
+                class="misc-qty-stepper misc-qty-stepper--mini"
+                data-misc-qty-stepper
+                data-variant-id="{{ v.id }}"
+              >
+                <button type="button" class="misc-qty-stepper__btn" data-misc-qty="-1" aria-label="Remove one {{ v.title | escape }} from cart">&minus;</button>
+                <input type="number" value="{{ v_cart_qty }}" min="0" step="1" class="misc-qty-stepper__input" aria-label="Quantity of {{ v.title | escape }} in cart" data-misc-qty-input>
+                <button type="button" class="misc-qty-stepper__btn" data-misc-qty="+1" aria-label="Add one {{ v.title | escape }} to cart">+</button>
+              </div>
+            {%- else -%}
+              {%- comment -%}
+                True OOS variant: no stepper, no add-to-cart. Show
+                the Unavailable label so the row reads cleanly.
+              {%- endcomment -%}
+              <span class="misc-pdp__unavailable-label misc-pdp__unavailable-label--inline" aria-disabled="true">Unavailable</span>
+            {%- endif -%}
+          </div>
+        </li>
+        {%- assign first_active = false -%}
+      {%- endfor -%}
+    {%- endfor -%}
+  </ul>
+</div>

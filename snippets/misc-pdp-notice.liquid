@@ -1,0 +1,46 @@
+{%- comment -%}
+  ============================================================
+  MISC PDP notice block. Renders forecast / non-promise wording
+  under the stepper for mixed / incoming / backorder states.
+
+  Per MISC_PDP_Implementation_Decisions.md D13. Source of truth
+  for wording: Mockups/misc-pdp-copy-confirmation.xlsx.
+
+  Single-variant only. Multi-variant PDPs surface per-variant
+  context inside the variant table rows.
+
+  Inputs:
+    - product
+    - primary_variant
+  ============================================================
+{%- endcomment -%}
+
+{%- if product.variants.size > 1 -%}
+  {%- comment -%} Multi-variant: no global notice; per-variant state lives in the table. {%- endcomment -%}
+{%- else -%}
+  {%- liquid
+    assign inv = primary_variant.inventory_quantity | default: 0
+    assign inc_qty = primary_variant.metafields.custom.incoming_qty.value | default: 0 | plus: 0
+    assign inc_eta = primary_variant.metafields.custom.incoming_eta.value
+    assign eta_str = ''
+    if inc_eta != blank
+      assign eta_str = inc_eta | date: '%-d %b'
+    endif
+  -%}
+  {%- if inv > 0 and inc_qty > 0 -%}
+    <div class="misc-pdp__notice misc-pdp__notice--inbound" role="note">
+      <strong>Split shipment</strong>
+      Orders over {{ inv }} units will ship in two batches. The {{ inv }} in stock ship now; the remainder is forecast to arrive{% if eta_str != '' %} on {{ eta_str }}{% endif %}. This is our estimated arrival date, not a guaranteed ship date.
+    </div>
+  {%- elsif inv <= 0 and inc_qty > 0 -%}
+    <div class="misc-pdp__notice misc-pdp__notice--inbound" role="note">
+      <strong>Incoming</strong>
+      Items added to cart are forecast to ship{% if eta_str != '' %} on {{ eta_str }}{% endif %}. This is our estimated arrival date, not a guaranteed ship date.
+    </div>
+  {%- elsif inv <= 0 and inc_qty <= 0 and primary_variant.available -%}
+    <div class="misc-pdp__notice misc-pdp__notice--backorder" role="note">
+      <strong>Backorder</strong>
+      This item will be put on backorder.
+    </div>
+  {%- endif -%}
+{%- endif -%}

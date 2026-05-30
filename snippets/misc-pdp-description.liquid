@@ -1,0 +1,24 @@
+{%- comment -%}
+  ============================================================
+  MISC PDP description block. Renders product.description with
+  a Copy all affordance (used by buyers re-publishing copy in
+  their own stores).
+
+  Description is a guaranteed product field — always render
+  the section even if empty (per Jeff: "description is always
+  there on the product").
+
+  Inputs:
+    - product
+  ============================================================
+{%- endcomment -%}
+
+<div class="misc-pdp__desc" data-misc-copy-source="description">
+  <div class="misc-pdp__desc-head">
+    <span class="misc-pdp__desc-title">Description</span>
+    <button type="button" class="misc-pdp__copy-btn" data-misc-copy="description">Copy all</button>
+  </div>
+  <div class="misc-pdp__desc-body" data-misc-copy-text>
+    {{ product.description }}
+  </div>
+</div>

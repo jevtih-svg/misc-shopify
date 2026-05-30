@@ -2,26 +2,6 @@
 {{ 'component-card.css' | asset_url | stylesheet_tag }}
 {{ 'component-price.css' | asset_url | stylesheet_tag }}
 
-{% if section.settings.image_shape == 'blob' %}
-  {{ 'mask-blobs.css' | asset_url | stylesheet_tag }}
-{%- endif -%}
-
-{%- unless section.settings.quick_add == 'none' -%}
-  {{ 'quick-add.css' | asset_url | stylesheet_tag }}
-{%- endunless -%}
-
-{%- if section.settings.quick_add == 'standard' -%}
-  <script src="{{ 'quick-add.js' | asset_url }}" defer="defer"></script>
-  <script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
-{%- endif -%}
-
-{%- if section.settings.quick_add == 'bulk' -%}
-  <script src="{{ 'quick-add-bulk.js' | asset_url }}" defer="defer"></script>
-  <script src="{{ 'quantity-popover.js' | asset_url }}" defer="defer"></script>
-  <script src="{{ 'price-per-item.js' | asset_url }}" defer="defer"></script>
-  <script src="{{ 'quick-order-list.js' | asset_url }}" defer="defer"></script>
-{%- endif -%}
-
 {%- style -%}
   .section-{{ section.id }}-padding {
     padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
@@ -36,96 +16,124 @@
   }
 {%- endstyle -%}
 
-<div class="section-{{ section.id }}-padding gradient color-{{ section.settings.color_scheme }}">
-  {%- paginate collection.products by section.settings.products_per_page -%}
-    {% comment %} Sort is the first tabbable element when filter type is vertical {% endcomment %}
-    {%- if section.settings.enable_sorting and section.settings.filter_type == 'vertical' -%}
-      <facet-filters-form class="facets facets-vertical-sort page-width small-hide">
-        <form class="facets-vertical-form" id="FacetSortForm">
-          <div class="facet-filters sorting caption">
-            <div class="facet-filters__field">
-              <h2 class="facet-filters__label caption-large text-body">
-                <label for="SortBy">{{ 'products.facets.sort_by_label' | t }}</label>
-              </h2>
-              <div class="select">
-                {%- assign sort_by = collection.sort_by | default: collection.default_sort_by -%}
-                <select
-                  name="sort_by"
-                  class="facet-filters__sort select__select caption-large"
-                  id="SortBy"
-                  aria-describedby="a11y-refresh-page-message"
-                >
-                  {%- for option in collection.sort_options -%}
-                    <option
-                      value="{{ option.value | escape }}"
-                      {% if option.value == sort_by %}
-                        selected="selected"
-                      {% endif %}
-                    >
-                      {{ option.name | escape }}
-                    </option>
-                  {%- endfor -%}
-                </select>
-                <span class="svg-wrapper">
-                  {{- 'icon-caret.svg' | inline_asset_content -}}
-                </span>
-              </div>
-            </div>
-          </div>
+{%- comment -%}
+  MISC: per_page is sourced from the section setting only.
+  Shopify Liquid has no portable way to read arbitrary query
+  params, so a user-facing per_page dropdown can't work
+  server-side without complex template variants. The merchant
+  configures products_per_page in the theme editor.
+{%- endcomment -%}
+{%- assign per_page = section.settings.products_per_page | plus: 0 -%}
 
-          <div class="product-count-vertical light" role="status">
-            <h2 class="product-count__text text-body">
-              <span id="ProductCountDesktop">
-                {%- if collection.results_count -%}
-                  {{
-                    'templates.search.results_with_count'
-                    | t: terms: collection.terms, count: collection.results_count
-                  }}
-                {%- elsif collection.products_count == collection.all_products_count -%}
-                  {{ 'products.facets.product_count_simple' | t: count: collection.products_count }}
-                {%- else -%}
-                  {{
-                    'products.facets.product_count'
-                    | t: product_count: collection.products_count, count: collection.all_products_count
-                  }}
-                {%- endif -%}
-              </span>
-            </h2>
-            {%- render 'loading-spinner' -%}
-          </div>
-        </form>
-      </facet-filters-form>
+{%- comment -%}
+  MISC: server-side default for active layout. The user-facing
+  layout toggle (Grid 3 / Grid 5 / List) runs entirely in JS via
+  the ?layout= URL param (handled in misc-view-toggle.js). Server
+  initially renders both grid and list, with the list hidden by
+  default; JS applies the correct visibility on load.
+
+  Shopify's ?view= param is reserved for template variants
+  (collection.per-N.json for per-page), so we use ?layout= to
+  avoid collision.
+{%- endcomment -%}
+{%- assign active_view = section.settings.default_view -%}
+{%- if active_view == 'list' and section.settings.enable_list_view == false -%}
+  {%- assign active_view = 'grid-3' -%}
+{%- endif -%}
+
+<div class="section-{{ section.id }}-padding gradient">
+
+  {%- comment -%}
+    MISC: "best on desktop" notice — only visible on mobile via
+    CSS (display:none on >=768px). Dismissible via misc-mobile.js.
+  {%- endcomment -%}
+  <div class="mobile-desktop-notice" data-mobile-notice>
+    <span>Best experienced on desktop</span>
+    <button type="button" class="mobile-desktop-notice__close" data-mobile-notice-close aria-label="Dismiss">&times;</button>
+  </div>
+
+  {%- paginate collection.products by per_page -%}
+
+    {%- comment -%} MISC: full-width filter-bar row above the catalog body {%- endcomment -%}
+    {%- if section.settings.enable_filtering or section.settings.enable_sorting -%}
+      {% render 'misc-filter-bar',
+        collection: collection,
+        results_url: collection.url,
+        active_view: active_view,
+        per_page: per_page,
+        enable_list_view: section.settings.enable_list_view
+      %}
     {%- endif -%}
 
-    <div class="{% if section.settings.filter_type == 'vertical' %} facets-vertical page-width{% endif %}">
+    <div class="facets-vertical page-width">
       {{ 'component-facets.css' | asset_url | stylesheet_tag }}
       <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
+
+      {%- comment -%}
+        MISC: facets.js satisfier elements.
+
+        facets.js references #FacetFiltersFormMobile.closest('menu-drawer').bindEvents()
+        unconditionally inside renderActiveFacets. Without this hidden satisfier the
+        call throws a TypeError on every AJAX filter change, breaking the entire
+        reload flow (the "filter doesn't refresh the page" bug).
+
+        The .active-facets-mobile and .active-facets-desktop empty containers
+        satisfy the active-facets selector list at facets.js:180.
+      {%- endcomment -%}
+      <menu-drawer hidden class="misc-facets-js-satisfier" aria-hidden="true">
+        <div id="FacetFiltersFormMobile"></div>
+      </menu-drawer>
+      <div class="active-facets-mobile" hidden aria-hidden="true"></div>
+      {%- comment -%}
+        The .active-facets-desktop element is the .misc-filter-bar
+        itself (class applied in the snippet). Don't render an
+        empty placeholder here — would duplicate the selector and
+        confuse facets.js.
+      {%- endcomment -%}
+
+      <!-- Sidebar backdrop for mobile drawer (Phase 10) -->
+      <div class="sidebar-backdrop" data-close-drawer aria-hidden="true"></div>
+
       {%- if section.settings.enable_filtering or section.settings.enable_sorting -%}
         <aside
           aria-labelledby="verticalTitle"
-          class="facets-wrapper{% unless section.settings.enable_filtering %} facets-wrapper--no-filters{% endunless %}{% if section.settings.filter_type != 'vertical' %} page-width{% endif %}"
+          class="facets-wrapper{% unless section.settings.enable_filtering %} facets-wrapper--no-filters{% endunless %}"
           id="main-collection-filters"
           data-id="{{ section.id }}"
         >
-          {% render 'facets',
+          {%- comment -%} MISC: mobile drawer header (hidden on desktop via CSS) {%- endcomment -%}
+          <div class="sidebar__mobile-header">
+            <span class="sidebar__mobile-title">Filters</span>
+            <button type="button" class="sidebar__mobile-close" data-close-drawer aria-label="Close filters">
+              {{- 'icon-close.svg' | inline_asset_content -}}
+            </button>
+          </div>
+
+          {%- comment -%} MISC: render our custom sidebar instead of Trade's facets {%- endcomment -%}
+          {% render 'misc-facets',
             results: collection,
             enable_filtering: section.settings.enable_filtering,
             enable_sorting: section.settings.enable_sorting,
-            filter_type: section.settings.filter_type,
             paginate: paginate
           %}
+
+          {%- comment -%} MISC: mobile drawer footer (hidden on desktop via CSS) {%- endcomment -%}
+          <div class="sidebar__mobile-footer">
+            <button type="button" class="sidebar__mobile-apply" data-close-drawer>
+              Show {{ collection.products_count }} products
+            </button>
+          </div>
         </aside>
       {%- endif -%}
 
       <div
         class="product-grid-container{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
         id="ProductGridContainer"
-        {% if settings.animations_reveal_on_scroll %}
-          data-cascade
-        {% endif %}
+        data-active-layout="{{ active_view }}"
+        {% if settings.animations_reveal_on_scroll %}data-cascade{% endif %}
       >
         {%- if collection.products.size == 0 -%}
-          <div class="collection collection--empty page-width" id="product-grid" data-id="{{ section.id }}">
+          <div class="collection collection--empty" id="product-grid" data-id="{{ section.id }}">
             <div class="loading-overlay gradient"></div>
             <div class="title-wrapper center">
               <h2 class="title title--primary">
@@ -139,48 +147,41 @@
             </div>
           </div>
         {%- else -%}
-          <div
-            class="collection{% if section.settings.filter_type != 'vertical' %} page-width{% endif %}"
-          >
+          <div class="collection">
             <div class="loading-overlay gradient"></div>
+
+            {%- comment -%}
+              MISC: grid view. id="product-grid" required by facets.js so it can
+              read the section ID via dataset.id for the AJAX request.
+            {%- endcomment -%}
             <ul
               id="product-grid"
               data-id="{{ section.id }}"
-              class="
-                grid product-grid grid--{{ section.settings.columns_mobile }}-col-tablet-down
-                grid--{{ section.settings.columns_desktop }}-col-desktop
-                {% if section.settings.quick_add == 'bulk' %} collection-quick-add-bulk{% endif %}
-              "
+              class="product-grid{% if active_view == 'grid-5' %} is-cols-5{% endif %}"
+              {% if active_view == 'list' %}hidden{% endif %}
             >
-              {% assign skip_card_product_styles = false %}
               {%- for product in collection.products -%}
-                {% assign lazy_load = false %}
-                {%- if forloop.index > 2 -%}
+                {%- assign lazy_load = false -%}
+                {%- if forloop.index > 6 -%}
                   {%- assign lazy_load = true -%}
                 {%- endif -%}
-                <li
-                  class="grid__item{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-                  {% if settings.animations_reveal_on_scroll %}
-                    data-cascade
-                    style="--animation-order: {{ forloop.index }};"
-                  {% endif %}
-                >
-                  {% render 'card-product',
+                <li>
+                  {% render 'misc-card-product',
                     card_product: product,
-                    media_aspect_ratio: section.settings.image_ratio,
-                    image_shape: section.settings.image_shape,
-                    show_secondary_image: section.settings.show_secondary_image,
-                    show_vendor: section.settings.show_vendor,
-                    show_rating: section.settings.show_rating,
                     lazy_load: lazy_load,
-                    skip_styles: skip_card_product_styles,
-                    quick_add: section.settings.quick_add,
                     section_id: section.id
                   %}
                 </li>
-                {%- assign skip_card_product_styles = true -%}
               {%- endfor -%}
             </ul>
+
+            {%- comment -%} MISC: list view (table) — Phase 9 {%- endcomment -%}
+            {%- if section.settings.enable_list_view -%}
+              {% render 'misc-product-list',
+                collection: collection,
+                active_view: active_view
+              %}
+            {%- endif -%}
 
             {%- if paginate.pages > 1 -%}
               {% render 'pagination', paginate: paginate, anchor: '' %}
@@ -190,200 +191,76 @@
       </div>
     </div>
   {%- endpaginate -%}
-  {% if section.settings.image_shape == 'arch' %}
-    {{ 'mask-arch.svg' | inline_asset_content }}
-  {%- endif -%}
 </div>
+
+<script src="{{ 'misc-view-toggle.js' | asset_url }}" defer="defer"></script>
 
 {% schema %}
 {
-  "name": "t:sections.main-collection-product-grid.name",
+  "name": "MISC catalog grid",
   "class": "section",
   "settings": [
     {
-      "type": "range",
+      "type": "header",
+      "content": "Display"
+    },
+    {
+      "type": "select",
       "id": "products_per_page",
-      "min": 8,
-      "max": 36,
-      "step": 4,
-      "default": 16,
-      "label": "t:sections.main-collection-product-grid.settings.products_per_page.label"
-    },
-    {
-      "type": "range",
-      "id": "columns_desktop",
-      "min": 1,
-      "max": 6,
-      "step": 1,
-      "default": 4,
-      "label": "t:sections.main-collection-product-grid.settings.columns_desktop.label"
-    },
-    {
-      "type": "select",
-      "id": "columns_mobile",
-      "default": "2",
-      "label": "t:sections.main-collection-product-grid.settings.columns_mobile.label",
+      "default": "48",
+      "label": "Products per page (default)",
+      "info": "Shopify defaults. Buyer can change this per session via the Per page dropdown.",
       "options": [
-        {
-          "value": "1",
-          "label": "t:sections.main-collection-product-grid.settings.columns_mobile.options__1.label"
-        },
-        {
-          "value": "2",
-          "label": "t:sections.main-collection-product-grid.settings.columns_mobile.options__2.label"
-        }
-      ]
-    },    
-    {
-      "type": "color_scheme",
-      "id": "color_scheme",
-      "label": "t:sections.all.colors.label",
-      "info": "t:sections.all.colors.has_cards_info",
-      "default": "scheme-1"
-    },
-    {
-      "type": "header",
-      "content": "t:sections.main-collection-product-grid.settings.header__3.content"
-    },
-    {
-      "type": "select",
-      "id": "image_ratio",
-      "options": [
-        {
-          "value": "adapt",
-          "label": "t:sections.main-collection-product-grid.settings.image_ratio.options__1.label"
-        },
-        {
-          "value": "portrait",
-          "label": "t:sections.main-collection-product-grid.settings.image_ratio.options__2.label"
-        },
-        {
-          "value": "square",
-          "label": "t:sections.main-collection-product-grid.settings.image_ratio.options__3.label"
-        }
-      ],
-      "default": "adapt",
-      "label": "t:sections.main-collection-product-grid.settings.image_ratio.label"
-    },
-    {
-      "type": "select",
-      "id": "image_shape",
-      "options": [
-        {
-          "value": "default",
-          "label": "t:sections.all.image_shape.options__1.label"
-        },
-        {
-          "value": "arch",
-          "label": "t:sections.all.image_shape.options__2.label"
-        },
-        {
-          "value": "blob",
-          "label": "t:sections.all.image_shape.options__3.label"
-        },
-        {
-          "value": "chevronleft",
-          "label": "t:sections.all.image_shape.options__4.label"
-        },
-        {
-          "value": "chevronright",
-          "label": "t:sections.all.image_shape.options__5.label"
-        },
-        {
-          "value": "diamond",
-          "label": "t:sections.all.image_shape.options__6.label"
-        },
-        {
-          "value": "parallelogram",
-          "label": "t:sections.all.image_shape.options__7.label"
-        },
-        {
-          "value": "round",
-          "label": "t:sections.all.image_shape.options__8.label"
-        }
-      ],
-      "default": "default",
-      "label": "t:sections.all.image_shape.label"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_secondary_image",
-      "default": false,
-      "label": "t:sections.main-collection-product-grid.settings.show_secondary_image.label"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_vendor",
-      "default": false,
-      "label": "t:sections.main-collection-product-grid.settings.show_vendor.label"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_rating",
-      "default": false,
-      "label": "t:sections.main-collection-product-grid.settings.show_rating.label",
-      "info": "t:sections.main-collection-product-grid.settings.show_rating.info"
-    },
-    {
-      "type": "select",
-      "id": "quick_add",
-      "default": "none",
-      "label": "t:sections.main-collection-product-grid.settings.quick_add.label",
-      "options": [
-        {
-          "value": "none",
-          "label": "t:sections.main-collection-product-grid.settings.quick_add.options.option_1"
-        },
-        {
-          "value": "standard",
-          "label": "t:sections.main-collection-product-grid.settings.quick_add.options.option_2"
-        },
-        {
-          "value": "bulk",
-          "label": "t:sections.main-collection-product-grid.settings.quick_add.options.option_3"
-        }
+        { "value": "24", "label": "24" },
+        { "value": "48", "label": "48" },
+        { "value": "72", "label": "72" },
+        { "value": "96", "label": "96" }
       ]
     },
     {
+      "type": "select",
+      "id": "default_view",
+      "default": "grid-3",
+      "label": "Default view",
+      "info": "Buyer can switch via the Grid 3 / Grid 5 / List toggle above the grid.",
+      "options": [
+        { "value": "grid-3", "label": "Grid (3 columns)" },
+        { "value": "grid-5", "label": "Grid (5 columns)" },
+        { "value": "list",   "label": "List (table)" }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_list_view",
+      "default": true,
+      "label": "Allow List view",
+      "info": "Hide the List button in the view toggle if your catalog doesn't suit a table layout."
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_search",
+      "default": true,
+      "label": "Show catalog search bar in the hero"
+    },
+    {
       "type": "header",
-      "content": "t:sections.main-collection-product-grid.settings.header__1.content"
+      "content": "Filters and sorting"
     },
     {
       "type": "checkbox",
       "id": "enable_filtering",
       "default": true,
-      "label": "t:sections.main-collection-product-grid.settings.enable_filtering.label",
-      "info": "t:sections.main-collection-product-grid.settings.enable_filtering.info"
-    },
-    {
-      "type": "select",
-      "id": "filter_type",
-      "options": [
-        {
-          "value": "horizontal",
-          "label": "t:sections.main-collection-product-grid.settings.filter_type.options__1.label"
-        },
-        {
-          "value": "vertical",
-          "label": "t:sections.main-collection-product-grid.settings.filter_type.options__2.label"
-        },
-        {
-          "value": "drawer",
-          "label": "t:sections.main-collection-product-grid.settings.filter_type.options__3.label"
-        }
-      ],
-      "default": "horizontal",
-      "label": "t:sections.main-collection-product-grid.settings.filter_type.label"
+      "label": "Enable filters"
     },
     {
       "type": "checkbox",
       "id": "enable_sorting",
       "default": true,
-      "label": "t:sections.main-collection-product-grid.settings.enable_sorting.label"
+      "label": "Enable sort"
     },
     {
       "type": "header",
-      "content": "t:sections.all.padding.section_padding_heading"
+      "content": "Section padding"
     },
     {
       "type": "range",
@@ -392,8 +269,8 @@
       "max": 100,
       "step": 4,
       "unit": "px",
-      "label": "t:sections.all.padding.padding_top",
-      "default": 36
+      "label": "Top padding",
+      "default": 0
     },
     {
       "type": "range",
@@ -402,8 +279,8 @@
       "max": 100,
       "step": 4,
       "unit": "px",
-      "label": "t:sections.all.padding.padding_bottom",
-      "default": 36
+      "label": "Bottom padding",
+      "default": 0
     }
   ]
 }
