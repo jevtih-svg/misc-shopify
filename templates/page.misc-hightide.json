@@ -1,0 +1,83 @@
+{
+  "sections": {
+    "main": {
+      "type": "misc-brand-page",
+      "settings": {
+        "eyebrow": "Brand",
+        "brand_name": "Hightide",
+        "force_lowercase": true,
+        "lead": "Established in 1994 in Arae, Sawara-ku, Fukuoka (South of Japan)",
+        "represented_label": "Represented by",
+        "represented_org": "MISC Distribution",
+        "represented_region": "Benelux, Germany, France & Scandinavia",
+        "discover_label": "Discover more",
+        "website_label": "hightide.co.jp",
+        "website_url": "http://hightide.co.jp/",
+        "tile_ratio": "16 / 9",
+        "rule_weight": 3,
+        "padding_top": 48,
+        "padding_bottom": 64
+      },
+      "blocks": {
+        "p_1": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>Hightide is the creation of two friends: a Japanese surfer and a design aficionado, who decided to create a company based on the importance of being fulfilled both spiritually and emotionally.</p>"
+          }
+        },
+        "p_2": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>Hightide creates elegant retro stationery and lifestyle designs. Through their different lines, they feature products that mix traditional Japanese designs with day-to-day functionality.</p>"
+          }
+        },
+        "p_3": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>Their products are lively and stylish, making Hightide an excellent everyday stationery choice.</p>"
+          }
+        },
+        "img_1": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/ez030-img-02-scaled-e1750939998174-1100x825.jpg?v=1780166228",
+            "alt": "Hightide"
+          }
+        },
+        "img_2": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/JF068Example03-e1750940018149.jpg?v=1780166228",
+            "alt": "Hightide"
+          }
+        },
+        "img_3": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/DB080AMGY02-e1750940040822.jpg?v=1780166228",
+            "alt": "Hightide"
+          }
+        },
+        "img_4": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/bkiv-img-1100x791.jpg?v=1780166228",
+            "alt": "Hightide"
+          }
+        }
+      },
+      "block_order": [
+        "p_1",
+        "p_2",
+        "p_3",
+        "img_1",
+        "img_2",
+        "img_3",
+        "img_4"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

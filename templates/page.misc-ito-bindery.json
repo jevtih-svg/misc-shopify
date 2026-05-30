@@ -1,0 +1,92 @@
+{
+  "sections": {
+    "main": {
+      "type": "misc-brand-page",
+      "settings": {
+        "eyebrow": "Brand",
+        "brand_name": "ITO Bindery",
+        "force_lowercase": true,
+        "lead": "Capture Your Inspiration",
+        "represented_label": "Represented by",
+        "represented_org": "MISC Distribution",
+        "represented_region": "Benelux & Germany",
+        "discover_label": "Discover more",
+        "website_label": "ito-bindery.com",
+        "website_url": "https://ito-bindery.com/en-nl",
+        "tile_ratio": "16 / 9",
+        "rule_weight": 3,
+        "padding_top": 48,
+        "padding_bottom": 64
+      },
+      "blocks": {
+        "p_1": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>Founded by Haruo Ito in 1938, ITO Bindery traded as a simple bookbinding business named Hakucho-do. When the business passed to Ito’s son, Toshio, in the late 1980s, the business changed a little too, adopting its current name.</p>"
+          }
+        },
+        "p_2": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>It wasn’t until 2009 that ITO Bindery began developing the notepads that we know and love today, but they were almost immediate successes. Their sobriety belies a deft originality, the kind that comes from following an idea from beginning to end with thought and method.</p>"
+          }
+        },
+        "img_1": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/DSCF9263-1100x825.jpg?v=1780166228",
+            "alt": "ITO Bindery"
+          }
+        },
+        "img_2": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/DSF1491-1100x825.jpg?v=1780166228",
+            "alt": "ITO Bindery"
+          }
+        },
+        "img_3": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/DSF1480-1100x825.jpg?v=1780166228",
+            "alt": "ITO Bindery"
+          }
+        },
+        "img_4": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/SH709174-1100x733.jpg?v=1780166228",
+            "alt": "ITO Bindery"
+          }
+        },
+        "img_5": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/DSCF0819-1100x825.jpg?v=1780166228",
+            "alt": "ITO Bindery"
+          }
+        },
+        "img_6": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/DSCF9097-1100x825.jpg?v=1780166228",
+            "alt": "ITO Bindery"
+          }
+        }
+      },
+      "block_order": [
+        "p_1",
+        "p_2",
+        "img_1",
+        "img_2",
+        "img_3",
+        "img_4",
+        "img_5",
+        "img_6"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

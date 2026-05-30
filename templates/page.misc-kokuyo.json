@@ -1,0 +1,90 @@
+{
+  "sections": {
+    "main": {
+      "type": "misc-brand-page",
+      "settings": {
+        "eyebrow": "Brand",
+        "brand_name": "Kokuyo",
+        "force_lowercase": true,
+        "lead": "",
+        "represented_label": "Represented by",
+        "represented_org": "MISC Distribution",
+        "represented_region": "Benelux & Germany",
+        "discover_label": "Discover more",
+        "website_label": "kokuyo-st.co.jp",
+        "website_url": "https://www.kokuyo-st.co.jp/en/",
+        "tile_ratio": "16 / 9",
+        "rule_weight": 3,
+        "padding_top": 48,
+        "padding_bottom": 64
+      },
+      "blocks": {
+        "p_1": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>Founded in 1905, Kokuyo soon became the industry leader in paper products (from account books to letter paper, forms and notebooks).</p>"
+          }
+        },
+        "p_2": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>In 1960 Kokuyo has ventured into a transition “from paper to metal”, producing their first filing cabinet. With the economy of that day and age (increasing complexity of administration x economic growth), there was a growing demand for know-how (filing systems) and office supplies (paper products) to manage the ever-mounting pile of paperwork effectively.</p>"
+          }
+        },
+        "p_3": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>The Think of Things selection is true to its heritage, but also constantly thinking and moving forward. Other items we carry include their famed Campus notebooks and some of their contest to market entries from their Kokuyo Design Award, such as the beetle tip marker and the Kadokeshi Eraser.</p>"
+          }
+        },
+        "p_4": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>As Kokuyo’s catalogue is so immense, our product selection might not have an item you’re looking for. If so; give us a shout.</p>"
+          }
+        },
+        "img_1": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/Kokuyo-Steel-Letter-Tray-3-Tiers-1100x824.jpg?v=1780166228",
+            "alt": "Kokuyo"
+          }
+        },
+        "img_2": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/Kokuyo-Hanging-Frame-1100x824.jpg?v=1780166228",
+            "alt": "Kokuyo"
+          }
+        },
+        "img_3": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/Kokuyo-Research-Lab-Notebook-A4-Entry-1100x824.jpg?v=1780166228",
+            "alt": "Kokuyo"
+          }
+        },
+        "img_4": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/Kokuyo-Gloo-Instand-Glue-Liquid-Gel-Cap-storage-1100x824.jpg?v=1780166228",
+            "alt": "Kokuyo"
+          }
+        }
+      },
+      "block_order": [
+        "p_1",
+        "p_2",
+        "p_3",
+        "p_4",
+        "img_1",
+        "img_2",
+        "img_3",
+        "img_4"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

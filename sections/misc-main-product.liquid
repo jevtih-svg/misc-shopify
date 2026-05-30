@@ -31,40 +31,35 @@
 
   comment
     Breadcrumb chain: Catalogue / Brand / Collection / Product.
-    Resolve the parent collection but SKIP Shopify's automatic
-    "frontpage" collection — that is the old "Home page" crumb that
-    linked to a one-product feed. Prefer the contextual collection
-    the buyer clicked through from; otherwise the first real
-    (non-frontpage) collection the product belongs to.
-  endcomment
-  assign parent_collection = nil
-  if collection != blank and collection.handle != 'frontpage'
-    assign parent_collection = collection
-  else
-    for misc_col in product.collections
-      if misc_col.handle != 'frontpage'
-        assign parent_collection = misc_col
-        break
-      endif
-    endfor
-  endif
 
-  comment
-    Brand for the breadcrumb. Display value uses the shared
-    misc-brand fallback chain. The Brand crumb links to the
-    all-products catalogue filtered by the custom.Manufacturer
-    metafield (the store's primary brand key). NOTE: this filter
-    only narrows results if the Manufacturer metafield is enabled
-    as a storefront filter in Shopify Search & Discovery.
+    This store has no per-brand or per-series Shopify collections —
+    brand and "collection" are encoded as product TAGS ("Hibi",
+    "Collection: Regular Large Box") and surfaced as facets on the
+    /collections/all catalogue grid. So the Brand and Collection
+    crumbs deep-link into that grid with a filter.p.tag query
+    pre-applied, mirroring the tag pills in misc-pdp-head.liquid.
+    (Needs the "Product tag" filter enabled in Search & Discovery —
+    the same dependency the PDP tag pills already rely on.)
   endcomment
+
+  comment Brand display value via the shared misc-brand fallback chain. endcomment
   capture misc_brand
     render 'misc-brand', product: product
   endcapture
   assign misc_brand = misc_brand | strip
-  assign brand_filter = product.metafields.custom.Manufacturer.value
-  if brand_filter == blank
-    assign brand_filter = misc_brand
-  endif
+
+  comment Collection from the "Collection:" tag — full tag is the filter value, stripped text is the label. endcomment
+  assign misc_collection_tag = ''
+  assign misc_collection_label = ''
+  for misc_t in product.tags
+    if misc_t contains 'Collection:'
+      assign misc_collection_tag = misc_t
+      assign misc_collection_label = misc_t | remove_first: 'Collection:' | strip
+      break
+    endif
+  endfor
+
+  assign catalogue_url = routes.collections_url | append: '/all'
 -%}
 
 {%- comment -%} ============================================================
@@ -76,14 +71,14 @@
   CSS grid; nesting the breadcrumb inside would make it a grid item.
 ============================================================ {%- endcomment -%}
 <nav class="misc-pdp-page-header__breadcrumb" aria-label="Breadcrumb">
-  <a href="{{ routes.collections_url }}">Catalogue</a>
+  <a href="{{ catalogue_url }}">Catalogue</a>
   {%- if misc_brand != blank -%}
     <span aria-hidden="true">/</span>
-    <a href="{{ routes.collections_url }}/all?filter.p.m.custom.Manufacturer={{ brand_filter | url_encode }}">{{ misc_brand | escape }}</a>
+    <a href="{{ catalogue_url }}?filter.p.tag={{ misc_brand | url_encode }}">{{ misc_brand | escape }}</a>
   {%- endif -%}
-  {%- if parent_collection != blank -%}
+  {%- if misc_collection_label != blank -%}
     <span aria-hidden="true">/</span>
-    <a href="{{ parent_collection.url }}">{{ parent_collection.title | escape }}</a>
+    <a href="{{ catalogue_url }}?filter.p.tag={{ misc_collection_tag | url_encode }}">{{ misc_collection_label | escape }}</a>
   {%- endif -%}
   <span aria-hidden="true">/</span>
   <span aria-current="page">{{ product.title | escape }}</span>

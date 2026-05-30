@@ -1,0 +1,59 @@
+{
+  "sections": {
+    "main": {
+      "type": "misc-brand-page",
+      "settings": {
+        "eyebrow": "Brand",
+        "brand_name": "Traveler’s Company",
+        "force_lowercase": true,
+        "lead": "",
+        "represented_label": "Represented by",
+        "represented_org": "MISC Distribution",
+        "represented_region": "Benelux, Germany & Scandinavia",
+        "discover_label": "Discover more",
+        "website_label": "travelers-company.com",
+        "website_url": "http://www.travelers-company.com",
+        "tile_ratio": "16 / 9",
+        "rule_weight": 3,
+        "padding_top": 48,
+        "padding_bottom": 64
+      },
+      "blocks": {
+        "p_1": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>Since its establishment in 1950, the Midori brand has been popular with many customers and has produces many hit products and long sellers. In addition to sophisticated designs, Midori manufactures goods that combine both beauty and functionality by paying special attention to beauty and materials used.</p>"
+          }
+        },
+        "p_2": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>TRAVELER’S Company is now a separate entity from Midori and comprises TRAVELER’S Notebook, BRASS, KRAFT and Spiral Ring Notebook series. In all packaging, the Midori logo’s will be omitted.</p>"
+          }
+        },
+        "p_3": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>TRAVELER’S Company has a big fanbase worldwide, and because the distribution is very much controlled, fans consider stores carrying it as true gems.</p>"
+          }
+        },
+        "img_1": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/TN-Company-LR.jpg?v=1780166228",
+            "alt": "Traveler’s Company"
+          }
+        }
+      },
+      "block_order": [
+        "p_1",
+        "p_2",
+        "p_3",
+        "img_1"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

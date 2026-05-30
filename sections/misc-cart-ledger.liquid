@@ -195,6 +195,21 @@
     {%- assign order_notes = cart.attributes.order_notes | default: '' -%}
     {%- assign ship_pref = cart.attributes.ship_preference | default: 'as_available' -%}
 
+    {%- comment -%}
+      Relevance flags — hide controls that can't do anything:
+        show_ship_pref : ship-as-available vs ship-complete only
+          matters when something is NOT ready now (incoming or
+          backordered). All-ready orders ship once, no choice.
+        status_buckets : how many of Ready/Incoming/Backorder are
+          present. With 0 or 1, the Status filter row is pointless.
+    {%- endcomment -%}
+    {%- assign show_ship_pref = true -%}
+    {%- if cart_inbound_qty == 0 and cart_backorder_qty == 0 -%}{%- assign show_ship_pref = false -%}{%- endif -%}
+    {%- assign status_buckets = 0 -%}
+    {%- if products_with_ready > 0 -%}{%- assign status_buckets = status_buckets | plus: 1 -%}{%- endif -%}
+    {%- if products_with_inbound > 0 -%}{%- assign status_buckets = status_buckets | plus: 1 -%}{%- endif -%}
+    {%- if products_with_backorder > 0 -%}{%- assign status_buckets = status_buckets | plus: 1 -%}{%- endif -%}
+
     <div class="misc-cart-ledger__page">
 
       {%- comment -%} ===== TITLE + META + INFO BANNER + TERMS STRIP ===== {%- endcomment -%}
@@ -257,24 +272,33 @@
             <button type="button" class="misc-cart-ledger__chip is-active" data-view="images">Images</button>
           </div>
         </div>
+        {%- comment -%} Status row only renders when 2+ stock states are present; each chip only when its bucket has products. {%- endcomment -%}
+        {%- if status_buckets > 1 -%}
         <div class="misc-cart-ledger__filter-row">
           <span class="misc-cart-ledger__filter-label">Status</span>
           <div class="misc-cart-ledger__filter-options">
+            {%- if products_with_ready > 0 -%}
             <button type="button" class="misc-cart-ledger__chip is-active" data-bucket="in">
               <span class="misc-cart-ledger__chip-dot misc-cart-ledger__chip-dot--in"></span>
               Ready <span class="misc-cart-ledger__chip-count">({{ products_with_ready }})</span>
             </button>
+            {%- endif -%}
+            {%- if products_with_inbound > 0 -%}
             <button type="button" class="misc-cart-ledger__chip is-active" data-bucket="inbound">
               <span class="misc-cart-ledger__chip-dot misc-cart-ledger__chip-dot--inbound"></span>
               Incoming <span class="misc-cart-ledger__chip-count">({{ products_with_inbound }})</span>
             </button>
+            {%- endif -%}
+            {%- if products_with_backorder > 0 -%}
             <button type="button" class="misc-cart-ledger__chip is-active" data-bucket="backorder">
               <span class="misc-cart-ledger__chip-dot misc-cart-ledger__chip-dot--backorder"></span>
               Backorder <span class="misc-cart-ledger__chip-count">({{ products_with_backorder }})</span>
             </button>
+            {%- endif -%}
           </div>
           <button type="button" class="misc-cart-ledger__reset" data-action="reset-state">Show all</button>
         </div>
+        {%- endif -%}
         <div class="misc-cart-ledger__filter-row">
           <span class="misc-cart-ledger__filter-label">Brand</span>
           <div class="misc-cart-ledger__filter-options">
@@ -629,10 +653,11 @@
         </div>
       </div>
 
-      {%- comment -%} ===== 3-COLUMN PRE-CONFIRM ROW ===== {%- endcomment -%}
-      <section class="misc-cart-ledger__pre-confirm">
+      {%- comment -%} ===== PRE-CONFIRM ROW (3 cols, or 2 when shipment preference is irrelevant) ===== {%- endcomment -%}
+      <section class="misc-cart-ledger__pre-confirm{% unless show_ship_pref %} misc-cart-ledger__pre-confirm--two-col{% endunless %}">
 
-        {%- comment -%} -- COL 1: Shipment preference -- {%- endcomment -%}
+        {%- comment -%} -- COL 1: Shipment preference — only when something isn't ready now -- {%- endcomment -%}
+        {%- if show_ship_pref -%}
         <div>
           <h3 class="misc-cart-ledger__col-title">Shipment preference</h3>
           <div class="misc-cart-ledger__ship-pref" data-ship-pref-group>
@@ -659,6 +684,7 @@
             </p>
           </div>
         </div>
+        {%- endif -%}
 
         {%- comment -%} -- COL 2: Order summary -- {%- endcomment -%}
         <div>

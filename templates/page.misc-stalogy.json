@@ -1,0 +1,97 @@
+{
+  "sections": {
+    "main": {
+      "type": "misc-brand-page",
+      "settings": {
+        "eyebrow": "Brand",
+        "brand_name": "Stálogy",
+        "force_lowercase": true,
+        "lead": "What should have been, is.",
+        "represented_label": "Represented by",
+        "represented_org": "MISC Distribution",
+        "represented_region": "Benelux, Germany & Scandinavia",
+        "discover_label": "Discover more",
+        "website_label": "stalogy.com",
+        "website_url": "https://www.stalogy.com",
+        "tile_ratio": "16 / 9",
+        "rule_weight": 3,
+        "padding_top": 48,
+        "padding_bottom": 64
+      },
+      "blocks": {
+        "p_1": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>when people first used a stick to draw on the ground.</p>"
+          }
+        },
+        "p_2": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>The link between stationery and people began. The link, time and again, has continued to evolve along with the evolution of people, and continues to exist today.</p>"
+          }
+        },
+        "p_3": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>However, its intended purpose has never changed.</p>"
+          }
+        },
+        "p_4": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>We are now rethinking this evolution. Eliminating unnecessary ornamentation and function, we are taking a new look at what’s really necessary, rediscovering essential elements and aiming to finally arrive at what should have existed all along.</p>"
+          }
+        },
+        "p_5": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>Stationery, standard & technology.</p>"
+          }
+        },
+        "img_1": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/STALOGY-Scene-Photo03.jpg?v=1780166228",
+            "alt": "Stálogy"
+          }
+        },
+        "img_2": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/STALOGY-Scene-Photo12-1100x733.jpg?v=1780166228",
+            "alt": "Stálogy"
+          }
+        },
+        "img_3": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/STALOGY-Scene-Photo11-1100x733.jpg?v=1780166228",
+            "alt": "Stálogy"
+          }
+        },
+        "img_4": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/Stalogy.jpg?v=1780166228",
+            "alt": "Stálogy"
+          }
+        }
+      },
+      "block_order": [
+        "p_1",
+        "p_2",
+        "p_3",
+        "p_4",
+        "p_5",
+        "img_1",
+        "img_2",
+        "img_3",
+        "img_4"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

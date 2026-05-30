@@ -183,12 +183,6 @@
   object-fit: cover;
   transform: scale(1.02);
   backface-visibility: hidden;
-  transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-
-.misc-brand-page__hero:hover img,
-.misc-brand-page__tile:hover img {
-  transform: scale(1.06);
 }
 
 /* Hero borrows its height from the text column beside it */

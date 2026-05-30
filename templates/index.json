@@ -59,32 +59,14 @@
     },
     "brand-portfolio": {
       "type": "misc-brand-portfolio",
-      "blocks": {
-        "b-hibi":     { "type": "brand", "settings": { "name": "Hibi" } },
-        "b-hightide": { "type": "brand", "settings": { "name": "Hightide" } },
-        "b-ito":      { "type": "brand", "settings": { "name": "ITO Bindery" } },
-        "b-kokuyo":   { "type": "brand", "settings": { "name": "Kokuyo" } },
-        "b-md":       { "type": "brand", "settings": { "name": "MD Product" } },
-        "b-midori":   { "type": "brand", "settings": { "name": "Midori" } },
-        "b-nahe":     { "type": "brand", "settings": { "name": "Nähe" } },
-        "b-paperlux": { "type": "brand", "settings": { "name": "Paperlux" } },
-        "b-penco":    { "type": "brand", "settings": { "name": "Penco" } },
-        "b-stalogy":  { "type": "brand", "settings": { "name": "Stálogy" } },
-        "b-studio":   { "type": "brand", "settings": { "name": "Studio Unto" } },
-        "b-trc":      { "type": "brand", "settings": { "name": "Traveler's Company" } },
-        "b-block":    { "type": "brand", "settings": { "name": "BLOCK" } }
-      },
-      "block_order": [
-        "b-hibi", "b-hightide", "b-ito", "b-kokuyo", "b-md", "b-midori",
-        "b-nahe", "b-paperlux", "b-penco", "b-stalogy", "b-studio", "b-trc", "b-block"
-      ],
       "settings": {
-        "meta_label": "Our brand portfolio",
+        "menu": "main-menu",
+        "parent_title": "Brands",
+        "meta_label": "Our brands",
         "meta_subtitle": "Carefully selected, design-led stationery",
         "show_count": true,
         "since_text": "Established 2010",
-        "cta_label": "View all brands",
-        "aria_label": "Brand portfolio"
+        "aria_label": "Our brands"
       }
     },
     "trade-shows": {

@@ -1,0 +1,83 @@
+{
+  "sections": {
+    "main": {
+      "type": "misc-brand-page",
+      "settings": {
+        "eyebrow": "Brand",
+        "brand_name": "Paperlux Studio",
+        "force_lowercase": true,
+        "lead": "",
+        "represented_label": "Represented by",
+        "represented_org": "MISC Distribution",
+        "represented_region": "Europe",
+        "discover_label": "Discover more",
+        "website_label": "paperlux.com",
+        "website_url": "https://paperlux.com/en/",
+        "tile_ratio": "16 / 9",
+        "rule_weight": 3,
+        "padding_top": 48,
+        "padding_bottom": 64
+      },
+      "blocks": {
+        "p_1": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>Paperlux Studio is an interdisciplinary design studio based in Hamburg – since 2006, we’ve been creating brands, products and experiences that last.</p>"
+          }
+        },
+        "p_2": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>In 2020, they took over a long-standing bookbinding studio they had previously worked with as clients. Today, it is fully integrated into their practice – where prototypes, dummies and bespoke productions are realized with exceptional precision. This is also where their own Paperlux Studio collections like the One Word A Day series is produced.</p>"
+          }
+        },
+        "p_3": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>Paperlux is a studio, a lab and a place to think. Where analog craftsmanship meets digital precision – and design becomes more than visual: it becomes spatial, tactile, and memorable.</p>"
+          }
+        },
+        "img_1": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/OWAD_InUse-blue-1100x734.jpg?v=1780166228",
+            "alt": "Paperlux Studio"
+          }
+        },
+        "img_2": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/OWAD_InUse-Green-open-1100x734.jpg?v=1780166228",
+            "alt": "Paperlux Studio"
+          }
+        },
+        "img_3": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/240424_store_OWAD_Header_Quer-1100x489.jpg?v=1780166228",
+            "alt": "Paperlux Studio"
+          }
+        },
+        "img_4": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/241126_store_OWAD_Neon_Header_Web2-1100x474.jpg?v=1780166228",
+            "alt": "Paperlux Studio"
+          }
+        }
+      },
+      "block_order": [
+        "p_1",
+        "p_2",
+        "p_3",
+        "img_1",
+        "img_2",
+        "img_3",
+        "img_4"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

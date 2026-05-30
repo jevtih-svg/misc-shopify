@@ -174,78 +174,102 @@
 .misc-hero__nav-btn svg { width: 18px; height: 18px; }
 
 /* ============================================================
-   BRAND PORTFOLIO BAND (dark editorial)
+   BRANDS DIRECTORY (hairline-framed grid, one cell per brand)
+   Data-driven from the Brands submenu. Each cell links to a
+   per-brand page. Resting state is light; hover fills with ink.
    ============================================================ */
-.misc-brand-strip {
-  background: var(--c-ink);
-  color: var(--c-bg);
-  padding: var(--space-7) var(--space-6);
+.misc-brands {
+  background: var(--c-bg);
+  border-bottom: 3px solid var(--c-ink);
 }
 
-.misc-brand-strip__meta {
+.misc-brands__head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  padding-bottom: var(--space-5);
-  border-bottom: 1px solid #2a2a2a;
-  margin-bottom: var(--space-6);
-  font-size: var(--fs-2xs);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  color: var(--c-ink-faint);
-  font-weight: var(--fw-medium);
   gap: var(--space-4);
   flex-wrap: wrap;
-}
-.misc-brand-strip__meta strong {
-  color: var(--c-bg);
-  font-weight: var(--fw-medium);
-}
-.misc-brand-strip__meta-right {
-  font-variant-numeric: tabular-nums;
-  display: flex;
-  gap: var(--space-5);
-}
-
-.misc-brand-strip__list {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0;
-  margin-bottom: var(--space-6);
-}
-
-.misc-brand-strip__name {
-  font-size: var(--fs-lg);
-  font-weight: var(--fw-medium);
-  letter-spacing: -0.01em;
-  color: var(--c-bg);
-  padding: var(--space-2) var(--space-5) var(--space-2) 0;
-  margin-right: var(--space-5);
-  border-right: 1px solid #2a2a2a;
-  line-height: 1.2;
-  transition: color 100ms ease;
-  text-decoration: none;
-}
-.misc-brand-strip__name:last-of-type { border-right: 0; }
-.misc-brand-strip__name:hover { color: var(--c-ink-faint); text-decoration: none; }
-
-.misc-brand-strip__cta {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-3);
-  color: var(--c-bg);
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--c-line);
   font-size: var(--fs-2xs);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   font-weight: var(--fw-medium);
-  padding: var(--space-3) 0;
-  border-top: 1px solid #2a2a2a;
-  width: 100%;
-  text-decoration: none;
 }
-.misc-brand-strip__cta:hover { color: var(--c-ink-faint); text-decoration: none; }
-.misc-brand-strip__cta svg { width: 14px; height: 14px; }
+.misc-brands__eyebrow { color: var(--c-ink); }
+.misc-brands__sub { color: var(--c-ink-mute); }
+.misc-brands__meta {
+  display: flex;
+  gap: var(--space-5);
+  color: var(--c-ink-mute);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The grid is full-bleed; cells carry the hairlines. Cell padding matches
+   the header padding so brand names line up under the eyebrow. */
+.misc-brands__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.misc-brands__cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 72px;
+  padding: var(--space-5) var(--space-6);
+  border-right: 1px solid var(--c-line);
+  border-bottom: 1px solid var(--c-line);
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-medium);
+  letter-spacing: -0.01em;
+  line-height: var(--lh-ui);
+  text-decoration: none;
+  transition: background 120ms ease, color 120ms ease;
+}
+/* Remove the seam where cells meet the section's own bottom frame and the
+   right edge, so only the interior hairlines show. */
+.misc-brands__grid .misc-brands__cell:nth-child(4n) { border-right: 0; }
+
+.misc-brands__cell svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+.misc-brands__cell:hover,
+.misc-brands__cell:focus-visible {
+  background: var(--c-ink);
+  color: var(--c-bg);
+  text-decoration: none;
+  outline: none;
+}
+.misc-brands__cell:hover svg,
+.misc-brands__cell:focus-visible svg { opacity: 1; transform: translateX(0); }
+
+.misc-brands__cell.is-active { background: var(--c-bg-subtle); }
+.misc-brands__cell.is-active svg { opacity: 1; transform: translateX(0); }
+
+@media (max-width: 900px) {
+  .misc-brands__grid { grid-template-columns: repeat(3, 1fr); }
+  .misc-brands__grid .misc-brands__cell:nth-child(4n) { border-right: 1px solid var(--c-line); }
+  .misc-brands__grid .misc-brands__cell:nth-child(3n) { border-right: 0; }
+}
+@media (max-width: 600px) {
+  .misc-brands__grid { grid-template-columns: repeat(2, 1fr); }
+  .misc-brands__grid .misc-brands__cell:nth-child(3n) { border-right: 1px solid var(--c-line); }
+  .misc-brands__grid .misc-brands__cell:nth-child(2n) { border-right: 0; }
+  .misc-brands__cell {
+    min-height: 60px;
+    padding: var(--space-4) var(--space-5);
+    font-size: var(--fs-sm);
+  }
+}
 
 /* ============================================================
    TRADE SHOWS

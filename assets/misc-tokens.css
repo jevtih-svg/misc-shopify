@@ -198,7 +198,14 @@ shopify-privacy-banner *,
   font-size: 16px !important;
 }
 
-/* Outer container: 3px ink border + white background */
+/* Outer container: 3px ink border + white background.
+   #shopify-pc__banner is Shopify's Customer Privacy ("pc") banner —
+   the white background sits on this element while .__dialog inside
+   is just a transparent centered flex row, so the frame goes here.
+   Without it the banner has no shadow (stripped globally below) and
+   a white bg, so it dissolves into the page. */
+#shopify-pc__banner,
+.shopify-pc__banner,
 shopify-privacy-banner,
 .shopify-privacy-banner,
 .shopify-section-cookie-consent > section,

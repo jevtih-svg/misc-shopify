@@ -1,0 +1,59 @@
+{
+  "sections": {
+    "main": {
+      "type": "misc-brand-page",
+      "settings": {
+        "eyebrow": "Brand",
+        "brand_name": "Midori",
+        "force_lowercase": true,
+        "lead": "",
+        "represented_label": "Represented by",
+        "represented_org": "MISC Distribution",
+        "represented_region": "Benelux, Germany & Scandinavia",
+        "discover_label": "Discover more",
+        "website_label": "midori-japan.co.jp",
+        "website_url": "http://www.midori-japan.co.jp/english/",
+        "tile_ratio": "16 / 9",
+        "rule_weight": 3,
+        "padding_top": 48,
+        "padding_bottom": 64
+      },
+      "blocks": {
+        "p_1": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>Since its establishment in 1950, the Midori brand has been popular with many customers and has produces many hit products and long sellers. In addition to sophisticated designs, Midori manufactures goods that combine both beauty and functionality by paying special attention to beauty and materials used.</p>"
+          }
+        },
+        "p_2": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>Midori has excelled in stationery items that reflect the very tranquil and ‘zen’ side of Japan with top selling series as TRAVELER’S notebook, KRAFT envelopes and BRASS stationery, which are now all part of the separate brand TRAVELER’S Company, as well the colorful and playful ‘pop’-items that reflect the “Kawai” side of Japan, such as the D-Clips and the various sticky notes, some of them receiving design awards.</p>"
+          }
+        },
+        "p_3": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>Besides the top-notch designs, we admire the quality and dedication that are put in designing the items, as well as executing them. There is so much attention in the details of the packaging, that unwrapping the items alone is already a big treat. Midori items are truly a bliss to work with and we are convinced your customers will love them too!</p>"
+          }
+        },
+        "img_1": {
+          "type": "image",
+          "settings": {
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/Midori-LR.jpg?v=1780166228",
+            "alt": "Midori"
+          }
+        }
+      },
+      "block_order": [
+        "p_1",
+        "p_2",
+        "p_3",
+        "img_1"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}
