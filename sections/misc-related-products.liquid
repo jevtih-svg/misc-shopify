@@ -1,0 +1,179 @@
+{%- comment -%}
+  ============================================================
+  MISC related products — fork of Trade's sections/related-products.liquid.
+
+  Why forked:
+    Trade's section renders its own `card-product` snippet with
+    Trade's grid styles. The visual treatment (rounded images,
+    fade-in animations, "Sold out" pills) doesn't match our
+    line-grid design system. Forking lets us drop the card swap
+    + the line-grid wrapper without polluting Trade's section.
+
+  What we keep from Trade:
+    - <product-recommendations> custom element, so Trade's
+      product-recommendations.js continues to call the
+      recommendations endpoint and inject the result.
+    - data-url + data-section-id + data-product-id attributes
+      that the element reads on mount.
+
+  What we change:
+    - Renders snippets/misc-card-product.liquid instead of
+      Trade's card-product.
+    - Uses .product-grid + .is-cols-5 (the same grid used on
+      the collection page) so the line-grid borders match.
+    - Drops Trade's animation / mask-shape / colour-scheme
+      plumbing (mockup is monochrome, no animations).
+
+  Section schema is trimmed to the settings that actually do
+  something in our markup: heading, products_to_show, padding.
+
+  Used by: templates/product.json
+  ============================================================
+{%- endcomment -%}
+
+{{ 'misc-collection.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .misc-related-{{ section.id }} {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+  @media screen and (min-width: 750px) {
+    .misc-related-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+  .misc-related-{{ section.id }} .misc-related__heading {
+    margin: 0 var(--space-5) var(--space-4);
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
+    letter-spacing: -0.01em;
+    color: var(--c-ink);
+  }
+
+  /* Inline line-grid rules so the section is self-contained.
+     misc-collection.css scopes its grid styles to .collection,
+     which doesn't apply outside the catalog page. We replicate
+     the 5-col + line-border treatment here. */
+  .misc-related__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border-top: 3px solid var(--c-ink);
+    border-left: 3px solid var(--c-ink);
+  }
+  .misc-related__grid > li {
+    border-right: 3px solid var(--c-ink);
+    border-bottom: 3px solid var(--c-ink);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  /* Responsive collapse */
+  @media (max-width: 1279px) {
+    .misc-related__grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 1023px) {
+    .misc-related__grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .misc-related__grid { grid-template-columns: repeat(2, 1fr); }
+    .misc-related-{{ section.id }} .misc-related__heading {
+      margin: 0 var(--space-4) var(--space-3);
+      font-size: var(--fs-lg);
+    }
+  }
+{%- endstyle -%}
+
+<product-recommendations
+  class="misc-related misc-related-{{ section.id }}"
+  data-url="{{ routes.product_recommendations_url }}?limit={{ section.settings.products_to_show }}"
+  data-section-id="{{ section.id }}"
+  data-product-id="{{ product.id }}"
+>
+  {%- if recommendations.performed and recommendations.products_count > 0 -%}
+    <h2 class="misc-related__heading">{{ section.settings.heading | escape }}</h2>
+
+    <ul
+      class="product-grid is-cols-5 misc-related__grid"
+      role="list"
+    >
+      {%- for recommendation in recommendations.products -%}
+        <li>
+          {%- render 'misc-card-product',
+             card_product: recommendation,
+             media_aspect_ratio: 'square',
+             show_vendor: true,
+             lazy_load: true,
+             quick_add: 'none',
+             section_id: section.id
+          -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+</product-recommendations>
+
+{% schema %}
+{
+  "name": "MISC related products",
+  "tag": "section",
+  "class": "misc-related-wrap",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Renders product recommendations using the MISC line-grid card. Only the settings below have an effect — Trade's image-shape / animations / colour-scheme settings are intentionally not exposed."
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "default": "You might also like",
+      "label": "Heading"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 5,
+      "label": "Products to show"
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 44
+    }
+  ],
+  "presets": [
+    {
+      "name": "MISC related products"
+    }
+  ]
+}
+{% endschema %}

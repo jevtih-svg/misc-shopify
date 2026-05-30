@@ -263,51 +263,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-.misc-filter-bar__sort {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  flex-shrink: 0;
-  font-size: var(--fs-sm);
-  white-space: nowrap;
-}
-
-.misc-sort__label {
-  color: var(--c-ink-mute);
-  font-weight: var(--fw-regular);
-  font-size: var(--fs-sm);
-}
-
-.misc-sort__select {
-  appearance: none;
-  -webkit-appearance: none;
-  background: transparent;
-  border: 0;
-  padding: 0 var(--space-4) 0 0;
-  font-family: var(--font-sans);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
-  color: var(--c-ink);
-  cursor: pointer;
-  /* Caret chevron rendered via background SVG since we removed
-     Trade's wrapper that previously housed the icon. */
-  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpolyline points='3,5 6,8 9,5' fill='none' stroke='%230A0A0A' stroke-width='1.5'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right center;
-  background-size: 12px 12px;
-}
-
-.misc-sort__select:focus {
-  outline: none;
-}
-
-.misc-sort__count {
-  color: var(--c-ink-mute);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-regular);
-  font-variant-numeric: tabular-nums;
-}
-
 .misc-filter-bar__title {
   font-size: var(--fs-2xs);
   font-weight: var(--fw-medium);
@@ -899,21 +854,36 @@
 .misc-product-card__stock--oos       { color: var(--c-ink-mute); }
 
 /* ============================================================
-   QUANTITY STEPPER (main, full-width below the card body)
-   Big, ink-bordered, hover invert. Acts as the primary CTA.
+   QUANTITY STEPPER
 
-   Trade's quick-add.css targets `.quick-add-modal` descendants —
-   it doesn't touch our `.misc-qty-stepper*` classes. Trade's
-   base.css has no generic `button` or `input[type="number"]`
-   rules (only `.quantity__*` classes we don't use). So our
-   custom classes win cleanly without !important.
+   Layout: CSS Grid with `place-items: center`. This is the
+   single most important technique on the page — it centers all
+   three children (− button, input, + button) at the geometric
+   center of the wrapper, INDEPENDENT of font metrics. Padding,
+   line-height, and font baseline don't enter the picture; grid
+   places each child's box at the cell center, and each child
+   centers its content inside its own box.
+
+   Why this matters: the previous flex-based approach pitted the
+   buttons' flex-centered text (geometric middle of line-box)
+   against the input's native baseline-aligned text (descent
+   below line-box middle). The "0" always read 1-3 px low. With
+   grid place-items: center on the wrapper + the buttons + the
+   input all set to width:100% / height:100% of their cell, every
+   glyph lands at the same Y position.
+
+   Trade's quick-add.css targets `.quick-add-modal` descendants
+   only, so our `.misc-qty-stepper*` classes win without !important
+   on most properties. !important stays on input-specific resets
+   (appearance, border, padding) where UA stylesheets fight back.
    ============================================================ */
+
+/* Main stepper (single-variant card): 52 px outer × 2 px border = 48 px inner */
 .misc-qty-stepper {
-  display: flex;
+  display: grid;
+  grid-template-columns: 48px 1fr 48px;
   align-items: stretch;
   height: 52px;
-  /* 2px instead of 1.5px so the border renders consistently — sub-pixel
-     values round down to 1px on standard-density displays. */
   border: 2px solid var(--c-ink);
   border-radius: var(--radius-sm);
   margin-top: var(--space-3);
@@ -922,133 +892,87 @@
   box-sizing: border-box;
 }
 
-.misc-qty-stepper__btn {
-  flex: 0 0 48px;
-  background: var(--c-bg);
-  color: var(--c-ink);
-  border: none;
-  font-size: var(--fs-xl);
-  font-weight: var(--fw-medium);
-  line-height: 1;
-  cursor: pointer;
-  padding: 0;
-  margin: 0;
-  transition: background 100ms ease, color 100ms ease;
-  box-shadow: none;
-  border-radius: 0;
-  /* Flex-center the +/- glyph in the button so it lands at the
-     geometric centre of the box. Otherwise UA stylesheets place
-     text on the baseline and the +/− sit slightly low. */
+/* All three children fill their grid cell completely and center
+   their content. Buttons get this for free because they're
+   block-level flex containers; input gets it via the same flex
+   pattern wrapped in inline-grid so its text centers visually. */
+.misc-qty-stepper__btn,
+.misc-qty-stepper__input {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-family: var(--font-sans);
+  font-weight: var(--fw-medium);
+  line-height: 1;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  outline: none;
+  cursor: pointer;
 }
 
+.misc-qty-stepper__btn {
+  font-size: var(--fs-xl);
+  transition: background 100ms ease, color 100ms ease;
+}
 .misc-qty-stepper__btn:hover {
   background: var(--c-ink);
   color: var(--c-bg);
 }
-
 .misc-qty-stepper__btn[disabled] {
   cursor: not-allowed;
   opacity: 0.4;
 }
 
 .misc-qty-stepper__input {
-  /* The stepper renders as a single bordered rectangle with
-     [−, value, +] inside. The input itself has NO borders — not
-     even left/right dividers. The visible rectangle is solely
-     drawn by the wrapper's `.misc-qty-stepper { border: 2px }`.
-
-     Full appearance reset so the browser stops drawing its native
-     input chrome (gray inset border, default padding, narrow font).
-     !important on font-size, border, appearance because some
-     browsers' UA stylesheets treat input defaults as higher
-     specificity than class rules in edge cases. */
+  /* Native input chrome reset. !important because some UA
+     stylesheets apply higher specificity to form-control defaults
+     than our class rule. */
   appearance: none !important;
   -webkit-appearance: none !important;
   -moz-appearance: textfield;
-
-  flex: 1 1 auto;
-  width: 100%;
-  min-width: 0;
-  height: 100%;
-
   border: 0 !important;
-  border-radius: 0 !important;
-
-  /* Centring: line-height: 1 sizes the line-box to font-size,
-     then equal top+bottom padding centres the em-box inside the
-     48px stepper inner area. This gives geometric centring rather
-     than the baseline-biased centring you get with line-height
-     matching the container height (the "0" was reading low).
-     22px font + 13px × 2 padding + box-sizing border-box = 48px. */
-  text-align: center !important;
-  text-indent: 0 !important;
-  vertical-align: middle !important;
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-lg) !important;
-  font-weight: var(--fw-medium) !important;
-  line-height: 1 !important;
-  height: 48px !important;
-  padding: 13px 0 !important;
-  box-sizing: border-box !important;
-  color: var(--c-ink);
-  background: var(--c-bg);
-
-  padding: 0;
-  margin: 0;
   box-shadow: none !important;
   outline: none !important;
+  text-align: center !important;
+  text-indent: 0 !important;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-lg) !important;
+  cursor: text;
+  /* Force the input's intrinsic height to ignore line-height so
+     the flex centering does the actual vertical positioning. */
+  min-height: 0;
+  box-sizing: border-box;
 }
-
-/* Suppress Trade's global focus outline on this input — we already
-   give visual feedback via the stepper border colour. */
+.misc-qty-stepper__input::-webkit-outer-spin-button,
+.misc-qty-stepper__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 .misc-qty-stepper__input:focus,
 .misc-qty-stepper__input:focus-visible {
   outline: none;
   box-shadow: none;
 }
 
-.misc-qty-stepper__input::-webkit-outer-spin-button,
-.misc-qty-stepper__input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
+/* Visual sync state (set by misc-quick-add.js when AJAX in flight) */
+.misc-qty-stepper.is-dirty   { border-color: var(--c-ink); }
+.misc-qty-stepper.is-syncing .misc-qty-stepper__input { color: var(--c-ink-mute); }
 
-.misc-qty-stepper__input:focus {
-  outline: none;
-}
-
-/* Pending sync / in-flight visual states (set by misc-quick-add.js) */
-.misc-qty-stepper.is-dirty {
-  border-color: var(--c-ink);
-}
-
-.misc-qty-stepper.is-syncing .misc-qty-stepper__input {
-  color: var(--c-ink-mute);
-}
-
-/* Mini-stepper variant (used inside variant rows). Smaller height,
-   thinner border, same hover-invert behaviour. */
+/* Mini-stepper (variant rows, list view): 36 px outer × 1.5 px border = 33 px inner */
 .misc-qty-stepper--mini {
-  height: 32px;
+  grid-template-columns: 32px 1fr 32px;
+  height: 36px;
   border-width: 1.5px;
 }
-
-.misc-qty-stepper--mini .misc-qty-stepper__btn {
-  flex: 0 0 32px;
-  font-size: var(--fs-md);
-}
-
-.misc-qty-stepper--mini .misc-qty-stepper__input {
-  /* Same centring trick as main stepper:
-     18px font + 5.5px × 2 padding = 29px (mini inner height). */
-  font-size: var(--fs-md) !important;
-  line-height: 1 !important;
-  height: 29px !important;
-  padding: 5.5px 0 !important;
-}
+.misc-qty-stepper--mini .misc-qty-stepper__btn { font-size: var(--fs-md); }
+.misc-qty-stepper--mini .misc-qty-stepper__input { font-size: var(--fs-md) !important; }
 
 /* ============================================================
    VARIANT ROWS (multi-variant cards)
@@ -1276,32 +1200,24 @@
     padding-left: var(--space-3);
     padding-right: var(--space-3);
   }
-  .misc-product-card__body {
-    padding: var(--space-3);
-  }
-  .misc-product-card__name {
-    font-size: var(--fs-sm);
-  }
-  .misc-product-card__price {
-    font-size: var(--fs-md);
-  }
+  .misc-product-card__body { padding: var(--space-3); }
+  .misc-product-card__name  { font-size: var(--fs-sm); }
+  .misc-product-card__price { font-size: var(--fs-md); }
+
+  /* Grid columns shrink — phone steppers stay tappable but
+     proportionally smaller. */
   .misc-qty-stepper {
+    grid-template-columns: 40px 1fr 40px;
     height: 44px;
   }
-  .misc-qty-stepper__btn {
-    flex: 0 0 40px;
-    font-size: var(--fs-lg);
-  }
-  .misc-qty-stepper__input {
-    font-size: var(--fs-md);
-  }
+  .misc-qty-stepper__btn { font-size: var(--fs-lg); }
+  .misc-qty-stepper__input { font-size: var(--fs-md) !important; }
+
   .misc-qty-stepper--mini {
+    grid-template-columns: 28px 1fr 28px;
     height: 28px;
   }
-  .misc-qty-stepper--mini .misc-qty-stepper__btn {
-    flex: 0 0 28px;
-    font-size: var(--fs-sm);
-  }
+  .misc-qty-stepper--mini .misc-qty-stepper__btn { font-size: var(--fs-sm); }
 }
 
 /* ============================================================
@@ -1334,8 +1250,6 @@
   color: var(--c-bg);
 }
 .view-toggle__btn:hover:not(.is-active) { background: var(--c-bg-subtle); }
-
-.sort-control--per-page { /* same styles as .sort-control */ }
 
 /* When the list view is active, hide the grid. The grid carries
    `display: grid` from its own rule, which beats the [hidden]
@@ -1445,8 +1359,24 @@ html.misc-prefer-grid-5 .product-grid {
   position: relative;
   display: flex;
   align-items: center;
-  padding: var(--space-3);
-  border-bottom: 3px solid var(--c-ink);
+  /* Tighter vertical padding so rows feel condensed and the table
+     packs more data per scroll. Horizontal padding stays at 12px
+     for column breathing room. */
+  padding: var(--space-1) var(--space-3);
+  /* Uniform row height regardless of cell content. Without
+     min-height, the header row (smaller fs-2xs font, no stepper)
+     was visibly shorter than data rows (taller fs-md price + 36px
+     stepper). 44px matches the data row's natural height (36 px
+     stepper + 4 px × 2 padding) so header rows and product rows
+     are pixel-perfect uniform. Cells with multi-line content
+     (e.g. mixed stock states) can still grow taller. */
+  min-height: 44px;
+  /* Hairline between regular product rows — heavy enough to make
+     each product feel distinct without the harshness of the 3px
+     ink line we use for section separators. 1px ink is darker
+     than the 1px grey we used before, but still much subtler than
+     the 3px brand-line on the header. */
+  border-bottom: 1px solid var(--c-ink);
   background: var(--c-bg);
   font-size: var(--fs-xs);
   color: var(--c-ink);
@@ -1454,6 +1384,22 @@ html.misc-prefer-grid-5 .product-grid {
   line-height: var(--lh-body);
   min-width: 0;
   white-space: nowrap;
+}
+
+/* Header row: keep the heavy 3px ink line below so the column
+   labels feel like a true section separator above the first
+   product row. Sticky-pinned to the top of the viewport so the
+   buyer sees column labels while scrolling a long catalog. The
+   z-index sits above the inset divider pseudo-elements (z 0)
+   and the popovers (z 100 — those stay above when triggered). */
+.list-row--head > .list-cell {
+  border-bottom: 3px solid var(--c-ink);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  /* Background must be opaque so scrolling content doesn't show
+     through the sticky header. */
+  background: var(--c-bg);
 }
 
 /* Inset grey vertical divider via pseudo-element so it sits BEHIND
@@ -1549,24 +1495,29 @@ html.misc-prefer-grid-5 .product-grid {
   justify-content: center;
 }
 .list-cell--stepper {
-  justify-content: flex-end;
-  padding-top: var(--space-2);
-  padding-bottom: var(--space-2);
+  /* Dead center horizontally and vertically. */
+  justify-content: center;
+  padding-top: var(--space-1);
+  padding-bottom: var(--space-1);
 }
 .list-cell--stepper .mini-stepper {
+  /* Mini-stepper inside list cells. Width 130 px, height matches
+     .misc-qty-stepper--mini's 36 px. The grid-template-columns
+     (32px 1fr 32px) gives the input the middle 66 px for the
+     digit, plenty of room. */
   width: 130px;
-  height: 36px;
-  border: 1.5px solid var(--c-ink);
 }
 
-/* Stepper-sized placeholder for out-of-stock rows. Same footprint
-   as the mini-stepper so the right edge of the table stays aligned
-   between orderable and OOS rows. Muted ink-faint border + text
-   reads as "not interactive" without a button affordance. */
+/* Stepper-sized placeholder for out-of-stock rows. Footprint
+   identical to the mini-stepper (same width, same height, same
+   border thickness) so row heights stay aligned across orderable
+   and OOS items. Muted ink-faint border + text reads as "not
+   interactive" without a button affordance. */
 .misc-stepper-placeholder {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
   width: 130px;
   height: 36px;
   border: 1.5px dashed var(--c-ink-faint);
@@ -1577,12 +1528,11 @@ html.misc-prefer-grid-5 .product-grid {
   font-weight: var(--fw-medium);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps-sm);
+  line-height: 1;
 }
-.list-row--variant .misc-stepper-placeholder {
-  width: 110px;
-  height: 28px;
-  font-size: 11px;
-}
+/* Variant placeholder uses the same footprint as the regular
+   stepper so all action cells in the table read as identical
+   visual elements. */
 
 /* Multi-variant in list view */
 .list-row--parent .list-cell {
@@ -1609,23 +1559,20 @@ html.misc-prefer-grid-5 .product-grid {
   color: var(--c-ink-mute);
 }
 .list-row--variant .list-cell {
+  /* Variant rows use the lighter grey hairline so they feel like
+     nested members of the parent group rather than independent
+     products. All cell typography (SKU, UPQ, HS, Origin, Stock,
+     RRP, Price) inherits the single-variant defaults so the table
+     reads as one consistent type scale across regular and variant
+     rows. Only the variant NAME cell is sized differently below
+     to mark it as a sub-item. */
   border-bottom: 1px solid var(--c-line);
-  padding-top: var(--space-2);
-  padding-bottom: var(--space-2);
-  font-size: var(--fs-2xs);
-}
-.list-row--variant .list-cell--stepper {
-  padding-top: var(--space-1);
-  padding-bottom: var(--space-1);
-}
-.list-row--variant .list-cell--stepper .mini-stepper {
-  height: 28px;
-  width: 110px;
 }
 .list-row--variant .list-cell--name {
   padding-left: 28px;
   position: relative;
   font-size: var(--fs-xs);
+  font-weight: var(--fw-regular);
   color: var(--c-ink);
 }
 .list-row--variant .list-cell--name::before {
@@ -1637,7 +1584,11 @@ html.misc-prefer-grid-5 .product-grid {
   height: 1px;
   background: var(--c-ink-mute);
 }
-.list-row--variant-last .list-cell { border-bottom: 3px solid var(--c-ink); }
+/* Closing line of a variant group is the same weight as regular
+   row dividers, so it doesn't pop as a "random heavy line" in
+   the middle of the table. The visual grouping cue is the parent
+   row's "X VARIANTS" hint and the tree-marker indent. */
+.list-row--variant-last .list-cell { border-bottom: 1px solid var(--c-ink); }
 
 /* Filtered-out rows (search) */
 .list-row.is-hidden,
@@ -1949,12 +1900,19 @@ body.drawer-open { overflow: hidden; }
   .misc-product-card__name { font-size: var(--fs-sm); -webkit-line-clamp: 2; min-height: auto; }
   .misc-product-card__price { font-size: var(--fs-md); }
 
-  /* Bigger touch targets */
-  .misc-qty-stepper { height: 48px; }
-  .misc-qty-stepper__btn { flex: 0 0 44px; font-size: var(--fs-lg); }
-  .misc-qty-stepper__input { font-size: var(--fs-md); height: 44px !important; padding: 10px 0 !important; }
-  .misc-qty-stepper--mini { height: 36px; }
-  .misc-qty-stepper--mini .misc-qty-stepper__btn { flex: 0 0 36px; font-size: var(--fs-md); }
+  /* Bigger touch targets on phone (Apple HIG 44 pt minimum). */
+  .misc-qty-stepper {
+    grid-template-columns: 44px 1fr 44px;
+    height: 48px;
+  }
+  .misc-qty-stepper__btn { font-size: var(--fs-lg); }
+  .misc-qty-stepper__input { font-size: var(--fs-md) !important; }
+
+  .misc-qty-stepper--mini {
+    grid-template-columns: 36px 1fr 36px;
+    height: 36px;
+  }
+  .misc-qty-stepper--mini .misc-qty-stepper__btn { font-size: var(--fs-md); }
 
   .facets-vertical .facets-wrapper { width: 100%; max-width: 100%; }
 }

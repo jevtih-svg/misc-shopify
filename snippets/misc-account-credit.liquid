@@ -1,0 +1,71 @@
+{%- comment -%}
+  Credit limit summary panel. Renders inside the top strip of the
+  account page. Data source: Stok.ly via customer metafields. Until
+  the Stok.ly sync writes those metafields, falls back to demo values
+  passed in from misc-account.liquid.
+
+  Inputs:
+    - credit_limit     : number (metafield value, EUR or store currency)
+    - credit_used      : number
+    - credit_currency  : 3-letter ISO (default 'EUR')
+    - payment_terms    : string (e.g. 'Net 30')
+{%- endcomment -%}
+
+{%- assign misc_credit_remaining = credit_limit | minus: credit_used -%}
+{%- if credit_limit > 0 -%}
+  {%- assign misc_credit_pct = credit_used | times: 100.0 | divided_by: credit_limit | round: 0 -%}
+{%- else -%}
+  {%- assign misc_credit_pct = 0 -%}
+{%- endif -%}
+
+{%- if misc_credit_pct >= 90 -%}
+  {%- assign misc_credit_state = 'danger' -%}
+{%- elsif misc_credit_pct >= 70 -%}
+  {%- assign misc_credit_state = 'warn' -%}
+{%- else -%}
+  {%- assign misc_credit_state = 'ok' -%}
+{%- endif -%}
+
+<div class="misc-card misc-card--credit" data-state="{{ misc_credit_state }}">
+  <header class="misc-card__header">
+    <h2 class="misc-card__title">Credit limit</h2>
+    <span class="misc-card__meta">{{ payment_terms }}</span>
+  </header>
+
+  <div class="misc-credit__numbers">
+    <div class="misc-credit__primary">
+      <span class="misc-credit__label">Available</span>
+      <span class="misc-credit__amount">
+        {{ misc_credit_remaining | times: 100 | money_without_currency }}
+        <span class="misc-credit__currency">{{ credit_currency }}</span>
+      </span>
+    </div>
+    <div class="misc-credit__secondary">
+      <span class="misc-credit__label">of</span>
+      <span class="misc-credit__amount-sm">
+        {{ credit_limit | times: 100 | money_without_currency }} {{ credit_currency }}
+      </span>
+    </div>
+  </div>
+
+  <div
+    class="misc-credit__bar"
+    role="progressbar"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    aria-valuenow="{{ misc_credit_pct }}"
+    aria-label="Credit used"
+  >
+    <div class="misc-credit__bar-fill" style="width: {{ misc_credit_pct }}%"></div>
+  </div>
+
+  <footer class="misc-card__footer">
+    <span class="misc-credit__used">
+      {{ misc_credit_pct }}% used · {{ credit_used | times: 100 | money_without_currency }} {{ credit_currency }}
+    </span>
+    {% comment -%}
+      TODO Stok.ly: link to a credit-history view (statement of open
+      invoices vs paid) once that data source exists.
+    {%- endcomment %}
+  </footer>
+</div>

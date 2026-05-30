@@ -1,0 +1,695 @@
+{%- comment -%}
+  ============================================================
+  MISC cart ledger
+  ------------------------------------------------------------
+  Full /cart page in accounting/ledger style. Replaces Trade's
+  default cart (templates/cart.json now references this section).
+
+  Source mockup: Mockups/misc-cart-page-ledger.html
+
+  Per MISC_Dev_Conventions.md this is a NEW misc-* section, not
+  a fork. Trade's main-cart-items.liquid and main-cart-footer.liquid
+  remain in sections/ untouched in case we ever need to revert.
+
+  Per-line stock breakdown math mirrors snippets/misc-cart-drawer-
+  injection.liquid (same Ready / Incoming / Backorder buckets and
+  the same variant-metafield inputs). Computed inline here so the
+  section is self-contained; we'll DRY this up once we factor a
+  shared snippet.
+
+  Inputs:
+    - cart.items: cart line items
+    - item.variant.inventory_quantity: on-hand stock
+    - item.variant.metafields.custom.incoming_qty: incoming integer
+    - item.variant.metafields.custom.incoming_eta: incoming date
+    - item.variant.metafields.custom.case_pack: pack size for label
+    - customer: for login gating + Account name
+    - cart.attributes.po_number / .order_notes: persisted order ref
+    - cart.attributes.ship_preference: as_available | complete
+  ============================================================
+{%- endcomment -%}
+
+{{ 'misc-cart-ledger.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'misc-cart-ledger.js' | asset_url }}" defer></script>
+
+{%- comment -%}
+  Login gate. Per conventions, prices / stock / steppers / the
+  inventory breakdown sit behind a logged-in customer. The dev-
+  only `misc_dev_show_price` checkbox in settings_schema opens
+  the gate for local preview.
+{%- endcomment -%}
+{%- assign misc_show_data = false -%}
+{%- if customer != blank or settings.misc_dev_show_price -%}
+  {%- assign misc_show_data = true -%}
+{%- endif -%}
+
+{%- comment -%}
+  Customer-driven values used in the Account & credit column.
+  All defaults until Stok.ly populates customer metafields.
+{%- endcomment -%}
+{%- assign credit_limit = customer.metafields.account.credit_limit | default: 1500000 -%}
+{%- assign open_invoices_cents = customer.metafields.account.open_invoices_total | default: 0 -%}
+{%- assign open_invoices_count = customer.metafields.account.open_invoices_count | default: 0 -%}
+
+<main class="misc-cart-ledger" data-section-id="{{ section.id }}">
+
+  {%- if cart == empty -%}
+
+    {%- comment -%} Empty state. Quiet, no filters or summary. {%- endcomment -%}
+    <div class="misc-cart-ledger__page">
+      <div class="misc-cart-ledger__title-row">
+        <h1 class="misc-cart-ledger__title">Your order</h1>
+      </div>
+      <p class="misc-cart-ledger__empty">
+        Your cart is empty. <a href="{{ routes.all_products_collection_url }}">Continue shopping</a>.
+      </p>
+    </div>
+
+  {%- else -%}
+
+    {%- comment -%}
+      ----------------------------------------------------------
+      AGGREGATIONS (first pass over cart.items)
+      ----------------------------------------------------------
+      For each line we compute:
+        - line_ready_qty / line_ready_amount
+        - line_inbound_qty / line_inbound_amount / line_inbound_eta
+        - line_backorder_qty / line_backorder_amount
+      We use these inline below for the avail sub-rows AND
+      aggregate them across the cart for the summary block.
+
+      The summary needs incoming totals grouped by ETA. Liquid
+      doesn't have a dict type, so we build a comma-joined list
+      of unique ETAs (string form), then loop through them and
+      re-aggregate per ETA.
+    ----------------------------------------------------------
+    {%- endcomment -%}
+
+    {%- assign cart_ready_qty = 0 -%}
+    {%- assign cart_ready_amount = 0 -%}
+    {%- assign cart_ready_products = 0 -%}
+    {%- assign cart_backorder_qty = 0 -%}
+    {%- assign cart_backorder_amount = 0 -%}
+    {%- assign cart_backorder_products = 0 -%}
+    {%- assign cart_inbound_qty = 0 -%}
+    {%- assign cart_inbound_amount = 0 -%}
+    {%- assign etas_pipe = '' -%}
+    {%- assign brands_pipe = '' -%}
+    {%- assign products_with_ready = 0 -%}
+    {%- assign products_with_inbound = 0 -%}
+    {%- assign products_with_backorder = 0 -%}
+
+    {%- for item in cart.items -%}
+      {%- assign requested = item.quantity | default: 0 -%}
+      {%- assign stock = item.variant.inventory_quantity | default: 0 -%}
+      {%- if stock < 0 -%}{%- assign stock = 0 -%}{%- endif -%}
+      {%- assign incoming_qty_var = item.variant.metafields.custom.incoming_qty.value | default: 0 -%}
+      {%- assign eta_var = item.variant.metafields.custom.incoming_eta.value -%}
+
+      {%- if stock >= requested -%}
+        {%- assign ready = requested -%}
+      {%- else -%}
+        {%- assign ready = stock -%}
+      {%- endif -%}
+      {%- assign remaining = requested | minus: ready -%}
+      {%- if incoming_qty_var >= remaining -%}
+        {%- assign coming = remaining -%}
+      {%- else -%}
+        {%- assign coming = incoming_qty_var -%}
+      {%- endif -%}
+      {%- assign bo = remaining | minus: coming -%}
+
+      {%- assign unit_cents = item.variant.price -%}
+
+      {%- if ready > 0 -%}
+        {%- assign cart_ready_qty = cart_ready_qty | plus: ready -%}
+        {%- assign cart_ready_amount = cart_ready_amount | plus: ready | times: unit_cents -%}
+        {%- assign products_with_ready = products_with_ready | plus: 1 -%}
+      {%- endif -%}
+      {%- if coming > 0 -%}
+        {%- assign cart_inbound_qty = cart_inbound_qty | plus: coming -%}
+        {%- assign cart_inbound_amount = cart_inbound_amount | plus: coming | times: unit_cents -%}
+        {%- assign products_with_inbound = products_with_inbound | plus: 1 -%}
+        {%- if eta_var != blank -%}
+          {%- assign eta_str = eta_var | date: '%Y-%m-%d' -%}
+          {%- assign etas_pipe = etas_pipe | append: eta_str | append: '|' -%}
+        {%- endif -%}
+      {%- endif -%}
+      {%- if bo > 0 -%}
+        {%- assign cart_backorder_qty = cart_backorder_qty | plus: bo -%}
+        {%- assign cart_backorder_amount = cart_backorder_amount | plus: bo | times: unit_cents -%}
+        {%- assign products_with_backorder = products_with_backorder | plus: 1 -%}
+      {%- endif -%}
+
+      {%- assign brand_lc = item.product.vendor | strip -%}
+      {%- if brand_lc != '' -%}
+        {%- assign brands_pipe = brands_pipe | append: brand_lc | append: '|' -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- assign cart_ready_products = products_with_ready -%}
+    {%- assign cart_backorder_products = products_with_backorder -%}
+
+    {%- assign unique_etas = etas_pipe | split: '|' | uniq | sort -%}
+    {%- assign unique_brands = brands_pipe | split: '|' | uniq | sort_natural -%}
+
+    {%- comment -%} Latest ETA across all incoming lines, used in the ship-complete copy. {%- endcomment -%}
+    {%- assign last_eta = '' -%}
+    {%- for eta in unique_etas -%}
+      {%- if eta != '' -%}
+        {%- assign last_eta = eta -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- comment -%}
+      Account & credit math (cents throughout).
+      this_order_cents = cart.total_price
+      total_used_cents = open_invoices + this_order
+      bar_existing_pct = open / limit * 100 (capped 0..100)
+      bar_this_pct = min(this / limit * 100, 100 - bar_existing_pct)
+      over_by_cents = max(total_used - limit, 0)
+    {%- endcomment -%}
+    {%- assign this_order_cents = cart.total_price -%}
+    {%- assign total_used_cents = open_invoices_cents | plus: this_order_cents -%}
+    {%- assign available_after_cents = credit_limit | minus: total_used_cents -%}
+
+    {%- assign bar_existing_pct_x100 = open_invoices_cents | times: 10000 | divided_by: credit_limit -%}
+    {%- if bar_existing_pct_x100 > 10000 -%}{%- assign bar_existing_pct_x100 = 10000 -%}{%- endif -%}
+    {%- assign bar_remaining_room_x100 = 10000 | minus: bar_existing_pct_x100 -%}
+    {%- assign bar_this_full_x100 = this_order_cents | times: 10000 | divided_by: credit_limit -%}
+    {%- if bar_this_full_x100 > bar_remaining_room_x100 -%}
+      {%- assign bar_this_pct_x100 = bar_remaining_room_x100 -%}
+      {%- assign this_over = true -%}
+    {%- else -%}
+      {%- assign bar_this_pct_x100 = bar_this_full_x100 -%}
+      {%- assign this_over = false -%}
+    {%- endif -%}
+
+    {%- assign po_number = cart.attributes.po_number | default: '' -%}
+    {%- assign order_notes = cart.attributes.order_notes | default: '' -%}
+    {%- assign ship_pref = cart.attributes.ship_preference | default: 'as_available' -%}
+
+    <div class="misc-cart-ledger__page">
+
+      {%- comment -%} ===== TITLE + META + INFO BANNER + TERMS STRIP ===== {%- endcomment -%}
+      <div class="misc-cart-ledger__title-row">
+        <h1 class="misc-cart-ledger__title">Your order</h1>
+        <span class="misc-cart-ledger__order-id">Draft &middot; CART-{{ cart.token | slice: 0, 6 | upcase }}</span>
+      </div>
+      <p class="misc-cart-ledger__meta">
+        {{ cart.item_count }} {{ cart.item_count | pluralize: 'product', 'products' }} &middot;
+        {{ cart.total_price | money }} &middot; prepared {{ 'now' | date: '%-d %b %Y' }}
+      </p>
+
+      <div class="misc-cart-ledger__info-banner" role="note">
+        <strong>Informational only &mdash; not a shipping commitment.</strong>
+        The breakdown below shows our current best estimate of what is ready, what is incoming, and what is on backorder.
+        Final shipment plan, dates, and minimum order quantities per shipment will be confirmed by your account manager.
+      </div>
+
+      <div class="misc-cart-ledger__terms-strip">
+        <div class="misc-cart-ledger__terms-cell">
+          <span class="misc-cart-ledger__terms-label">Account</span>
+          <span class="misc-cart-ledger__terms-value">
+            {%- if customer.default_address.company != blank -%}
+              {{ customer.default_address.company }}
+            {%- elsif customer -%}
+              {{ customer.first_name }} {{ customer.last_name }}
+            {%- else -%}
+              Guest
+            {%- endif -%}
+          </span>
+        </div>
+        <div class="misc-cart-ledger__terms-cell">
+          <span class="misc-cart-ledger__terms-label">Buyer</span>
+          <span class="misc-cart-ledger__terms-value">
+            {%- if customer -%}{{ customer.first_name }} {{ customer.last_name }}{%- else -%}&mdash;{%- endif -%}
+          </span>
+        </div>
+        <div class="misc-cart-ledger__terms-cell">
+          <span class="misc-cart-ledger__terms-label">Payment terms</span>
+          <span class="misc-cart-ledger__terms-value">Net 30</span>
+        </div>
+        <div class="misc-cart-ledger__terms-cell">
+          <span class="misc-cart-ledger__terms-label">Currency</span>
+          <span class="misc-cart-ledger__terms-value">{{ cart.currency.iso_code }} ({{ cart.currency.symbol }})</span>
+        </div>
+      </div>
+
+      {%- comment -%} ===== ITEMS SECTION ===== {%- endcomment -%}
+      <div class="misc-cart-ledger__section-head">
+        <h2 class="misc-cart-ledger__section-title">Items</h2>
+        <span class="misc-cart-ledger__section-sub">{{ cart.item_count }} {{ cart.item_count | pluralize: 'product', 'products' }} &middot; {{ unique_brands.size }} {{ unique_brands.size | pluralize: 'brand', 'brands' }}</span>
+      </div>
+
+      {%- comment -%} Filter + sort UI. JS attaches interactions. {%- endcomment -%}
+      <section class="misc-cart-ledger__filters" aria-label="Filter and sort the cart">
+        <div class="misc-cart-ledger__filter-row">
+          <span class="misc-cart-ledger__filter-label">Show</span>
+          <div class="misc-cart-ledger__filter-options">
+            <button type="button" class="misc-cart-ledger__chip is-active" data-bucket="in">
+              <span class="misc-cart-ledger__chip-dot misc-cart-ledger__chip-dot--in"></span>
+              Ready <span class="misc-cart-ledger__chip-count">({{ products_with_ready }})</span>
+            </button>
+            <button type="button" class="misc-cart-ledger__chip is-active" data-bucket="inbound">
+              <span class="misc-cart-ledger__chip-dot misc-cart-ledger__chip-dot--inbound"></span>
+              Incoming <span class="misc-cart-ledger__chip-count">({{ products_with_inbound }})</span>
+            </button>
+            <button type="button" class="misc-cart-ledger__chip is-active" data-bucket="backorder">
+              <span class="misc-cart-ledger__chip-dot misc-cart-ledger__chip-dot--backorder"></span>
+              Backorder <span class="misc-cart-ledger__chip-count">({{ products_with_backorder }})</span>
+            </button>
+          </div>
+          <button type="button" class="misc-cart-ledger__reset" data-action="reset-state">Show all</button>
+        </div>
+        <div class="misc-cart-ledger__filter-row">
+          <span class="misc-cart-ledger__filter-label">Brand</span>
+          <div class="misc-cart-ledger__filter-options">
+            {%- for brand in unique_brands -%}
+              {%- if brand != '' -%}
+                {%- assign brand_count = 0 -%}
+                {%- for item in cart.items -%}
+                  {%- if item.product.vendor == brand -%}{%- assign brand_count = brand_count | plus: 1 -%}{%- endif -%}
+                {%- endfor -%}
+                <button type="button" class="misc-cart-ledger__chip is-active" data-brand="{{ brand | escape }}">
+                  {{ brand }} <span class="misc-cart-ledger__chip-count">({{ brand_count }})</span>
+                </button>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+          <button type="button" class="misc-cart-ledger__reset" data-action="reset-brands">All brands</button>
+        </div>
+        <div class="misc-cart-ledger__filter-row">
+          <span class="misc-cart-ledger__filter-label">Sort</span>
+          <div class="misc-cart-ledger__filter-options">
+            <button type="button" class="misc-cart-ledger__chip is-active" data-sort="default">Default</button>
+            <button type="button" class="misc-cart-ledger__chip" data-sort="brand">By brand</button>
+            <button type="button" class="misc-cart-ledger__chip" data-sort="value">By value (high to low)</button>
+            <button type="button" class="misc-cart-ledger__chip" data-sort="qty">By quantity (high to low)</button>
+          </div>
+        </div>
+      </section>
+
+      {%- comment -%} The items table itself. {%- endcomment -%}
+      <form action="{{ routes.cart_url }}" method="post" id="misc-cart-ledger-form" novalidate>
+        <table class="misc-cart-ledger__items">
+          <colgroup>
+            <col class="misc-cart-ledger__col-num">
+            <col class="misc-cart-ledger__col-sku">
+            <col class="misc-cart-ledger__col-product">
+            <col class="misc-cart-ledger__col-qty">
+            <col class="misc-cart-ledger__col-unit">
+            <col class="misc-cart-ledger__col-rrp">
+            <col class="misc-cart-ledger__col-subtotal">
+          </colgroup>
+          <thead>
+            <tr>
+              <th class="misc-cart-ledger__col-num">#</th>
+              <th class="misc-cart-ledger__col-sku">SKU</th>
+              <th class="misc-cart-ledger__col-product">Product</th>
+              <th class="misc-cart-ledger__col-qty misc-cart-ledger__num">Qty</th>
+              <th class="misc-cart-ledger__col-unit misc-cart-ledger__num">Unit ({{ cart.currency.symbol }})</th>
+              <th class="misc-cart-ledger__col-rrp misc-cart-ledger__num">RRP ({{ cart.currency.symbol }})</th>
+              <th class="misc-cart-ledger__col-subtotal misc-cart-ledger__num">Subtotal ({{ cart.currency.symbol }})</th>
+            </tr>
+          </thead>
+          <tbody>
+            {%- for item in cart.items -%}
+              {%- assign requested = item.quantity | default: 0 -%}
+              {%- assign stock = item.variant.inventory_quantity | default: 0 -%}
+              {%- if stock < 0 -%}{%- assign stock = 0 -%}{%- endif -%}
+              {%- assign incoming_qty_var = item.variant.metafields.custom.incoming_qty.value | default: 0 -%}
+              {%- assign eta_var = item.variant.metafields.custom.incoming_eta.value -%}
+              {%- if stock >= requested -%}{%- assign ready = requested -%}{%- else -%}{%- assign ready = stock -%}{%- endif -%}
+              {%- assign remaining = requested | minus: ready -%}
+              {%- if incoming_qty_var >= remaining -%}{%- assign coming = remaining -%}{%- else -%}{%- assign coming = incoming_qty_var -%}{%- endif -%}
+              {%- assign bo = remaining | minus: coming -%}
+
+              {%- assign case_pack = item.variant.metafields.custom.case_pack.value | default: 1 -%}
+              {%- if case_pack > 1 -%}
+                {%- assign pack_label = 'Pack of ' | append: case_pack -%}
+              {%- else -%}
+                {%- assign pack_label = 'Single unit' -%}
+              {%- endif -%}
+
+              {%- assign line_amount_cents = item.final_line_price -%}
+              {%- assign ready_amount_cents = ready | times: item.variant.price -%}
+              {%- assign coming_amount_cents = coming | times: item.variant.price -%}
+              {%- assign bo_amount_cents = bo | times: item.variant.price -%}
+
+              <tr class="misc-cart-ledger__product-row"
+                  data-line="{{ forloop.index }}"
+                  data-variant-id="{{ item.variant.id }}"
+                  data-brand="{{ item.product.vendor | escape }}"
+                  data-total-amount-cents="{{ line_amount_cents }}"
+                  data-total-qty="{{ requested }}"
+                  data-ready-qty="{{ ready }}"
+                  data-inbound-qty="{{ coming }}"
+                  data-backorder-qty="{{ bo }}">
+                <td class="misc-cart-ledger__col-num">{{ forloop.index }}</td>
+                <td class="misc-cart-ledger__col-sku">{{ item.variant.sku | default: '&mdash;' }}</td>
+                <td class="misc-cart-ledger__col-product">
+                  <span class="misc-cart-ledger__brand">{{ item.product.vendor }}</span>
+                  &middot; <a href="{{ item.url }}" class="misc-cart-ledger__name">{{ item.product.title }}</a>
+                  {%- unless item.product.has_only_default_variant -%}
+                    <span class="misc-cart-ledger__variant"> &middot; {{ item.variant.title }}</span>
+                  {%- endunless -%}
+                  <span class="misc-cart-ledger__pack">{{ pack_label }}</span>
+                </td>
+                <td class="misc-cart-ledger__col-qty misc-cart-ledger__num">
+                  {%- if misc_show_data -%}
+                    <span class="misc-cart-ledger__stepper">
+                      <button type="button" class="misc-cart-ledger__step-btn" data-step="-1" aria-label="Decrease quantity">−</button>
+                      <input
+                        type="number"
+                        class="misc-cart-ledger__qty-input"
+                        name="updates[{{ item.variant.id }}]"
+                        value="{{ item.quantity }}"
+                        min="0"
+                        data-variant-id="{{ item.variant.id }}"
+                        data-line="{{ forloop.index }}"
+                        aria-label="Quantity for {{ item.product.title | escape }}">
+                      <button type="button" class="misc-cart-ledger__step-btn" data-step="1" aria-label="Increase quantity">+</button>
+                    </span>
+                  {%- else -%}
+                    {{ item.quantity }}
+                  {%- endif -%}
+                </td>
+                <td class="misc-cart-ledger__col-unit misc-cart-ledger__num">
+                  {%- if misc_show_data -%}{{ item.variant.price | money_without_currency }}{%- else -%}&mdash;{%- endif -%}
+                </td>
+                <td class="misc-cart-ledger__col-rrp misc-cart-ledger__num">
+                  {%- if misc_show_data and item.variant.compare_at_price > 0 -%}
+                    {{ item.variant.compare_at_price | money_without_currency }}
+                  {%- else -%}
+                    &mdash;
+                  {%- endif -%}
+                </td>
+                <td class="misc-cart-ledger__col-subtotal misc-cart-ledger__num">
+                  {%- if misc_show_data -%}
+                    <span data-line-subtotal>{{ line_amount_cents | money_without_currency }}</span>
+                    <button type="button" class="misc-cart-ledger__remove" data-variant-id="{{ item.variant.id }}" aria-label="Remove {{ item.product.title | escape }}">&times;</button>
+                  {%- else -%}
+                    &mdash;
+                  {%- endif -%}
+                </td>
+              </tr>
+
+              {%- comment -%} Availability sub-rows. Render only buckets > 0. {%- endcomment -%}
+              {%- if misc_show_data -%}
+                {%- if ready > 0 -%}
+                  <tr class="misc-cart-ledger__avail-row misc-cart-ledger__avail-row--in" data-bucket="in" data-line="{{ forloop.index }}">
+                    <td></td><td></td>
+                    <td class="misc-cart-ledger__col-product">
+                      <span class="misc-cart-ledger__state-label misc-cart-ledger__state-label--in">Ready to ship</span>
+                      <span class="misc-cart-ledger__state-detail">&mdash; from current stock, ships in 2 business days</span>
+                    </td>
+                    <td class="misc-cart-ledger__num">{{ ready }}</td>
+                    <td></td><td></td>
+                    <td class="misc-cart-ledger__num">{{ ready_amount_cents | money_without_currency }}</td>
+                  </tr>
+                {%- endif -%}
+                {%- if coming > 0 -%}
+                  <tr class="misc-cart-ledger__avail-row misc-cart-ledger__avail-row--inbound" data-bucket="inbound" data-line="{{ forloop.index }}">
+                    <td></td><td></td>
+                    <td class="misc-cart-ledger__col-product">
+                      <span class="misc-cart-ledger__state-label misc-cart-ledger__state-label--inbound">Incoming</span>
+                      <span class="misc-cart-ledger__state-detail">
+                        {%- if eta_var != blank -%}
+                          &mdash; arrives at warehouse {{ eta_var | date: '%-d %b %Y' }}
+                        {%- else -%}
+                          &mdash; arrival date to be confirmed
+                        {%- endif -%}
+                      </span>
+                    </td>
+                    <td class="misc-cart-ledger__num">{{ coming }}</td>
+                    <td></td><td></td>
+                    <td class="misc-cart-ledger__num">{{ coming_amount_cents | money_without_currency }}</td>
+                  </tr>
+                {%- endif -%}
+                {%- if bo > 0 -%}
+                  <tr class="misc-cart-ledger__avail-row misc-cart-ledger__avail-row--backorder" data-bucket="backorder" data-line="{{ forloop.index }}">
+                    <td></td><td></td>
+                    <td class="misc-cart-ledger__col-product">
+                      <span class="misc-cart-ledger__state-label misc-cart-ledger__state-label--backorder">Backorder</span>
+                      <span class="misc-cart-ledger__state-detail">&mdash; lead time to be confirmed by account manager</span>
+                    </td>
+                    <td class="misc-cart-ledger__num">{{ bo }}</td>
+                    <td></td><td></td>
+                    <td class="misc-cart-ledger__num">{{ bo_amount_cents | money_without_currency }}</td>
+                  </tr>
+                {%- endif -%}
+              {%- endif -%}
+            {%- endfor -%}
+          </tbody>
+          <tfoot>
+            <tr class="misc-cart-ledger__items-foot-filtered" hidden>
+              <td colspan="3" class="misc-cart-ledger__items-foot-label">Filtered items subtotal</td>
+              <td class="misc-cart-ledger__num" data-filtered-qty>0</td>
+              <td></td><td></td>
+              <td class="misc-cart-ledger__num" data-filtered-amount>0.00</td>
+            </tr>
+            <tr class="misc-cart-ledger__items-foot">
+              <td colspan="3" class="misc-cart-ledger__items-foot-label">Items subtotal</td>
+              <td class="misc-cart-ledger__num">{{ cart.item_count }}</td>
+              <td></td><td></td>
+              <td class="misc-cart-ledger__num">{{ cart.total_price | money_without_currency }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </form>
+
+      {%- comment -%} ===== 3-COLUMN PRE-CONFIRM ROW ===== {%- endcomment -%}
+      <section class="misc-cart-ledger__pre-confirm">
+
+        {%- comment -%} -- COL 1: Shipment preference -- {%- endcomment -%}
+        <div>
+          <h3 class="misc-cart-ledger__col-title">Shipment preference</h3>
+          <div class="misc-cart-ledger__ship-pref" data-ship-pref-group>
+            <label class="misc-cart-ledger__ship-pref-option">
+              <input type="radio" name="ship-pref" class="misc-cart-ledger__ship-pref-radio" value="as_available"{% if ship_pref == 'as_available' %} checked{% endif %}>
+              <span>
+                <span class="misc-cart-ledger__ship-pref-title">Ship as available</span>
+                <span class="misc-cart-ledger__ship-pref-desc">Send Ready items now, then each Incoming shipment as it arrives. Multiple deliveries; faster access to ready stock. Default.</span>
+              </span>
+            </label>
+            <label class="misc-cart-ledger__ship-pref-option">
+              <input type="radio" name="ship-pref" class="misc-cart-ledger__ship-pref-radio" value="complete"{% if ship_pref == 'complete' %} checked{% endif %}>
+              <span>
+                <span class="misc-cart-ledger__ship-pref-title">Ship complete</span>
+                <span class="misc-cart-ledger__ship-pref-desc">
+                  Hold all items until the full order is ready.
+                  {%- if last_eta != '' %} One consolidated delivery on or after {{ last_eta | date: '%-d %b %Y' }};{% endif -%}
+                  one freight cost.
+                </span>
+              </span>
+            </label>
+            <p class="misc-cart-ledger__ship-pref-hint">
+              Backordered units have no committed date and will ship separately. Your preference is saved as a cart attribute and read by Stok.ly on order import.
+            </p>
+          </div>
+        </div>
+
+        {%- comment -%} -- COL 2: Order summary -- {%- endcomment -%}
+        <div>
+          <h3 class="misc-cart-ledger__col-title">
+            Order summary
+            <span class="misc-cart-ledger__col-title-sub" data-filter-status></span>
+          </h3>
+          <div class="misc-cart-ledger__summary">
+            <p class="misc-cart-ledger__summary-note">
+              <strong>Estimate only.</strong> Final shipment plan, dates and per-shipment MOQs are confirmed by your account manager before any goods leave the warehouse.
+            </p>
+            <p class="misc-cart-ledger__summary-trust">
+              Recent ETAs have been within <strong>3 days of estimate, 92% of the time</strong> (last 47 inbound shipments).
+            </p>
+
+            <table class="misc-cart-ledger__summary-table">
+              <tbody>
+
+                {%- if cart_ready_qty > 0 -%}
+                  <tr class="misc-cart-ledger__shipment" data-bucket="in" data-amount-cents="{{ cart_ready_amount }}" data-units="{{ cart_ready_qty }}" data-products="{{ cart_ready_products }}">
+                    <td class="misc-cart-ledger__summary-label">
+                      <span class="misc-cart-ledger__summary-dot misc-cart-ledger__summary-dot--in"></span>
+                      Ready to ship now
+                      <span class="misc-cart-ledger__summary-meta">{{ cart_ready_qty }} units &middot; {{ cart_ready_products }} {{ cart_ready_products | pluralize: 'product', 'products' }}</span>
+                    </td>
+                    <td class="misc-cart-ledger__summary-amount">{{ cart_ready_amount | money_without_currency }}</td>
+                  </tr>
+                {%- endif -%}
+
+                {%- comment -%} Incoming rows grouped by ETA. {%- endcomment -%}
+                {%- for eta in unique_etas -%}
+                  {%- if eta != '' -%}
+                    {%- assign eta_units = 0 -%}
+                    {%- assign eta_amount = 0 -%}
+                    {%- assign eta_products = 0 -%}
+                    {%- for item in cart.items -%}
+                      {%- assign item_eta_raw = item.variant.metafields.custom.incoming_eta.value -%}
+                      {%- if item_eta_raw != blank -%}
+                        {%- assign item_eta_str = item_eta_raw | date: '%Y-%m-%d' -%}
+                        {%- if item_eta_str == eta -%}
+                          {%- assign requested2 = item.quantity | default: 0 -%}
+                          {%- assign stock2 = item.variant.inventory_quantity | default: 0 -%}
+                          {%- if stock2 < 0 -%}{%- assign stock2 = 0 -%}{%- endif -%}
+                          {%- if stock2 >= requested2 -%}{%- assign ready2 = requested2 -%}{%- else -%}{%- assign ready2 = stock2 -%}{%- endif -%}
+                          {%- assign remaining2 = requested2 | minus: ready2 -%}
+                          {%- assign incoming2 = item.variant.metafields.custom.incoming_qty.value | default: 0 -%}
+                          {%- if incoming2 >= remaining2 -%}{%- assign coming2 = remaining2 -%}{%- else -%}{%- assign coming2 = incoming2 -%}{%- endif -%}
+                          {%- if coming2 > 0 -%}
+                            {%- assign eta_units = eta_units | plus: coming2 -%}
+                            {%- assign eta_amount = eta_amount | plus: coming2 | times: item.variant.price -%}
+                            {%- assign eta_products = eta_products | plus: 1 -%}
+                          {%- endif -%}
+                        {%- endif -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+                    {%- if eta_units > 0 -%}
+                      <tr class="misc-cart-ledger__shipment" data-bucket="inbound" data-amount-cents="{{ eta_amount }}" data-units="{{ eta_units }}" data-products="{{ eta_products }}">
+                        <td class="misc-cart-ledger__summary-label">
+                          <span class="misc-cart-ledger__summary-dot misc-cart-ledger__summary-dot--inbound"></span>
+                          Arrives {{ eta | date: '%-d %b %Y' }}
+                          <span class="misc-cart-ledger__summary-meta">{{ eta_units }} units &middot; {{ eta_products }} {{ eta_products | pluralize: 'product', 'products' }}</span>
+                        </td>
+                        <td class="misc-cart-ledger__summary-amount">{{ eta_amount | money_without_currency }}</td>
+                      </tr>
+                    {%- endif -%}
+                  {%- endif -%}
+                {%- endfor -%}
+
+                {%- if cart_backorder_qty > 0 -%}
+                  <tr class="misc-cart-ledger__shipment" data-bucket="backorder" data-amount-cents="{{ cart_backorder_amount }}" data-units="{{ cart_backorder_qty }}" data-products="{{ cart_backorder_products }}">
+                    <td class="misc-cart-ledger__summary-label">
+                      <span class="misc-cart-ledger__summary-dot misc-cart-ledger__summary-dot--backorder"></span>
+                      On backorder
+                      <span class="misc-cart-ledger__summary-meta">{{ cart_backorder_qty }} units &middot; {{ cart_backorder_products }} {{ cart_backorder_products | pluralize: 'product', 'products' }} &middot; lead time TBC</span>
+                    </td>
+                    <td class="misc-cart-ledger__summary-amount">{{ cart_backorder_amount | money_without_currency }}</td>
+                  </tr>
+                {%- endif -%}
+
+                <tr class="misc-cart-ledger__summary-subtotal">
+                  <td class="misc-cart-ledger__summary-label">
+                    <span data-summary-subtotal-label>Summary subtotal</span>
+                    <span class="misc-cart-ledger__summary-meta" data-summary-subtotal-meta>{{ cart.item_count }} units &middot; {{ cart.item_count }} {{ cart.item_count | pluralize: 'product', 'products' }}</span>
+                  </td>
+                  <td class="misc-cart-ledger__summary-amount" data-summary-subtotal-amount>{{ cart.total_price | money_without_currency }}</td>
+                </tr>
+                <tr class="misc-cart-ledger__summary-muted"><td class="misc-cart-ledger__summary-label">VAT</td><td class="misc-cart-ledger__summary-amount">Calculated at checkout</td></tr>
+                <tr class="misc-cart-ledger__summary-muted"><td class="misc-cart-ledger__summary-label">Shipping</td><td class="misc-cart-ledger__summary-amount">Confirmed by AM</td></tr>
+                <tr class="misc-cart-ledger__summary-total"><td class="misc-cart-ledger__summary-label">Order total</td><td class="misc-cart-ledger__summary-amount">{{ cart.total_price | money }}</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {%- comment -%} -- COL 3: Account & credit -- {%- endcomment -%}
+        <div>
+          <h3 class="misc-cart-ledger__col-title">
+            Account &amp; credit
+            <span class="misc-cart-ledger__col-title-sub{% if this_over %} misc-cart-ledger__col-title-sub--over{% endif %}">
+              Net 30 &middot; {{ credit_limit | money }} limit{% if this_over %} &middot; over{% endif %}
+            </span>
+          </h3>
+
+          <div class="misc-cart-ledger__credit-bar" aria-label="Credit usage">
+            <div class="misc-cart-ledger__credit-bar-fill misc-cart-ledger__credit-bar-fill--existing" style="width: {{ bar_existing_pct_x100 | divided_by: 100.0 }}%;"></div>
+            <div class="misc-cart-ledger__credit-bar-fill misc-cart-ledger__credit-bar-fill--this{% if this_over %} misc-cart-ledger__credit-bar-fill--this-over{% endif %}" style="width: {{ bar_this_pct_x100 | divided_by: 100.0 }}%;"></div>
+          </div>
+          <div class="misc-cart-ledger__credit-bar-scale">
+            <span>{{ 0 | money }}</span>
+            <span>{{ credit_limit | money }} limit</span>
+          </div>
+
+          <div class="misc-cart-ledger__credit-ledger">
+            <div class="misc-cart-ledger__credit-row">
+              <span class="misc-cart-ledger__credit-label">Credit limit</span>
+              <span class="misc-cart-ledger__credit-amount">{{ credit_limit | money_without_currency }}</span>
+            </div>
+            <div class="misc-cart-ledger__credit-row">
+              <span class="misc-cart-ledger__credit-label">Open invoices ({{ open_invoices_count }})</span>
+              <span class="misc-cart-ledger__credit-amount{% if open_invoices_cents > 0 %} misc-cart-ledger__credit-amount--red{% endif %}">
+                {%- if open_invoices_cents > 0 %}&minus;{% endif -%}
+                {{ open_invoices_cents | money_without_currency }}
+              </span>
+            </div>
+            <div class="misc-cart-ledger__credit-row">
+              <span class="misc-cart-ledger__credit-label">This order</span>
+              <span class="misc-cart-ledger__credit-amount{% if this_over %} misc-cart-ledger__credit-amount--red{% endif %}">&minus;{{ this_order_cents | money_without_currency }}</span>
+            </div>
+            <div class="misc-cart-ledger__credit-row misc-cart-ledger__credit-row--total">
+              <span class="misc-cart-ledger__credit-label">Available after this order</span>
+              <span class="misc-cart-ledger__credit-amount{% if available_after_cents < 0 %} misc-cart-ledger__credit-amount--red{% endif %}">
+                {%- if available_after_cents < 0 -%}
+                  &minus;{{ available_after_cents | times: -1 | money_without_currency }}
+                {%- else -%}
+                  {{ available_after_cents | money_without_currency }}
+                {%- endif -%}
+              </span>
+            </div>
+
+            {%- if this_over -%}
+              {%- assign over_by_cents = total_used_cents | minus: credit_limit -%}
+              <div class="misc-cart-ledger__credit-warning">
+                <strong>This order exceeds your credit limit by {{ over_by_cents | money }}.</strong>
+                Account manager confirmation required before submission. You can reduce quantities, split the order, or arrange settlement of open invoices before confirming.
+              </div>
+            {%- else -%}
+              <p class="misc-cart-ledger__credit-hint">
+                Open invoices in red represent outstanding debt against your account. If "Available after this order" would go below zero, your account manager must confirm before submission.
+              </p>
+            {%- endif -%}
+          </div>
+        </div>
+
+      </section>
+
+      {%- comment -%} ===== ORDER REFERENCE ===== {%- endcomment -%}
+      <div class="misc-cart-ledger__section-head">
+        <h2 class="misc-cart-ledger__section-title">Order reference</h2>
+      </div>
+      <div class="misc-cart-ledger__order-ref">
+        <div class="misc-cart-ledger__field">
+          <label class="misc-cart-ledger__field-label" for="misc-cart-po-number">Your PO number / order reference</label>
+          <input type="text"
+                 id="misc-cart-po-number"
+                 class="misc-cart-ledger__field-input"
+                 placeholder="e.g. PO-2026-0612"
+                 value="{{ po_number | escape }}"
+                 data-cart-attribute="po_number">
+          <span class="misc-cart-ledger__field-hint">Appears on the invoice, packing slips and any related shipment communication.</span>
+        </div>
+        <div class="misc-cart-ledger__field">
+          <label class="misc-cart-ledger__field-label" for="misc-cart-order-notes">Notes for this order</label>
+          <textarea id="misc-cart-order-notes"
+                    class="misc-cart-ledger__field-textarea"
+                    placeholder="Delivery instructions, attention-to, hold dates, special requests..."
+                    data-cart-attribute="order_notes">{{ order_notes | escape }}</textarea>
+        </div>
+      </div>
+
+      <a href="{{ routes.all_products_collection_url }}" class="misc-cart-ledger__continue-link">&larr; Continue shopping</a>
+
+    </div>{%- comment -%} /.misc-cart-ledger__page {%- endcomment -%}
+
+    {%- comment -%} ===== STICKY ACTION BAR ===== {%- endcomment -%}
+    <div class="misc-cart-ledger__action-bar">
+      <div class="misc-cart-ledger__action-bar-inner">
+        <div class="misc-cart-ledger__action-totals">
+          Order total<strong>{{ cart.total_price | money }}</strong>
+          <span class="misc-cart-ledger__action-meta">{{ cart.item_count }} {{ cart.item_count | pluralize: 'product', 'products' }} &middot; {{ unique_brands.size }} {{ unique_brands.size | pluralize: 'brand', 'brands' }}</span>
+        </div>
+        <button type="submit" name="checkout" form="misc-cart-ledger-form" class="misc-cart-ledger__btn-confirm">Confirm order</button>
+      </div>
+    </div>
+
+  {%- endif -%}{%- comment -%} /if cart == empty {%- endcomment -%}
+
+</main>
+
+{% schema %}
+{
+  "name": "MISC cart ledger",
+  "settings": []
+}
+{% endschema %}

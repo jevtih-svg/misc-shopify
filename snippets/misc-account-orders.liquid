@@ -1,0 +1,71 @@
+{%- comment -%}
+  Orders panel. Lists the customer's Shopify orders. Real data via
+  the `customer.orders` Liquid drop (no Stok.ly dependency here).
+
+  Inputs:
+    - customer : customer
+{%- endcomment -%}
+
+<header class="misc-panel__header">
+  <h2 class="misc-panel__title">Orders</h2>
+  <span class="misc-panel__count">{{ customer.orders_count }} total</span>
+</header>
+
+{% paginate customer.orders by 20 %}
+  {%- if customer.orders.size > 0 -%}
+    <table class="misc-table misc-table--orders">
+      <thead>
+        <tr>
+          <th scope="col" class="misc-table__col--id">Order</th>
+          <th scope="col" class="misc-table__col--date">Date</th>
+          <th scope="col" class="misc-table__col--status">Payment</th>
+          <th scope="col" class="misc-table__col--status">Fulfilment</th>
+          <th scope="col" class="misc-table__col--num">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {%- for order in customer.orders -%}
+          <tr>
+            <td data-label="Order">
+              <a href="{{ order.customer_url }}" class="misc-link">
+                {{ order.name }}
+              </a>
+            </td>
+            <td data-label="Date">
+              {{ order.created_at | time_tag: format: 'date' }}
+            </td>
+            <td data-label="Payment">
+              <span class="misc-badge misc-badge--{{ order.financial_status | downcase | replace: '_', '-' }}">
+                {{ order.financial_status_label }}
+              </span>
+            </td>
+            <td data-label="Fulfilment">
+              <span class="misc-badge misc-badge--{{ order.fulfillment_status | downcase | default: 'unfulfilled' | replace: '_', '-' }}">
+                {{ order.fulfillment_status_label }}
+              </span>
+            </td>
+            <td data-label="Total" class="misc-table__cell--num">
+              {{ order.total_net_amount | money_with_currency }}
+            </td>
+          </tr>
+        {%- endfor -%}
+      </tbody>
+    </table>
+
+    {%- if paginate.pages > 1 -%}
+      <nav class="misc-pagination" role="navigation" aria-label="Orders pagination">
+        {%- if paginate.previous -%}
+          <a href="{{ paginate.previous.url }}" class="misc-link">← Previous</a>
+        {%- endif -%}
+        <span class="misc-pagination__pos">
+          Page {{ paginate.current_page }} of {{ paginate.pages }}
+        </span>
+        {%- if paginate.next -%}
+          <a href="{{ paginate.next.url }}" class="misc-link">Next →</a>
+        {%- endif -%}
+      </nav>
+    {%- endif -%}
+  {%- else -%}
+    <p class="misc-empty">No orders yet. <a href="{{ routes.root_url }}" class="misc-link">Browse the catalog</a>.</p>
+  {%- endif -%}
+{% endpaginate %}

@@ -1,0 +1,96 @@
+{%- comment -%}
+  Backordered items panel. STUBBED for V1 prototype.
+
+  DATA SOURCE: Stok.ly. Each row in production will come from one
+  of these (decision pending, see Stokly_Developer_Questions_v1.md):
+
+    Option A — Per-customer backorder list pushed to a customer
+               metafield `stokly.backorders` as a JSON array of
+               { sku, title, qty_ordered, qty_shipped, qty_backordered,
+                 eta_date, po_number, order_name, line_url }.
+
+    Option B — Live lookup via Theme App Extension calling Stok.ly's
+               /customers/{id}/backorders endpoint at render time.
+
+    Recommended: A for V1 (no app dependency, scales fine for MISC's
+    customer count), B once volume justifies live-fetched data.
+
+  Until then we render demo rows so the layout is reviewable.
+{%- endcomment -%}
+
+<header class="misc-panel__header">
+  <h2 class="misc-panel__title">Backordered items</h2>
+  <span class="misc-panel__count misc-panel__count--stub">Demo data · Stok.ly TODO</span>
+</header>
+
+<p class="misc-panel__intro">
+  Items on your past orders that we couldn't ship in full. ETAs come
+  from Stok.ly purchase orders and update as suppliers confirm.
+</p>
+
+<table class="misc-table misc-table--backorders">
+  <thead>
+    <tr>
+      <th scope="col" class="misc-table__col--id">Order</th>
+      <th scope="col">SKU / Item</th>
+      <th scope="col" class="misc-table__col--num">Backordered</th>
+      <th scope="col" class="misc-table__col--date">ETA</th>
+      <th scope="col">PO</th>
+      <th scope="col" class="misc-table__col--status">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {%- comment -%} STUB ROW 1 — pending PO {%- endcomment -%}
+    <tr>
+      <td data-label="Order"><a href="#" class="misc-link">#1042</a></td>
+      <td data-label="Item">
+        <span class="misc-mono">MD-CW-A5-001</span><br>
+        <span class="misc-table__sub">Midori MD Cotton Notebook A5 Blank</span>
+      </td>
+      <td data-label="Backordered" class="misc-table__cell--num">12</td>
+      <td data-label="ETA">2026-06-18</td>
+      <td data-label="PO"><span class="misc-mono">PO-2026-088</span></td>
+      <td data-label="Status">
+        <span class="misc-badge misc-badge--inbound">Inbound</span>
+      </td>
+    </tr>
+
+    {%- comment -%} STUB ROW 2 — confirmed ship date {%- endcomment -%}
+    <tr>
+      <td data-label="Order"><a href="#" class="misc-link">#1042</a></td>
+      <td data-label="Item">
+        <span class="misc-mono">PL-G2-07-BLK</span><br>
+        <span class="misc-table__sub">Pilot G2 0.7mm Black (12-pack)</span>
+      </td>
+      <td data-label="Backordered" class="misc-table__cell--num">6</td>
+      <td data-label="ETA">2026-06-05</td>
+      <td data-label="PO"><span class="misc-mono">PO-2026-091</span></td>
+      <td data-label="Status">
+        <span class="misc-badge misc-badge--inbound">Inbound</span>
+      </td>
+    </tr>
+
+    {%- comment -%} STUB ROW 3 — no PO yet, true backorder {%- endcomment -%}
+    <tr>
+      <td data-label="Order"><a href="#" class="misc-link">#1039</a></td>
+      <td data-label="Item">
+        <span class="misc-mono">TB-MN-12</span><br>
+        <span class="misc-table__sub">Tombow Mono Eraser (12-pack)</span>
+      </td>
+      <td data-label="Backordered" class="misc-table__cell--num">24</td>
+      <td data-label="ETA"><span class="misc-empty">Awaiting PO</span></td>
+      <td data-label="PO">—</td>
+      <td data-label="Status">
+        <span class="misc-badge misc-badge--backorder">Backorder</span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<footer class="misc-panel__footer">
+  <p class="misc-panel__hint">
+    To cancel a backordered line, contact
+    <a href="{{ section.settings.support_url | default: '/pages/support' }}" class="misc-link">support</a>.
+    Cancellations after a PO is raised may incur restocking fees.
+  </p>
+</footer>
