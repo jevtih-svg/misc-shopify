@@ -137,9 +137,50 @@
   <ul class="misc-site-nav__inner">
     {%- if has_menu_items -%}
       {%- for link in nav_menu.links -%}
-        <li>
-          <a href="{{ link.url }}" class="misc-site-nav__item{% if link.active %} is-active{% endif %}">{{ link.title }}</a>
-        </li>
+        {%- if link.links.size > 0 -%}
+          {%- comment -%} A parent whose URL is just an anchor (#) has no real destination, so the parent itself becomes the submenu toggle instead of a dead link. {%- endcomment -%}
+          {%- assign parent_no_dest = false -%}
+          {%- if link.url == blank or link.url contains '#' -%}
+            {%- assign parent_no_dest = true -%}
+          {%- endif -%}
+          <li class="misc-site-nav__group" data-misc-nav-group>
+            {%- if parent_no_dest -%}
+              <button
+                type="button"
+                class="misc-site-nav__item misc-site-nav__item--parent{% if link.active or link.child_active %} is-active{% endif %}"
+                aria-expanded="false"
+                aria-haspopup="true"
+                data-misc-nav-toggle
+              >
+                {{ link.title }}
+                <svg class="misc-site-nav__chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2.5 4.5L6 8l3.5-3.5"/></svg>
+              </button>
+            {%- else -%}
+              <a href="{{ link.url }}" class="misc-site-nav__item misc-site-nav__item--parent{% if link.active or link.child_active %} is-active{% endif %}">{{ link.title }}</a>
+              <button
+                type="button"
+                class="misc-site-nav__toggle"
+                aria-expanded="false"
+                aria-haspopup="true"
+                aria-label="Show {{ link.title | escape }} submenu"
+                data-misc-nav-toggle
+              >
+                <svg class="misc-site-nav__chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2.5 4.5L6 8l3.5-3.5"/></svg>
+              </button>
+            {%- endif -%}
+            <ul class="misc-site-nav__dropdown" data-misc-nav-panel>
+              {%- for child in link.links -%}
+                <li>
+                  <a href="{{ child.url }}" class="misc-site-nav__sub{% if child.active or child.child_active %} is-active{% endif %}">{{ child.title }}</a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </li>
+        {%- else -%}
+          <li>
+            <a href="{{ link.url }}" class="misc-site-nav__item{% if link.active %} is-active{% endif %}">{{ link.title }}</a>
+          </li>
+        {%- endif -%}
       {%- endfor -%}
     {%- else -%}
       {%- comment -%} Fallback if the menu isn't set up yet {%- endcomment -%}

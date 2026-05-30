@@ -277,6 +277,103 @@ predictive-search[open] .misc-site-header__predictive { display: block; }
 .misc-site-nav__item.is-active,
 .misc-site-nav__item:hover { border-bottom-color: var(--c-ink); text-decoration: none; }
 
+/* ---- Primary nav: dropdown sub-menus ---- */
+.misc-site-nav__group {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.misc-site-nav__group .misc-site-nav__item { white-space: nowrap; }
+
+/* Parent (link OR button) keeps its label + chevron tight together so the
+   group occupies the same visual width as a plain nav item. */
+.misc-site-nav__item--parent {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+/* When the parent has no real destination it renders as a <button>; strip the
+   UA button chrome so it is indistinguishable from the anchor nav items. */
+button.misc-site-nav__item {
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.misc-site-nav__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0 0 -2px var(--space-1);
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--c-ink);
+  cursor: pointer;
+}
+.misc-site-nav__group:hover .misc-site-nav__item,
+.misc-site-nav__group:focus-within .misc-site-nav__item,
+.misc-site-nav__group.is-open .misc-site-nav__item,
+.misc-site-nav__group.is-open .misc-site-nav__toggle { border-bottom-color: var(--c-ink); }
+
+.misc-site-nav__chevron {
+  width: 10px;
+  height: 10px;
+  transition: transform 120ms ease;
+}
+.misc-site-nav__group:hover .misc-site-nav__chevron,
+.misc-site-nav__group.is-open .misc-site-nav__chevron { transform: rotate(180deg); }
+
+.misc-site-nav__dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 50;
+  min-width: 220px;
+  margin: 0;
+  padding: var(--space-2) 0;
+  list-style: none;
+  background: var(--c-bg);
+  border: var(--line-strong);
+}
+.misc-site-nav__group.is-open > .misc-site-nav__dropdown { display: block; }
+
+/* Open on hover for pointer devices on desktop. Touch and keyboard still use
+   the click toggle (a finger has no hover; focus-within covers Tab users). */
+@media (hover: hover) and (min-width: 901px) {
+  .misc-site-nav__group:hover > .misc-site-nav__dropdown,
+  .misc-site-nav__group:focus-within > .misc-site-nav__dropdown { display: block; }
+}
+
+.misc-site-nav__dropdown li + li { border-top: var(--line-hairline); }
+
+.misc-site-nav__sub {
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  font-weight: var(--fw-medium);
+  color: var(--c-ink);
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background 100ms ease;
+}
+.misc-site-nav__sub:hover,
+.misc-site-nav__sub.is-active { background: var(--c-bg-subtle); text-decoration: none; }
+
+/* On narrow viewports anchor the panel to the right so it never
+   clips off the right edge for the last nav items. */
+@media (max-width: 900px) {
+  .misc-site-nav__dropdown { left: auto; right: 0; }
+}
+
 /* ============================================================
    FOOTER (4-column, dark ink)
    ============================================================ */
