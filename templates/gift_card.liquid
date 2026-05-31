@@ -103,6 +103,8 @@
     {%- endunless -%}
 
     {{ 'template-giftcard.css' | asset_url | stylesheet_tag }}
+    {% comment %} MISC: brand restyle for the gift card page (loaded last so it overrides Trade) {% endcomment %}
+    {{ 'misc-gift-card.css' | asset_url | stylesheet_tag }}
   </head>
 
   <body class="gradient gift-card">

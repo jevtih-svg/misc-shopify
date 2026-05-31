@@ -1742,6 +1742,15 @@ html.misc-prefer-grid-5 .product-grid {
    row's "X VARIANTS" hint and the tree-marker indent. */
 .list-row--variant-last .list-cell { border-bottom: 1px solid var(--c-ink); }
 
+/* Row hover highlight (list view). misc-row-hover.js toggles
+   .is-row-hover on every cell of the hovered row (rows are
+   display:contents, so :hover on the row can't tint the cells).
+   Placed after the parent/variant background rules so it wins on
+   source order for those rows too. A touch stronger than
+   --c-bg-subtle (#FAFAFA) so the highlight is actually perceptible
+   while staying monochrome and quiet. */
+.list-cell.is-row-hover { background: #F0F0F0; }
+
 /* Filtered-out rows (search) */
 .list-row.is-hidden,
 .product-grid > li.is-hidden { display: none !important; }
@@ -2128,5 +2137,108 @@ body.drawer-open { overflow: hidden; }
   .misc-product-card__name { font-size: var(--fs-xs); }
   .misc-product-card__rrp,
   .misc-product-card__price-row .misc-product-card__rrp { display: none; }
+}
+
+/* ============================================================
+   SEARCH RESULTS PAGE
+   Used by: sections/misc-main-search.liquid
+   The grid, sidebar, filter bar, and cards all reuse the catalogue
+   classes above, so only the search-specific chrome is styled here:
+   the slim results head, the empty/prompt states, and the non-product
+   (article/page) result fallback cell.
+   ============================================================ */
+
+.misc-search-head {
+  padding: var(--space-4) var(--space-5) var(--space-5);
+}
+
+.misc-search-head__form {
+  position: relative;
+  max-width: 560px;
+}
+
+.misc-search-head__form svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--c-ink-mute);
+  pointer-events: none;
+}
+
+.misc-search-head__form input[type="search"] {
+  width: 100%;
+  height: 44px;
+  padding: 0 var(--space-4) 0 38px;
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  background: var(--c-bg);
+  color: var(--c-ink);
+  transition: border-color 100ms ease;
+}
+.misc-search-head__form input[type="search"]:focus {
+  outline: none;
+  border-color: var(--c-ink);
+}
+
+.misc-search-head__meta {
+  margin: var(--space-3) 0 0;
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--c-ink-mute);
+}
+
+/* Empty results + no-query prompt */
+.misc-search-empty {
+  grid-column: 1 / -1;
+  padding: var(--space-8) var(--space-5);
+  text-align: center;
+}
+.misc-search-empty__title {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-medium);
+  margin: 0 0 var(--space-2);
+}
+.misc-search-empty__hint {
+  font-size: var(--fs-sm);
+  color: var(--c-ink-mute);
+  margin: 0;
+}
+.misc-search-prompt {
+  padding: var(--space-7) var(--space-5);
+  font-size: var(--fs-sm);
+  color: var(--c-ink-mute);
+}
+
+/* Non-product result cell (article / page) — keeps the grid uniform */
+.misc-search-result-generic {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+  padding: var(--space-5);
+  text-decoration: none;
+  color: var(--c-ink);
+  background: var(--c-bg);
+  transition: background 120ms ease;
+}
+.misc-search-result-generic:hover { background: var(--c-bg-subtle); text-decoration: none; }
+.misc-search-result-generic__kind {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--c-ink-mute);
+}
+.misc-search-result-generic__title {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
 }
 
