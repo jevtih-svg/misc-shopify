@@ -1,0 +1,85 @@
+{%- comment -%}
+  ============================================================
+  MISC 404: themed "page not found" screen
+  ------------------------------------------------------------
+  Replaces Trade's plain main-404 section with the MISC
+  line-grid treatment: large 404 numeral, heading, supporting
+  copy, and a primary CTA into the catalogue (/collections/all).
+
+  Pure visual / Liquid; Trade's core sections/main-404.liquid is
+  left untouched. This section is wired in via templates/404.json.
+
+  CSS: assets/misc-404.css
+  Used by: templates/404.json
+  ============================================================
+{%- endcomment -%}
+
+{{ 'misc-404.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign cat_url = section.settings.catalogue_link
+  if cat_url == blank
+    assign cat_url = routes.all_products_collection_url
+  endif
+-%}
+
+<section
+  class="misc-404"
+  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="misc-404__inner">
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="misc-404__eyebrow">{{ section.settings.eyebrow }}</p>
+    {%- endif -%}
+
+    {%- if section.settings.show_numeral -%}
+      <p class="misc-404__numeral" aria-hidden="true">{{ section.settings.numeral_text }}</p>
+    {%- endif -%}
+
+    <h1 class="misc-404__title">{{ section.settings.heading }}</h1>
+
+    {%- if section.settings.body != blank -%}
+      <div class="misc-404__body rte">{{ section.settings.body }}</div>
+    {%- endif -%}
+
+    <div class="misc-404__actions">
+      <a href="{{ cat_url }}" class="misc-404__btn misc-404__btn--primary">
+        {{ section.settings.catalogue_label }}
+      </a>
+      {%- if section.settings.show_home_link -%}
+        <a href="{{ routes.root_url }}" class="misc-404__btn misc-404__btn--ghost">
+          {{ section.settings.home_label }}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "MISC 404",
+  "tag": "section",
+  "class": "misc-404-section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Error 404" },
+    { "type": "checkbox", "id": "show_numeral", "label": "Show large 404 numeral", "default": true },
+    { "type": "text", "id": "numeral_text", "label": "Numeral", "default": "404" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Page not found" },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Body text",
+      "default": "<p>The page you were looking for has moved or no longer exists. Everything we stock lives in the catalogue.</p>"
+    },
+    { "type": "header", "content": "Primary action" },
+    { "type": "text", "id": "catalogue_label", "label": "Catalogue button label", "default": "Browse the catalogue" },
+    { "type": "url", "id": "catalogue_link", "label": "Catalogue link", "info": "Leave blank to use /collections/all (all products)." },
+    { "type": "header", "content": "Secondary action" },
+    { "type": "checkbox", "id": "show_home_link", "label": "Show 'Back to home' link", "default": true },
+    { "type": "text", "id": "home_label", "label": "Home link label", "default": "Back to home" },
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top", "label": "Padding top", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "label": "Padding bottom", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 96 }
+  ]
+}
+{% endschema %}
