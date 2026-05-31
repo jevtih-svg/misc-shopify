@@ -86,7 +86,7 @@
           "type": "shop",
           "settings": {
             "label": "Shop ITO Bindery",
-            "link": "/collections/all?filter.p.tag=ITO%20Bindery"
+            "link": "/collections/all?filter.p.m.custom.brand=ITO%20Bindery"
           }
         }
       },

@@ -70,7 +70,7 @@
           "type": "shop",
           "settings": {
             "label": "Shop Nähe",
-            "link": "/collections/all?filter.p.tag=N%C3%A4he"
+            "link": "/collections/all?filter.p.m.custom.brand=N%C3%A4he"
           }
         }
       },

@@ -1,0 +1,170 @@
+{%- comment -%}
+  ============================================================
+  MISC Journal — blog landing.
+  News timeline (left, from a blog) + Exhibitions sidebar (right,
+  from the `exhibition` metaobject). Upcoming sorted soonest-first;
+  past sorted most-recent-first and capped by `max_past`.
+  Used by templates/page.misc-journal.json.
+  ============================================================
+{%- endcomment -%}
+{{ 'misc-journal.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign news_blog = section.settings.news_blog | default: 'news'
+  assign per_page = section.settings.per_page | default: 12
+  assign max_past = section.settings.max_past | default: 2
+  assign heading = section.settings.heading | default: 'Journal'
+  assign fairs = shop.metaobjects.exhibition.values
+  assign now_ts = 'now' | date: '%s' | plus: 0
+  # Use the current blog on the blog template; fall back to the named blog on a page template.
+  assign jblog = blog
+  if jblog == blank
+    assign jblog = blogs[news_blog]
+  endif
+-%}
+
+<div class="misc-journal">
+
+  <div class="misc-journal__head">
+    <h1 class="misc-journal__title">{{ heading }}</h1>
+    {%- if section.settings.intro != blank -%}
+      <p class="misc-journal__sub">{{ section.settings.intro }}</p>
+    {%- endif -%}
+  </div>
+
+  <div class="misc-journal__layout">
+
+    <main class="misc-journal__main">
+      <div class="misc-journal__sec-head">
+        <h2 class="misc-journal__sec-title">{{ section.settings.news_heading | default: 'News & Updates' }}</h2>
+      </div>
+      <div class="misc-journal__feed">
+        {%- paginate jblog.articles by per_page -%}
+          {%- for article in jblog.articles -%}
+            {%- liquid
+              assign ex_text = article.excerpt | strip_html | strip
+              if ex_text == blank
+                assign ex_text = article.content | strip_html | truncatewords: 28
+              endif
+            -%}
+            <a class="misc-news-card" href="{{ article.url }}">
+              <span class="misc-news-card__rail">
+                <span class="misc-news-card__date">{{ article.published_at | date: '%Y · %m · %d' }}</span>
+                {%- if article.tags.size > 0 -%}<span class="misc-news-card__cat">{{ article.tags.first }}</span>{%- endif -%}
+              </span>
+              <span class="misc-news-card__body">
+                <span class="misc-news-card__title">{{ article.title }}</span>
+                <span class="misc-news-card__excerpt">{{ ex_text }}</span>
+                <span class="misc-news-card__more">Read →</span>
+              </span>
+            </a>
+          {%- else -%}
+            <div class="misc-exh-empty"><div class="misc-exh-empty__title">No posts yet</div>Check back soon.</div>
+          {%- endfor -%}
+
+          {%- if paginate.pages > 1 -%}
+            <div class="misc-journal__pager">
+              {%- if paginate.previous -%}
+                <a class="misc-journal__step" href="{{ paginate.previous.url }}">← Newer</a>
+              {%- else -%}
+                <span class="misc-journal__step misc-journal__step--off">← Newer</span>
+              {%- endif -%}
+              <div class="misc-journal__pager-pages">
+                {%- for part in paginate.parts -%}
+                  {%- if part.is_link -%}
+                    <a class="misc-journal__page" href="{{ part.url }}">{{ part.title }}</a>
+                  {%- else -%}
+                    <span class="misc-journal__page" aria-current="page">{{ part.title }}</span>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+              {%- if paginate.next -%}
+                <a class="misc-journal__step" href="{{ paginate.next.url }}">Older →</a>
+              {%- else -%}
+                <span class="misc-journal__step misc-journal__step--off">Older →</span>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        {%- endpaginate -%}
+      </div>
+    </main>
+
+    <aside class="misc-journal__aside">
+      {%- liquid
+        # Bucket events into upcoming / past, keyed by "starttimestamp#handle" so we
+        # can sort then re-fetch each entry by handle (the values collection is not
+        # integer-indexable).
+        assign up_keys = ''
+        assign past_keys = ''
+        for ex in fairs
+          assign ed = ex.end_date.value | default: ex.start_date.value
+          assign end_ts = ed | date: '%s' | plus: 0
+          assign start_ts = ex.start_date.value | date: '%s' | plus: 0
+          if end_ts >= now_ts
+            assign up_keys = up_keys | append: start_ts | append: '#' | append: ex.system.handle | append: '||'
+          else
+            assign past_keys = past_keys | append: start_ts | append: '#' | append: ex.system.handle | append: '||'
+          endif
+        endfor
+        assign up_arr = up_keys | split: '||' | sort_natural
+        assign past_arr = past_keys | split: '||' | sort_natural | reverse
+        assign up_count = up_arr | size
+      -%}
+
+      <div class="misc-journal__sec-head">
+        <h2 class="misc-journal__sec-title misc-journal__sec-title--sm">{{ section.settings.sidebar_heading | default: 'Where to find us' }}</h2>
+        <span class="misc-journal__sec-meta">{{ up_count }} upcoming</span>
+      </div>
+
+      {%- if up_count > 0 -%}
+        {%- for key in up_arr -%}
+          {%- assign h = key | split: '#' | last -%}
+          {%- assign ex = shop.metaobjects.exhibition[h] -%}
+          {%- if ex != blank -%}
+            {%- assign st = ex.start_date.value | date: '%s' | plus: 0 -%}
+            {%- if st <= now_ts -%}{%- assign status = 'now' -%}{%- else -%}{%- assign status = 'upcoming' -%}{%- endif -%}
+            {%- render 'misc-exh-item', ex: ex, status: status -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- else -%}
+        <div class="misc-exh-empty">
+          <div class="misc-exh-empty__title">{{ section.settings.empty_title | default: 'Nothing scheduled right now' }}</div>
+          {{ section.settings.empty_text | default: 'We attend a handful of trade fairs each year. Our next confirmed appearance will show up here.' }}
+        </div>
+      {%- endif -%}
+
+      {%- assign past_total = past_arr | size -%}
+      {%- if past_total > 0 -%}
+        <div class="misc-exh-sub">{{ section.settings.past_heading | default: 'Past appearances' }}</div>
+        {%- for key in past_arr limit: max_past -%}
+          {%- assign h = key | split: '#' | last -%}
+          {%- assign ex = shop.metaobjects.exhibition[h] -%}
+          {%- if ex != blank -%}{%- render 'misc-exh-item', ex: ex, status: 'past' -%}{%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    </aside>
+
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "MISC Journal",
+  "settings": [
+    { "type": "header", "content": "Page header" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Journal" },
+    { "type": "textarea", "id": "intro", "label": "Intro text", "default": "What's new at MISC, and where to find us. Updates and brand arrivals for our wholesale partners, plus the trade fairs we're attending." },
+    { "type": "header", "content": "News column" },
+    { "type": "text", "id": "news_heading", "label": "News heading", "default": "News & Updates" },
+    { "type": "text", "id": "news_blog", "label": "News blog handle", "default": "news" },
+    { "type": "range", "id": "per_page", "min": 6, "max": 24, "step": 6, "label": "Posts per page", "default": 12 },
+    { "type": "header", "content": "Exhibitions sidebar" },
+    { "type": "text", "id": "sidebar_heading", "label": "Sidebar heading", "default": "Where to find us" },
+    { "type": "text", "id": "past_heading", "label": "Past appearances heading", "default": "Past appearances" },
+    { "type": "range", "id": "max_past", "min": 0, "max": 6, "step": 1, "label": "Max past events shown", "default": 2 },
+    { "type": "text", "id": "empty_title", "label": "Empty-state title", "default": "Nothing scheduled right now" },
+    { "type": "textarea", "id": "empty_text", "label": "Empty-state text", "default": "We attend a handful of trade fairs each year. Our next confirmed appearance will show up here." }
+  ],
+  "presets": [{ "name": "MISC Journal" }]
+}
+{% endschema %}

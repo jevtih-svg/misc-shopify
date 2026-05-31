@@ -70,7 +70,7 @@
           "type": "shop",
           "settings": {
             "label": "Shop Stálogy",
-            "link": "/collections/all?filter.p.tag=STALOGY"
+            "link": "/collections/all?filter.p.m.custom.brand=STALOGY"
           }
         }
       },

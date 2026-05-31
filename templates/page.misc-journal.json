@@ -3,7 +3,6 @@
     "main": {
       "type": "misc-journal",
       "settings": {
-        "heading": "Journal",
         "news_blog": "news",
         "per_page": 12,
         "max_past": 2

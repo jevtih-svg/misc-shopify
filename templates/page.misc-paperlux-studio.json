@@ -70,7 +70,7 @@
           "type": "shop",
           "settings": {
             "label": "Shop Paperlux Studio",
-            "link": "/collections/all?filter.p.tag=Paperlux%20Studio"
+            "link": "/collections/all?filter.p.m.custom.brand=Paperlux%20Studio"
           }
         }
       },

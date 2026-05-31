@@ -46,7 +46,7 @@
           "type": "shop",
           "settings": {
             "label": "Shop Midori",
-            "link": "/collections/all?filter.p.tag=midori"
+            "link": "/collections/all?filter.p.m.custom.brand=Midori"
           }
         }
       },

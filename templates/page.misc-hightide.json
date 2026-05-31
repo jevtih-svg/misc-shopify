@@ -70,7 +70,7 @@
           "type": "shop",
           "settings": {
             "label": "Shop Hightide",
-            "link": "/collections/all?filter.p.tag=Hightide"
+            "link": "/collections/all?filter.p.m.custom.brand=Hightide"
           }
         }
       },

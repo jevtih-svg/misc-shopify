@@ -62,7 +62,7 @@
           "type": "shop",
           "settings": {
             "label": "Shop Penco",
-            "link": "/collections/all?filter.p.tag=Penco"
+            "link": "/collections/all?filter.p.m.custom.brand=Penco"
           }
         }
       },

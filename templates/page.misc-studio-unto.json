@@ -70,7 +70,7 @@
           "type": "shop",
           "settings": {
             "label": "Shop Studio Unto",
-            "link": "/collections/all?filter.p.tag=Studio%20Unto"
+            "link": "/collections/all?filter.p.m.custom.brand=Studio%20Unto"
           }
         }
       },

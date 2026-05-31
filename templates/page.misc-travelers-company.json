@@ -46,7 +46,7 @@
           "type": "shop",
           "settings": {
             "label": "Shop Traveler’s Company",
-            "link": "/collections/all?filter.p.tag=Travelers%20Company"
+            "link": "/collections/all?filter.p.m.custom.brand=Travelers%20Company"
           }
         }
       },

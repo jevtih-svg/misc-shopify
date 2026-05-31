@@ -83,7 +83,7 @@
           "type": "shop",
           "settings": {
             "label": "Shop hibi",
-            "link": "/collections/all?filter.p.tag=Hibi"
+            "link": "/collections/all?filter.p.m.custom.brand=Hibi"
           }
         }
       },

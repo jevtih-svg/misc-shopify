@@ -1,0 +1,36 @@
+{%- comment -%}
+  ============================================================
+  MISC news article single — boxed reading column.
+  Rendered by templates/article.json for blog posts.
+  ============================================================
+{%- endcomment -%}
+{{ 'misc-journal.css' | asset_url | stylesheet_tag }}
+
+<div class="misc-post">
+  <div class="misc-post__top">
+    <a class="misc-post__back" href="{{ blog.url }}">Back to {{ blog.title }}</a>
+    <span class="misc-post__kicker">{{ blog.title }}</span>
+  </div>
+
+  <article>
+    <div class="misc-post__head">
+      {%- if article.tags.size > 0 -%}<span class="misc-post__cat">{{ article.tags.first }}</span>{%- endif -%}
+      <h1 class="misc-post__title">{{ article.title }}</h1>
+      <div class="misc-post__meta">
+        {{ article.published_at | date: '%Y · %m · %d' }}{% if article.author != blank %} · {{ article.author }}{% endif %}
+      </div>
+    </div>
+
+    {%- if article.image -%}
+      <div class="misc-post__media">
+        <img src="{{ article.image | image_url: width: 1600 }}" alt="{{ article.image.alt | escape }}" loading="lazy" width="1600">
+      </div>
+    {%- endif -%}
+
+    <div class="misc-post__body">{{ article.content }}</div>
+  </article>
+</div>
+
+{% schema %}
+{ "name": "MISC Article (news)", "settings": [] }
+{% endschema %}
