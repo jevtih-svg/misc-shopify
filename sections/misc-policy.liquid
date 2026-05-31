@@ -1,0 +1,52 @@
+{%- comment -%}
+  ============================================================
+  MISC Policy — themed shop-policy page
+  ------------------------------------------------------------
+  Renders any shop policy (Privacy, Refund, Terms, Shipping) in
+  the MISC line-grid style. Shopify exposes the current policy
+  as the `policy` object (policy.title, policy.body).
+
+  All shop policies share one policy template, so this single
+  section styles every policy consistently. Pure visual / Liquid;
+  no Trade core files touched.
+
+  CSS: assets/misc-policy.css
+  Used by: templates/policy.json
+  ============================================================
+{%- endcomment -%}
+
+{{ 'misc-policy.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="misc-policy"
+  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <header class="misc-policy__head">
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="misc-policy__eyebrow">{{ section.settings.eyebrow }}</p>
+    {%- endif -%}
+    <h1 class="misc-policy__title">{{ policy.title }}</h1>
+  </header>
+
+  <div class="misc-policy__body rte">
+    {{ policy.body }}
+  </div>
+
+  {%- if section.settings.show_back -%}
+    <p class="misc-policy__back"><a href="{{ routes.root_url }}">&larr; Back to store</a></p>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "MISC Policy",
+  "tag": "section",
+  "class": "misc-policy-section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Legal" },
+    { "type": "checkbox", "id": "show_back", "label": "Show 'Back to store' link", "default": true },
+    { "type": "range", "id": "padding_top", "label": "Padding top", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 },
+    { "type": "range", "id": "padding_bottom", "label": "Padding bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 72 }
+  ]
+}
+{% endschema %}

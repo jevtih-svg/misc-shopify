@@ -32,23 +32,28 @@
   comment
     Breadcrumb chain: Catalogue / Brand / Collection / Product.
 
-    This store has no per-brand or per-series Shopify collections —
-    brand and "collection" are encoded as product TAGS ("Hibi",
+    This store has no per-brand or per-series Shopify collections.
+    Brand and "collection" are encoded as product TAGS ("Hibi",
     "Collection: Regular Large Box") and surfaced as facets on the
     /collections/all catalogue grid. So the Brand and Collection
     crumbs deep-link into that grid with a filter.p.tag query
     pre-applied, mirroring the tag pills in misc-pdp-head.liquid.
-    (Needs the "Product tag" filter enabled in Search & Discovery —
-    the same dependency the PDP tag pills already rely on.)
+    Needs the "Product tag" filter enabled in Search and Discovery,
+    the same dependency the PDP tag pills already rely on.
   endcomment
 
-  comment Brand display value via the shared misc-brand fallback chain. endcomment
+  comment
+    Brand display value via the shared misc-brand fallback chain.
+  endcomment
   capture misc_brand
     render 'misc-brand', product: product
   endcapture
   assign misc_brand = misc_brand | strip
 
-  comment Collection from the "Collection:" tag — full tag is the filter value, stripped text is the label. endcomment
+  comment
+    Collection from the "Collection:" tag. The full tag is the
+    filter value; the stripped text is the display label.
+  endcomment
   assign misc_collection_tag = ''
   assign misc_collection_label = ''
   for misc_t in product.tags

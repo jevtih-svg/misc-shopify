@@ -1,0 +1,121 @@
+/* ============================================================
+   MISC Policy page
+   Section: sections/misc-policy.liquid
+   Template: templates/policy.json
+
+   A clean editorial document: line-grid header band with eyebrow
+   + title, then the policy body in a comfortable reading column.
+   Tokens from misc-tokens.css; only the title size is local.
+   ============================================================ */
+
+.misc-policy {
+  --misc-policy-title: clamp(36px, 5vw, 56px);
+  max-width: var(--max-width-page);
+  margin: 0 auto;
+  padding-left: var(--space-5);
+  padding-right: var(--space-5);
+  color: var(--c-ink);
+}
+
+/* ----- Header band ----- */
+
+.misc-policy__head {
+  border-bottom: 3px solid var(--c-ink);
+  padding-bottom: var(--space-5);
+  margin-bottom: var(--space-7);
+}
+.misc-policy__eyebrow {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--c-ink-mute);
+  font-weight: var(--fw-medium);
+  margin: 0 0 var(--space-3);
+}
+.misc-policy__title {
+  font-size: var(--misc-policy-title);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  font-weight: var(--fw-bold);
+  margin: 0;
+}
+
+/* ----- Body (RTE document) ----- */
+
+.misc-policy__body {
+  max-width: var(--max-width-prose);
+  font-size: var(--fs-md);
+  line-height: 1.7;
+  color: var(--c-ink);
+}
+.misc-policy__body > :first-child { margin-top: 0; }
+
+.misc-policy__body p {
+  margin: 0 0 var(--space-4);
+}
+.misc-policy__body h2 {
+  font-size: var(--fs-xl);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: var(--space-7) 0 var(--space-3);
+}
+.misc-policy__body h3 {
+  font-size: var(--fs-lg);
+  line-height: 1.25;
+  margin: var(--space-6) 0 var(--space-2);
+}
+.misc-policy__body h4 {
+  font-size: var(--fs-md);
+  margin: var(--space-5) 0 var(--space-2);
+}
+.misc-policy__body ul,
+.misc-policy__body ol {
+  margin: 0 0 var(--space-4);
+  padding-left: var(--space-5);
+}
+.misc-policy__body li {
+  margin-bottom: var(--space-2);
+}
+.misc-policy__body a {
+  color: var(--c-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.misc-policy__body strong { font-weight: var(--fw-bold); }
+.misc-policy__body hr {
+  border: 0;
+  border-top: 1px solid var(--c-line);
+  margin: var(--space-6) 0;
+}
+.misc-policy__body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 var(--space-4);
+  font-size: var(--fs-sm);
+}
+.misc-policy__body th,
+.misc-policy__body td {
+  border: 1px solid var(--c-line);
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  vertical-align: top;
+}
+
+/* ----- Back link ----- */
+
+.misc-policy__back {
+  max-width: var(--max-width-prose);
+  margin: var(--space-7) 0 0;
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--c-line);
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-weight: var(--fw-medium);
+}
+.misc-policy__back a { color: var(--c-ink-mute); text-decoration: none; }
+.misc-policy__back a:hover { color: var(--c-ink); }
+
+@media (max-width: 600px) {
+  .misc-policy { padding-left: var(--space-4); padding-right: var(--space-4); }
+}

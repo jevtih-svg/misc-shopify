@@ -43,6 +43,15 @@
    Slim — 56px tall. Logo left, search middle (hairline only,
    activates on focus), account state + cart right.
    ============================================================ */
+/* The whole header sits above page content so the nav dropdown
+   overlays the catalog. Without a stacking context here, the catalog's
+   sticky list header (z 50) and list image popover (z 100) painted on
+   top of the open dropdown. */
+.shopify-section-group-header-group {
+  position: relative;
+  z-index: 300;
+}
+
 .misc-site-header {
   background: var(--c-bg);
   border-bottom: 1px solid var(--c-line);
@@ -334,7 +343,10 @@ button.misc-site-nav__item {
   position: absolute;
   top: 100%;
   left: 0;
-  z-index: 50;
+  /* Above the catalog's sticky list header (z 50) and list image
+     popover (z 100). The header group also gets its own stacking
+     context (below) so the whole header sits over page content. */
+  z-index: 200;
   min-width: 220px;
   margin: 0;
   padding: var(--space-2) 0;
