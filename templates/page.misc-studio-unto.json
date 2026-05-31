@@ -65,6 +65,13 @@
             "website_label": "studiounto.com",
             "website_url": "https://studiounto.com"
           }
+        },
+        "shop": {
+          "type": "shop",
+          "settings": {
+            "label": "Shop Studio Unto",
+            "link": "/collections/all?filter.p.tag=Studio%20Unto"
+          }
         }
       },
       "block_order": [
@@ -74,6 +81,7 @@
         "img_2",
         "img_3",
         "img_4",
+        "shop",
         "footer"
       ]
     }

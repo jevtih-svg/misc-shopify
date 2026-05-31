@@ -65,6 +65,13 @@
             "website_label": "stalogy.com",
             "website_url": "https://www.stalogy.com"
           }
+        },
+        "shop": {
+          "type": "shop",
+          "settings": {
+            "label": "Shop Stálogy",
+            "link": "/collections/all?filter.p.tag=STALOGY"
+          }
         }
       },
       "block_order": [
@@ -74,6 +81,7 @@
         "img_2",
         "img_3",
         "img_4",
+        "shop",
         "footer"
       ]
     }

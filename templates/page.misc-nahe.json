@@ -65,6 +65,13 @@
             "website_label": "hightide.co.jp",
             "website_url": "http://hightide.co.jp/product/list/nahe.php"
           }
+        },
+        "shop": {
+          "type": "shop",
+          "settings": {
+            "label": "Shop Nähe",
+            "link": "/collections/all?filter.p.tag=N%C3%A4he"
+          }
         }
       },
       "block_order": [
@@ -74,6 +81,7 @@
         "img_2",
         "img_3",
         "img_4",
+        "shop",
         "footer"
       ]
     }

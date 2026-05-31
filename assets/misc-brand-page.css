@@ -140,6 +140,27 @@
 .misc-brand-page__foot-link:hover { color: var(--c-ink-mute); text-decoration: none; }
 .misc-brand-page__foot-link:hover .misc-brand-page__foot-arrow { transform: translate(3px, -3px); }
 
+/* ----- Shop button block ----- */
+.misc-brand-page__shop { padding: var(--space-7); display: flex; }
+.misc-brand-page__shop-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--c-ink);
+  color: #fff;
+  border: 2px solid var(--c-ink);
+  padding: var(--space-4) var(--space-6);
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: var(--fw-medium);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.misc-brand-page__shop-btn:hover { background: var(--c-bg); color: var(--c-ink); }
+.misc-brand-page__shop-arrow { transition: transform 0.25s ease; }
+.misc-brand-page__shop-btn:hover .misc-brand-page__shop-arrow { transform: translateX(3px); }
+
 /* ----- Responsive ----- */
 @media (max-width: 900px) {
   .misc-brand-page__grid { grid-template-columns: 1fr; }

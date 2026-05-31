@@ -57,6 +57,13 @@
             "website_label": "hightide.co.jp",
             "website_url": "http://hightide.co.jp/product/list/penco.php"
           }
+        },
+        "shop": {
+          "type": "shop",
+          "settings": {
+            "label": "Shop Penco",
+            "link": "/collections/all?filter.p.tag=Penco"
+          }
         }
       },
       "block_order": [
@@ -65,6 +72,7 @@
         "img_1",
         "img_2",
         "img_3",
+        "shop",
         "footer"
       ]
     }

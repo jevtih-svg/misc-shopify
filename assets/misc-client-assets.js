@@ -20,6 +20,20 @@
     return out;
   }
 
+  function buildGroup(label, iconId, items) {
+    var g = document.createElement('div');
+    g.className = 'misc-ca__group';
+    var head = document.createElement('div');
+    head.className = 'misc-ca__group-head';
+    head.innerHTML = '<span class="misc-ca__group-ic"><svg class="misc-ca__icon" aria-hidden="true" focusable="false"><use href="#' + iconId + '"></use></svg></span>' + label + '<span class="misc-ca__group-ct">' + items.length + '</span>';
+    g.appendChild(head);
+    var listEl = document.createElement('div');
+    listEl.className = 'misc-ca__list';
+    items.forEach(function (a) { listEl.appendChild(a); });
+    g.appendChild(listEl);
+    return g;
+  }
+
   function initSection(root) {
     if (!root) { return; }
     var st = root.miscCa || (root.miscCa = {});
@@ -53,6 +67,20 @@
       if (numEl) { numEl.textContent = pad2(i + 1); }
       var countsEl = brand.querySelector('[data-counts]');
       if (countsEl) { countsEl.innerHTML = countsMarkup(img, cat); }
+
+      var srcList = brand.querySelector('[data-list]');
+      if (srcList) {
+        var imgA = [], catA = [];
+        assets.forEach(function (a) {
+          if (a.getAttribute('data-group') === 'catalogue') { catA.push(a); } else { imgA.push(a); }
+        });
+        var groups = document.createElement('div');
+        groups.className = 'misc-ca__groups';
+        if (imgA.length) { groups.appendChild(buildGroup('Image Bank', 'misc-ca-img', imgA)); }
+        if (catA.length) { groups.appendChild(buildGroup('Catalogues', 'misc-ca-doc', catA)); }
+        if (imgA.length && catA.length) { groups.classList.add('misc-ca__groups--two'); }
+        srcList.parentNode.replaceChild(groups, srcList);
+      }
     });
     var tFiles = tImg + tCat;
 

@@ -41,12 +41,20 @@
             "website_label": "midori-japan.co.jp",
             "website_url": "http://www.midori-japan.co.jp/english/"
           }
+        },
+        "shop": {
+          "type": "shop",
+          "settings": {
+            "label": "Shop Midori",
+            "link": "/collections/all?filter.p.tag=midori"
+          }
         }
       },
       "block_order": [
         "heading",
         "text",
         "img_1",
+        "shop",
         "footer"
       ]
     }

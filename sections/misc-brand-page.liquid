@@ -77,6 +77,16 @@
             {%- endif -%}
           </figure>
 
+        {%- when 'shop' -%}
+          <div class="misc-brand-page__cell misc-brand-page__shop" style="grid-column: span 6;" {{ block.shopify_attributes }}>
+            {%- if block.settings.link != blank -%}
+              <a class="misc-brand-page__shop-btn" href="{{ block.settings.link }}">
+                {{ block.settings.label | default: 'Shop the collection' }}
+                <span class="misc-brand-page__shop-arrow" aria-hidden="true">&rarr;</span>
+              </a>
+            {%- endif -%}
+          </div>
+
         {%- when 'footer' -%}
           <div class="misc-brand-page__cell misc-brand-page__foot" style="grid-column: span 6;" {{ block.shopify_attributes }}>
             <div class="misc-brand-page__foot-cell">
@@ -177,6 +187,15 @@
       ]
     },
     {
+      "type": "shop",
+      "name": "Shop button",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Button label", "default": "Shop the collection" },
+        { "type": "url", "id": "link", "label": "Link (filtered catalogue)" }
+      ]
+    },
+    {
       "type": "footer",
       "name": "Footer",
       "limit": 1,
@@ -202,6 +221,7 @@
         { "type": "image" },
         { "type": "image" },
         { "type": "image" },
+        { "type": "shop" },
         { "type": "footer" }
       ]
     }

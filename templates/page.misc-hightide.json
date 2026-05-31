@@ -65,6 +65,13 @@
             "website_label": "hightide.co.jp",
             "website_url": "http://hightide.co.jp/"
           }
+        },
+        "shop": {
+          "type": "shop",
+          "settings": {
+            "label": "Shop Hightide",
+            "link": "/collections/all?filter.p.tag=Hightide"
+          }
         }
       },
       "block_order": [
@@ -74,6 +81,7 @@
         "img_2",
         "img_3",
         "img_4",
+        "shop",
         "footer"
       ]
     }

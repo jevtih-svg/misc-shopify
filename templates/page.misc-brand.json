@@ -78,6 +78,13 @@
             "website_label": "hibi-jp.com",
             "website_url": "https://hibi-jp.com"
           }
+        },
+        "shop": {
+          "type": "shop",
+          "settings": {
+            "label": "Shop hibi",
+            "link": "/collections/all?filter.p.tag=Hibi"
+          }
         }
       },
       "block_order": [
@@ -89,6 +96,7 @@
         "img_1",
         "img_2",
         "img_3",
+        "shop",
         "footer"
       ]
     }

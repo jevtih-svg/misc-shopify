@@ -65,6 +65,13 @@
             "website_label": "kokuyo-st.co.jp",
             "website_url": "https://www.kokuyo-st.co.jp/en/"
           }
+        },
+        "shop": {
+          "type": "shop",
+          "settings": {
+            "label": "Shop Kokuyo",
+            "link": "/collections/all?filter.p.tag=Kokuyo"
+          }
         }
       },
       "block_order": [
@@ -74,6 +81,7 @@
         "img_2",
         "img_3",
         "img_4",
+        "shop",
         "footer"
       ]
     }

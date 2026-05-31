@@ -81,6 +81,13 @@
             "website_label": "ito-bindery.com",
             "website_url": "https://ito-bindery.com/en-nl"
           }
+        },
+        "shop": {
+          "type": "shop",
+          "settings": {
+            "label": "Shop ITO Bindery",
+            "link": "/collections/all?filter.p.tag=ITO%20Bindery"
+          }
         }
       },
       "block_order": [
@@ -92,6 +99,7 @@
         "img_4",
         "img_5",
         "img_6",
+        "shop",
         "footer"
       ]
     }

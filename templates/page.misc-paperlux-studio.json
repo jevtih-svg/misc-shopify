@@ -65,6 +65,13 @@
             "website_label": "paperlux.com",
             "website_url": "https://paperlux.com/en/"
           }
+        },
+        "shop": {
+          "type": "shop",
+          "settings": {
+            "label": "Shop Paperlux Studio",
+            "link": "/collections/all?filter.p.tag=Paperlux%20Studio"
+          }
         }
       },
       "block_order": [
@@ -74,6 +81,7 @@
         "img_2",
         "img_3",
         "img_4",
+        "shop",
         "footer"
       ]
     }
