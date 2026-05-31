@@ -1,0 +1,8 @@
+{
+  "sections": {
+    "main": {
+      "type": "misc-curated-index"
+    }
+  },
+  "order": ["main"]
+}

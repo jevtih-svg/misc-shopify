@@ -1,26 +1,22 @@
 {%- comment -%}
   ============================================================
-  MISC Curated Collection — one reusable section per collection
+  MISC Curated Collection — dual source
   ------------------------------------------------------------
-  Each curated collection is a Page with its own template that
-  references this section (same pattern as the brand pages).
+  Renders a curated collection from EITHER:
+    A) a `curated_collection` metaobject (preferred) — used by
+       templates/metaobject/curated_collection.json. Managed in
+       Admin → Content → Metaobjects. Each item is a `curated_item`
+       metaobject (variant + default_quantity + display_size +
+       optional description_override).
+    B) section product blocks (legacy / Theme-Editor path).
 
-  Curation is done entirely from the Theme Editor. Each product
-  is a "product" block whose settings answer the two questions:
-    - Display size  -> how the product is shown (full / two / three per row)
-    - Add-all qty   -> the quantity used by "Add collection to cart"
-    - Description    -> optional per-collection override of the copy
-    - Product        -> the product (its first available variant is used)
-
-  "Add collection to cart" reads every block's variant + add-all
-  quantity and posts them to the cart in one request (see
-  assets/misc-curated-collection.js). Individual steppers set
-  that product's quantity in the cart directly (catalogue logic,
-  plus/minus only, no add button).
+  Layout, "Add collection to cart", and the steppers are identical
+  for both. The add-all button posts every item's variant at its
+  default quantity to /cart/add.js (assets/misc-curated-collection.js).
 
   CSS: assets/misc-curated-collection.css
   JS:  assets/misc-curated-collection.js
-  Used by: templates/page.misc-curated-*.json
+  Cell: snippets/misc-curated-cell.liquid
   ============================================================
 {%- endcomment -%}
 
@@ -29,48 +25,74 @@
 
 {%- liquid
   assign rule = section.settings.rule_weight | default: 3
-  assign product_blocks = section.blocks
+  assign is_mo = false
+  if metaobject != blank
+    assign is_mo = true
+  endif
 
+  assign cc_eyebrow = section.settings.eyebrow | default: 'Curated'
   assign total_cents = 0
   assign total_units = 0
   assign items_json = ''
-  for block in product_blocks
-    assign v = block.settings.product.selected_or_first_available_variant
-    if v
-      assign q = block.settings.add_qty | default: 1
-      assign line = v.price | times: q
-      assign total_cents = total_cents | plus: line
-      assign total_units = total_units | plus: q
-      assign items_json = items_json | append: ',{"id":' | append: v.id | append: ',"quantity":' | append: q | append: '}'
-    endif
-  endfor
+
+  if is_mo
+    assign cc_title = metaobject.title.value
+    assign cc_brand = metaobject.brand.value
+    assign cc_desc = metaobject.description.value
+    assign cc_addlabel = metaobject.add_all_label.value | default: 'Add collection to cart'
+    for item in metaobject.items.value
+      assign v = item.variant.value
+      if v
+        assign q = item.default_quantity.value | default: 1
+        assign line = v.price | times: q
+        assign total_cents = total_cents | plus: line
+        assign total_units = total_units | plus: q
+        assign items_json = items_json | append: ',{"id":' | append: v.id | append: ',"quantity":' | append: q | append: '}'
+      endif
+    endfor
+  else
+    assign cc_title = section.settings.title
+    assign cc_brand = section.settings.brand
+    assign cc_desc = section.settings.description
+    assign cc_addlabel = section.settings.add_all_label | default: 'Add collection to cart'
+    for block in section.blocks
+      assign v = block.settings.product.selected_or_first_available_variant
+      if v
+        assign q = block.settings.add_qty | default: 1
+        assign line = v.price | times: q
+        assign total_cents = total_cents | plus: line
+        assign total_units = total_units | plus: q
+        assign items_json = items_json | append: ',{"id":' | append: v.id | append: ',"quantity":' | append: q | append: '}'
+      endif
+    endfor
+  endif
   assign items_json = items_json | remove_first: ','
 -%}
 
 <section
   class="misc-curated"
   style="--misc-cc-rule: {{ rule }}px; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
-  aria-label="{{ section.settings.title | default: 'Curated collection' | escape }}"
+  aria-label="{{ cc_title | default: 'Curated collection' | escape }}"
 >
   <div class="misc-curated__head">
     <div class="misc-curated__intro">
-      {%- if section.settings.eyebrow != blank or section.settings.brand != blank -%}
+      {%- if cc_eyebrow != blank or cc_brand != blank -%}
         <p class="misc-curated__eyebrow">
-          {{- section.settings.eyebrow -}}
-          {%- if section.settings.eyebrow != blank and section.settings.brand != blank %} &middot; {% endif -%}
-          {{- section.settings.brand -}}
+          {{- cc_eyebrow -}}
+          {%- if cc_eyebrow != blank and cc_brand != blank %} &middot; {% endif -%}
+          {{- cc_brand -}}
         </p>
       {%- endif -%}
-      <h1 class="misc-curated__title">{{ section.settings.title | default: 'Curated collection' }}</h1>
-      {%- if section.settings.description != blank -%}
-        <p class="misc-curated__desc">{{ section.settings.description }}</p>
+      <h1 class="misc-curated__title">{{ cc_title | default: 'Curated collection' }}</h1>
+      {%- if cc_desc != blank -%}
+        <div class="misc-curated__desc">{{ cc_desc }}</div>
       {%- endif -%}
     </div>
 
     {%- if items_json != blank -%}
       <div class="misc-curated__addwrap">
         <button type="button" class="misc-curated__addall" id="MiscCuratedAddAll" data-items='[{{ items_json }}]'>
-          <span class="misc-curated__addall-label">{{ section.settings.add_all_label | default: 'Add collection to cart' }}</span>
+          <span class="misc-curated__addall-label">{{ cc_addlabel }}</span>
           <span class="misc-curated__addall-total">{{ total_cents | money }}</span>
         </button>
         <p class="misc-curated__addnote">{{ total_units }} units &middot; you can always adjust quantities in the cart</p>
@@ -79,48 +101,21 @@
   </div>
 
   <div class="misc-curated__grid">
-    {%- for block in product_blocks -%}
-      {%- assign product = block.settings.product -%}
-      {%- assign v = product.selected_or_first_available_variant -%}
-      {%- assign size = block.settings.size | default: 'half' -%}
-      <article class="misc-curated__product misc-curated__product--{{ size }}" {{ block.shopify_attributes }}>
-        <figure class="misc-curated__media">
-          {%- if product.featured_image -%}
-            {{ product.featured_image | image_url: width: 1000 | image_tag:
-                loading: 'lazy',
-                widths: '320, 480, 720, 1000',
-                sizes: '(max-width: 1000px) 100vw, 33vw',
-                alt: product.title }}
-          {%- endif -%}
-        </figure>
-        <div class="misc-curated__body">
-          <p class="misc-curated__eyebrow">{{ section.settings.brand | default: product.vendor }}</p>
-          <h3 class="misc-curated__name">{{ product.title }}</h3>
-          <div class="misc-curated__prose">
-            {%- if block.settings.description != blank -%}
-              {{ block.settings.description }}
-            {%- else -%}
-              <p>{{ product.description | strip_html | truncatewords: 28 }}</p>
-            {%- endif -%}
-          </div>
-          {%- if v.sku != blank -%}<p class="misc-curated__sku">{{ v.sku }}</p>{%- endif -%}
-          {%- if v.available -%}
-            <span class="misc-curated__state misc-curated__state--instock">In stock</span>
-          {%- else -%}
-            <span class="misc-curated__state misc-curated__state--backorder">Backorder</span>
-          {%- endif -%}
-          <div class="misc-curated__price">{{ v.price | money }}</div>
-          <div class="misc-curated__actions">
-            <span class="misc-curated__qtylabel">Qty</span>
-            <div class="misc-curated__stepper" data-variant-id="{{ v.id }}">
-              <button type="button" data-step="-1" aria-label="Decrease quantity">&minus;</button>
-              <input type="number" class="misc-curated__qty" value="0" min="0" inputmode="numeric" aria-label="Quantity for {{ product.title | escape }}">
-              <button type="button" data-step="1" aria-label="Increase quantity">+</button>
-            </div>
-          </div>
-        </div>
-      </article>
-    {%- endfor -%}
+    {%- if is_mo -%}
+      {%- for item in metaobject.items.value -%}
+        {%- assign v = item.variant.value -%}
+        {%- if v -%}
+          {%- render 'misc-curated-cell', product: v.product, v: v, size: item.display_size.value, desc: item.description_override.value, brand: cc_brand -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- else -%}
+      {%- for block in section.blocks -%}
+        {%- assign v = block.settings.product.selected_or_first_available_variant -%}
+        {%- if v -%}
+          {%- render 'misc-curated-cell', product: block.settings.product, v: v, size: block.settings.size, desc: block.settings.description, brand: cc_brand -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
   </div>
 </section>
 
@@ -131,6 +126,7 @@
   "class": "misc-curated-section",
   "max_blocks": 50,
   "settings": [
+    { "type": "paragraph", "content": "On a curated_collection metaobject page this section reads the metaobject. The settings/blocks below are only used on a normal page template." },
     { "type": "header", "content": "Header" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Curated" },
     { "type": "text", "id": "brand", "label": "Brand", "default": "Penco" },
@@ -165,14 +161,7 @@
     }
   ],
   "presets": [
-    {
-      "name": "MISC Curated Collection",
-      "blocks": [
-        { "type": "product" },
-        { "type": "product" },
-        { "type": "product" }
-      ]
-    }
+    { "name": "MISC Curated Collection", "blocks": [ { "type": "product" }, { "type": "product" }, { "type": "product" } ] }
   ]
 }
 {% endschema %}

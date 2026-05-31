@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": {
+      "type": "misc-exhibition",
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}

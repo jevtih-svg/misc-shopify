@@ -1,0 +1,50 @@
+{%- comment -%}
+  MISC curated collection — one product cell.
+  Shared by the metaobject path and the legacy block path of
+  sections/misc-curated-collection.liquid.
+
+  Inputs:
+    product : the product drop
+    v       : the variant drop (selected/first available)
+    size    : full | half | third
+    desc    : optional HTML/text description override
+    brand   : eyebrow brand label
+{%- endcomment -%}
+{%- assign cell_size = size | default: 'half' -%}
+<article class="misc-curated__product misc-curated__product--{{ cell_size }}">
+  <figure class="misc-curated__media">
+    {%- if product.featured_image -%}
+      {{ product.featured_image | image_url: width: 1000 | image_tag:
+          loading: 'lazy',
+          widths: '320, 480, 720, 1000',
+          sizes: '(max-width: 1000px) 100vw, 33vw',
+          alt: product.title }}
+    {%- endif -%}
+  </figure>
+  <div class="misc-curated__body">
+    <p class="misc-curated__eyebrow">{{ brand | default: product.vendor }}</p>
+    <h3 class="misc-curated__name">{{ product.title }}</h3>
+    <div class="misc-curated__prose">
+      {%- if desc != blank -%}
+        {{ desc }}
+      {%- else -%}
+        <p>{{ product.description | strip_html | truncatewords: 28 }}</p>
+      {%- endif -%}
+    </div>
+    {%- if v.sku != blank -%}<p class="misc-curated__sku">{{ v.sku }}</p>{%- endif -%}
+    {%- if v.available -%}
+      <span class="misc-curated__state misc-curated__state--instock">In stock</span>
+    {%- else -%}
+      <span class="misc-curated__state misc-curated__state--backorder">Backorder</span>
+    {%- endif -%}
+    <div class="misc-curated__price">{{ v.price | money }}</div>
+    <div class="misc-curated__actions">
+      <span class="misc-curated__qtylabel">Qty</span>
+      <div class="misc-curated__stepper" data-variant-id="{{ v.id }}">
+        <button type="button" data-step="-1" aria-label="Decrease quantity">&minus;</button>
+        <input type="number" class="misc-curated__qty" value="0" min="0" inputmode="numeric" aria-label="Quantity for {{ product.title | escape }}">
+        <button type="button" data-step="1" aria-label="Increase quantity">+</button>
+      </div>
+    </div>
+  </div>
+</article>

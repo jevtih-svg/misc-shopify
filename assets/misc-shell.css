@@ -408,8 +408,29 @@ predictive-search[open] .misc-site-header__predictive { display: block; }
   transition: border-color 120ms ease;
   text-decoration: none;
 }
-.misc-site-nav__item.is-active,
 .misc-site-nav__item:hover { border-bottom-color: var(--c-ink); text-decoration: none; }
+
+/* MISC: active-page marker. The nav already has a 3px ink bottom frame, so a
+   bottom-border underline blends straight into it and the current page can't be
+   seen. Use a text underline offset up from the frame instead. The is-active
+   class is set in misc-header.liquid from link.active (top-level items + Home)
+   and link.active or link.child_active (parents, so a brand or other sub-page
+   underlines its parent menu item). Works for any future menu item too. */
+.misc-site-nav__item.is-active {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+/* No-destination parents render as a <button> with the chevron INSIDE, so a
+   plain underline would run under the caret. Scope it to the label span only.
+   (Parents with a real URL render as an <a> with the chevron as a separate
+   sibling button, so the rule above already underlines just their label.) */
+button.misc-site-nav__item--parent.is-active { text-decoration: none; }
+button.misc-site-nav__item--parent.is-active .misc-site-nav__label {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
 
 /* ---- Primary nav: dropdown sub-menus ---- */
 .misc-site-nav__group {

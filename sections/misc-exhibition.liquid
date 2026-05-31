@@ -2,7 +2,7 @@
   ============================================================
   MISC Exhibition single — renders an `exhibition` metaobject.
   Info left / image right, boxed. Used by
-  templates/metaobject.exhibition.json (the metaobject page).
+  templates/metaobject/exhibition.json (the metaobject page).
   ============================================================
 {%- endcomment -%}
 {{ 'misc-journal.css' | asset_url | stylesheet_tag }}
@@ -75,7 +75,7 @@
       {%- endif -%}
 
       {%- if ex.description.value != blank -%}
-        <div class="misc-event__body">{{ ex.description }}</div>
+        <div class="misc-event__body">{{ ex.description | metafield_tag }}</div>
       {%- endif -%}
     </div>
 

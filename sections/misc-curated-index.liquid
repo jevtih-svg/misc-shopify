@@ -1,0 +1,70 @@
+{%- comment -%}
+  ============================================================
+  MISC Curated Collections index
+  ------------------------------------------------------------
+  Lists every published `curated_collection` metaobject as a
+  card linking to its page (/pages/curated/<handle>). New
+  collections appear automatically — nothing to wire per
+  collection. Reads shop.metaobjects.curated_collection.values.
+
+  CSS: assets/misc-curated-collection.css (index styles)
+  ============================================================
+{%- endcomment -%}
+
+{{ 'misc-curated-collection.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="misc-curated-index"
+  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="misc-curated-index__head">
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="misc-curated__eyebrow">{{ section.settings.eyebrow }}</p>
+    {%- endif -%}
+    <h1 class="misc-curated-index__title">{{ section.settings.title | default: 'Curated Collections' }}</h1>
+    {%- if section.settings.intro != blank -%}
+      <p class="misc-curated-index__intro">{{ section.settings.intro }}</p>
+    {%- endif -%}
+  </div>
+
+  <div class="misc-curated-index__grid">
+    {%- for coll in shop.metaobjects.curated_collection.values -%}
+      {%- assign first = coll.items.value.first -%}
+      {%- assign fv = first.variant.value -%}
+      <a class="misc-curated-index__card" href="{{ coll.system.url }}">
+        <figure class="misc-curated-index__media">
+          {%- if fv.product.featured_image -%}
+            {{ fv.product.featured_image | image_url: width: 800 | image_tag:
+                loading: 'lazy',
+                widths: '320, 480, 800',
+                sizes: '(max-width: 900px) 100vw, 33vw',
+                alt: coll.title.value }}
+          {%- endif -%}
+        </figure>
+        <div class="misc-curated-index__body">
+          {%- if coll.brand.value != blank -%}
+            <p class="misc-curated__eyebrow">{{ coll.brand.value }}</p>
+          {%- endif -%}
+          <h2 class="misc-curated-index__name">{{ coll.title.value }}</h2>
+          <span class="misc-curated-index__count">{{ coll.items.value.count }} items</span>
+        </div>
+      </a>
+    {%- endfor -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "MISC Curated Index",
+  "tag": "section",
+  "class": "misc-curated-index-section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Shop" },
+    { "type": "text", "id": "title", "label": "Title", "default": "Curated Collections" },
+    { "type": "textarea", "id": "intro", "label": "Intro", "default": "Edits we have put together from the brands we represent. A focused way into the catalogue while you build an order." },
+    { "type": "range", "id": "padding_top", "label": "Padding top", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "label": "Padding bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "presets": [ { "name": "MISC Curated Index" } ]
+}
+{% endschema %}

@@ -117,6 +117,10 @@
 .misc-btn:hover{ background:var(--c-ink); color:var(--c-bg); text-decoration:none; }
 .misc-btn--solid{ background:var(--c-ink); color:var(--c-bg); }
 .misc-btn--solid:hover{ background:var(--c-ink-mute); border-color:var(--c-ink-mute); }
+/* Higher-specificity reinforcement so Trade's anchor colour can't hide the label. */
+.misc-event .misc-btn, .misc-post .misc-btn{ color:var(--c-ink); }
+.misc-event .misc-btn--solid, .misc-post .misc-btn--solid{ color:var(--c-bg); }
+.misc-event .misc-btn:hover, .misc-post .misc-btn:hover{ color:var(--c-bg); }
 
 .misc-event__body{ margin-top:var(--space-7); font-size:var(--fs-md); line-height:var(--lh-body); max-width:var(--max-width-prose); }
 .misc-event__body h3{ font-size:var(--fs-lg); margin:var(--space-6) 0 var(--space-3); text-transform:uppercase; letter-spacing:var(--ls-caps-sm); }
