@@ -3,62 +3,69 @@
     "main": {
       "type": "misc-brand-page",
       "settings": {
-        "eyebrow": "Brand",
-        "brand_name": "Penco",
-        "force_lowercase": true,
-        "lead": "A stationery brand founded on a single ballpoint pen.",
-        "represented_label": "Represented by",
-        "represented_org": "MISC Distribution",
-        "represented_region": "Benelux, Germany, France & Scandinavia",
-        "discover_label": "Discover more",
-        "website_label": "hightide.co.jp",
-        "website_url": "http://hightide.co.jp/product/list/penco.php",
-        "tile_ratio": "16 / 9",
         "rule_weight": 3,
         "padding_top": 48,
         "padding_bottom": 64
       },
       "blocks": {
-        "p_1": {
-          "type": "paragraph",
+        "heading": {
+          "type": "heading",
           "settings": {
-            "text": "<p>As the Americana inspired name suggests, PENCO is a company making pens. That is, it started with a single ballpoint pen. By now their nostalgic analog collections encompass stationery ranging from clips to clipboards, notebooks to console boxes and pencases to, well… pens.</p>"
+            "eyebrow": "Brand",
+            "heading": "Penco",
+            "force_lowercase": true
           }
         },
-        "p_2": {
-          "type": "paragraph",
+        "text": {
+          "type": "text",
           "settings": {
-            "text": "<p>Penco is a Hightide brand, and their attention to design can be seen throughout the entire Hightide range of casual everyday stationery.</p>"
+            "width": "half",
+            "text": "<p>A stationery brand founded on a single ballpoint pen.</p><p>As the Americana inspired name suggests, PENCO is a company making pens. That is, it started with a single ballpoint pen. By now their nostalgic analog collections encompass stationery ranging from clips to clipboards, notebooks to console boxes and pencases to, well… pens.</p><p>Penco is a Hightide brand, and their attention to design can be seen throughout the entire Hightide range of casual everyday stationery.</p>"
           }
         },
         "img_1": {
           "type": "image",
           "settings": {
+            "width": "half",
             "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/Lifestyle-Penco-1100x733.png?v=1780166229",
-            "alt": "Penco"
+            "title": "Penco"
           }
         },
         "img_2": {
           "type": "image",
           "settings": {
+            "width": "half",
             "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/IMG_9924-kopie-1100x733.jpg?v=1780166228",
-            "alt": "Penco"
+            "title": "Penco"
           }
         },
         "img_3": {
           "type": "image",
           "settings": {
+            "width": "half",
             "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/penco-1100x733.png?v=1780166229",
-            "alt": "Penco"
+            "title": "Penco"
+          }
+        },
+        "footer": {
+          "type": "footer",
+          "settings": {
+            "represented_label": "Represented by",
+            "title": "MISC Distribution",
+            "represented_region": "Benelux, Germany, France & Scandinavia",
+            "discover_label": "Discover more",
+            "website_label": "hightide.co.jp",
+            "website_url": "http://hightide.co.jp/product/list/penco.php"
           }
         }
       },
       "block_order": [
-        "p_1",
-        "p_2",
+        "heading",
+        "text",
         "img_1",
         "img_2",
-        "img_3"
+        "img_3",
+        "footer"
       ]
     }
   },

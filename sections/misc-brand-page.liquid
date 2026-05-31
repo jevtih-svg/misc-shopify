@@ -1,115 +1,110 @@
 {%- comment -%}
   ============================================================
-  MISC brand page (v2) — one reusable section per brand
+  MISC brand page (v3) — fully block-composed
   ------------------------------------------------------------
-  One section renders a brand's dedicated marketing page in the
-  MISC line-grid aesthetic. Editable end to end from the Theme
-  Editor: every string, fact, paragraph and image is a setting
-  or a block.
+  Same editing model as the hero slider: every element is a
+  block you add with +, remove, and drag to reorder. No hidden
+  rules, no long settings form.
 
-  Structure (all inside one ink frame):
-    1. Brand name      — eyebrow + h1
-    2. Spec facts      — "fact" blocks, one cell each, divided
-                         by vertical lines
-    3. Body grid       — a single 50/50 split shared by three
-                         rows so one centre line runs straight
-                         down all of them:
-                           row 1: boxed text  |  hero image
-                           row 2: image tiles (horizontal)
-                           row 3: represented-by | discover link
+  Block types (add / remove / reorder in the Theme Editor):
+    - heading : eyebrow + brand name + lowercase toggle
+    - fact    : a spec cell (label + value); sit several in a row
+    - text    : rich text; Width = Full / Half
+    - image   : photo; Width = Full / Half / Third (explicit, was
+                the old hidden "first image is the hero" rule)
+    - footer  : represented-by + website strip
 
-  Blocks (admin-orderable):
-    - fact       (label + value)         → spec strip
-    - paragraph  (richtext)              → body copy (verbatim)
-    - image      (image_picker / url)    → first = hero,
-                                           rest = tiles
+  Blocks render top to bottom in the ink line-grid (6-col).
+  Width controls the span (full=6, half=3, third=2); heading,
+  fact and footer have fixed spans. Only divider weight + padding
+  are section settings.
 
-  Settings: see schema. Divider thickness, tile shape and the
-  footer strings are all merchant-editable.
-
-  CSS: assets/misc-brand-page.css (loaded below; only ships when
-  this section renders). Tokens from misc-tokens.css.
-
-  Used by: templates/page.misc-brand.json (worked example: hibi)
+  CSS: assets/misc-brand-page.css
+  Used by: templates/page.misc-*.json (per-brand)
   ============================================================
 {%- endcomment -%}
 
 {{ 'misc-brand-page.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
-  assign image_blocks = section.blocks | where: 'type', 'image'
-  assign fact_blocks = section.blocks | where: 'type', 'fact'
   assign rule = section.settings.rule_weight | default: 3
-  assign tile_ratio = section.settings.tile_ratio | default: '16 / 9'
-  assign has_hero = false
-  if image_blocks.size > 0
-    assign has_hero = true
-  endif
 -%}
 
 <section
   class="misc-brand-page"
-  style="--misc-brand-rule: {{ rule }}px; --misc-brand-tile-ratio: {{ tile_ratio }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
-  aria-label="{{ section.settings.brand_name | default: 'Brand' | escape }}"
+  style="--misc-brand-rule: {{ rule }}px; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
 >
-  <div class="misc-brand-page__frame">
+  <div class="misc-brand-page__grid">
+    {%- for block in section.blocks -%}
+      {%- case block.type -%}
 
-    {%- comment -%} 1. Brand name {%- endcomment -%}
-    <header class="misc-brand-page__name">
-      {%- if section.settings.eyebrow != blank -%}
-        <p class="misc-brand-page__eyebrow">{{ section.settings.eyebrow }}</p>
-      {%- endif -%}
-      <h1 class="misc-brand-page__title{% if section.settings.force_lowercase %} misc-brand-page__title--lower{% endif %}">{{ section.settings.brand_name | default: 'Brand' }}</h1>
-    </header>
+        {%- when 'heading' -%}
+          <header class="misc-brand-page__cell misc-brand-page__name" style="grid-column: span 6;" {{ block.shopify_attributes }}>
+            {%- if block.settings.eyebrow != blank -%}
+              <p class="misc-brand-page__eyebrow">{{ block.settings.eyebrow }}</p>
+            {%- endif -%}
+            <h1 class="misc-brand-page__title{% if block.settings.force_lowercase %} misc-brand-page__title--lower{% endif %}">{{ block.settings.heading | default: 'Brand' }}</h1>
+          </header>
 
-    {%- comment -%} 2. Spec facts {%- endcomment -%}
-    {%- if fact_blocks.size > 0 -%}
-      <section class="misc-brand-page__meta" style="--misc-brand-meta-cols: {{ fact_blocks.size }};" aria-label="Brand details">
-        {%- for block in fact_blocks -%}
-          <div class="misc-brand-page__meta-item" {{ block.shopify_attributes }}>
-            {%- if block.settings.label != blank -%}
-              <p class="misc-brand-page__eyebrow">{{ block.settings.label }}</p>
+        {%- when 'fact' -%}
+          <div class="misc-brand-page__cell misc-brand-page__meta" style="grid-column: span 2;" {{ block.shopify_attributes }}>
+            {%- if block.settings.title != blank -%}
+              <p class="misc-brand-page__eyebrow">{{ block.settings.title }}</p>
             {%- endif -%}
             {%- if block.settings.value != blank -%}
               <p class="misc-brand-page__meta-value">{{ block.settings.value }}</p>
             {%- endif -%}
           </div>
-        {%- endfor -%}
-      </section>
-    {%- endif -%}
 
-    {%- comment -%} 3. Body grid: text+hero, tiles, footer {%- endcomment -%}
-    <div class="misc-brand-page__body">
+        {%- when 'text' -%}
+          {%- assign span = 3 -%}
+          {%- if block.settings.width == 'full' -%}{%- assign span = 6 -%}{%- endif -%}
+          <div class="misc-brand-page__cell misc-brand-page__text" style="grid-column: span {{ span }};" {{ block.shopify_attributes }}>
+            <div class="misc-brand-page__prose">{{ block.settings.text }}</div>
+          </div>
 
-      {%- render 'misc-brand-page-prose', section: section, has_hero: has_hero -%}
-      {%- render 'misc-brand-page-gallery', section: section -%}
+        {%- when 'image' -%}
+          {%- assign span = 3 -%}
+          {%- assign wclass = 'half' -%}
+          {%- if block.settings.width == 'full' -%}{%- assign span = 6 -%}{%- assign wclass = 'full' -%}{%- endif -%}
+          {%- if block.settings.width == 'third' -%}{%- assign span = 2 -%}{%- assign wclass = 'third' -%}{%- endif -%}
+          {%- assign alt_text = block.settings.title | default: 'Brand image' -%}
+          <figure class="misc-brand-page__cell misc-brand-page__media misc-brand-page__media--{{ wclass }}" style="grid-column: span {{ span }};" {{ block.shopify_attributes }}>
+            {%- if block.settings.image != blank -%}
+              {{ block.settings.image | image_url: width: 1400 | image_tag: loading: 'lazy', widths: '480, 720, 1000, 1400', sizes: '(max-width: 900px) 100vw, 50vw', alt: alt_text }}
+            {%- elsif block.settings.image_url != blank -%}
+              <img src="{{ block.settings.image_url }}" alt="{{ alt_text | escape }}" loading="lazy">
+            {%- endif -%}
+          </figure>
 
-      <div class="misc-brand-page__foot">
-        {%- if section.settings.represented_label != blank -%}
-          <p class="misc-brand-page__eyebrow">{{ section.settings.represented_label }}</p>
-        {%- endif -%}
-        {%- if section.settings.represented_org != blank -%}
-          <p class="misc-brand-page__foot-org">{{ section.settings.represented_org }}</p>
-        {%- endif -%}
-        {%- if section.settings.represented_region != blank -%}
-          <p class="misc-brand-page__foot-region">{{ section.settings.represented_region }}</p>
-        {%- endif -%}
-      </div>
+        {%- when 'footer' -%}
+          <div class="misc-brand-page__cell misc-brand-page__foot" style="grid-column: span 6;" {{ block.shopify_attributes }}>
+            <div class="misc-brand-page__foot-cell">
+              {%- if block.settings.represented_label != blank -%}
+                <p class="misc-brand-page__eyebrow">{{ block.settings.represented_label }}</p>
+              {%- endif -%}
+              {%- if block.settings.title != blank -%}
+                <p class="misc-brand-page__foot-org">{{ block.settings.title }}</p>
+              {%- endif -%}
+              {%- if block.settings.represented_region != blank -%}
+                <p class="misc-brand-page__foot-region">{{ block.settings.represented_region }}</p>
+              {%- endif -%}
+            </div>
+            <div class="misc-brand-page__foot-cell">
+              {%- if block.settings.discover_label != blank -%}
+                <p class="misc-brand-page__eyebrow">{{ block.settings.discover_label }}</p>
+              {%- endif -%}
+              {%- if block.settings.website_label != blank or block.settings.website_url != blank -%}
+                <a class="misc-brand-page__foot-link" href="{{ block.settings.website_url | default: '#' }}" target="_blank" rel="noopener">
+                  {{ block.settings.website_label | default: 'Visit website' }}
+                  <span class="misc-brand-page__foot-arrow" aria-hidden="true">&#8599;</span>
+                </a>
+              {%- endif -%}
+            </div>
+          </div>
 
-      <div class="misc-brand-page__foot">
-        {%- if section.settings.discover_label != blank -%}
-          <p class="misc-brand-page__eyebrow">{{ section.settings.discover_label }}</p>
-        {%- endif -%}
-        {%- if section.settings.website_label != blank or section.settings.website_url != blank -%}
-          <a class="misc-brand-page__foot-link" href="{{ section.settings.website_url | default: '#' }}" target="_blank" rel="noopener">
-            {{ section.settings.website_label | default: 'Visit website' }}
-            <span class="misc-brand-page__foot-arrow" aria-hidden="true">&#8599;</span>
-          </a>
-        {%- endif -%}
-      </div>
-
-    </div>
-
+      {%- endcase -%}
+    {%- endfor -%}
   </div>
 </section>
 
@@ -118,142 +113,47 @@
   "name": "MISC Brand Page",
   "tag": "section",
   "class": "misc-brand-page-section",
-  "max_blocks": 30,
+  "max_blocks": 50,
   "settings": [
-    { "type": "header", "content": "Brand name" },
-    {
-      "type": "text",
-      "id": "eyebrow",
-      "label": "Eyebrow (small label above name)",
-      "default": "Brand"
-    },
-    {
-      "type": "text",
-      "id": "brand_name",
-      "label": "Brand name (h1)",
-      "default": "hibi"
-    },
-    {
-      "type": "checkbox",
-      "id": "force_lowercase",
-      "label": "Force lowercase brand name",
-      "default": true
-    },
-    { "type": "header", "content": "Intro" },
-    {
-      "type": "textarea",
-      "id": "lead",
-      "label": "Lead sentence (optional, shown larger above the body copy)",
-      "default": "The incense of Awaji Island and the matches of Harima."
-    },
-    { "type": "header", "content": "Footer" },
-    {
-      "type": "text",
-      "id": "represented_label",
-      "label": "Footer left label",
-      "default": "Represented by"
-    },
-    {
-      "type": "text",
-      "id": "represented_org",
-      "label": "Representing company",
-      "default": "MISC Distribution"
-    },
-    {
-      "type": "text",
-      "id": "represented_region",
-      "label": "Territories",
-      "default": "Netherlands & Germany"
-    },
-    {
-      "type": "text",
-      "id": "discover_label",
-      "label": "Footer right label",
-      "default": "Discover more"
-    },
-    {
-      "type": "text",
-      "id": "website_label",
-      "label": "Website link label",
-      "default": "hibi-jp.com"
-    },
-    {
-      "type": "url",
-      "id": "website_url",
-      "label": "Website link URL"
-    },
-    { "type": "header", "content": "Layout" },
-    {
-      "type": "select",
-      "id": "tile_ratio",
-      "label": "Bottom image shape",
-      "options": [
-        { "value": "16 / 9", "label": "Wide (16:9)" },
-        { "value": "3 / 2", "label": "Landscape (3:2)" },
-        { "value": "2 / 1", "label": "Banner (2:1)" }
-      ],
-      "default": "16 / 9"
-    },
-    {
-      "type": "range",
-      "id": "rule_weight",
-      "label": "Divider thickness",
-      "min": 1,
-      "max": 6,
-      "step": 1,
-      "unit": "px",
-      "default": 3
-    },
-    {
-      "type": "range",
-      "id": "padding_top",
-      "label": "Padding top",
-      "min": 0,
-      "max": 120,
-      "step": 4,
-      "unit": "px",
-      "default": 48
-    },
-    {
-      "type": "range",
-      "id": "padding_bottom",
-      "label": "Padding bottom",
-      "min": 0,
-      "max": 120,
-      "step": 4,
-      "unit": "px",
-      "default": 64
-    }
+    { "type": "header", "content": "Global styling" },
+    { "type": "range", "id": "rule_weight", "label": "Divider thickness", "min": 1, "max": 6, "step": 1, "unit": "px", "default": 3 },
+    { "type": "range", "id": "padding_top", "label": "Padding top", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "label": "Padding bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64 }
   ],
   "blocks": [
+    {
+      "type": "heading",
+      "name": "Brand name",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Brand" },
+        { "type": "text", "id": "heading", "label": "Brand name", "default": "hibi" },
+        { "type": "checkbox", "id": "force_lowercase", "label": "Force lowercase", "default": true }
+      ]
+    },
     {
       "type": "fact",
       "name": "Spec fact",
       "settings": [
-        {
-          "type": "text",
-          "id": "label",
-          "label": "Label",
-          "default": "Category"
-        },
-        {
-          "type": "text",
-          "id": "value",
-          "label": "Value",
-          "default": "Incense & design stationery"
-        }
+        { "type": "text", "id": "title", "label": "Label", "default": "Category" },
+        { "type": "text", "id": "value", "label": "Value", "default": "Incense & design stationery" }
       ]
     },
     {
-      "type": "paragraph",
-      "name": "Paragraph",
+      "type": "text",
+      "name": "Text",
       "settings": [
         {
-          "type": "richtext",
-          "id": "text",
-          "label": "Paragraph (preserve source wording)",
-          "default": "<p>Paragraph text.</p>"
-        }
+          "type": "select",
+          "id": "width",
+          "label": "Width",
+          "options": [
+            { "value": "full", "label": "Full width" },
+            { "value": "half", "label": "Half (two per row)" }
+          ],
+          "default": "half"
+        },
+        { "type": "richtext", "id": "text", "label": "Text", "default": "<p>Body text.</p>" }
       ]
     },
     {
@@ -261,24 +161,32 @@
       "name": "Image",
       "settings": [
         {
-          "type": "paragraph",
-          "content": "The first image block is the large hero beside the text. Every image after it becomes a horizontal tile below."
+          "type": "select",
+          "id": "width",
+          "label": "Width",
+          "options": [
+            { "value": "full", "label": "Full width" },
+            { "value": "half", "label": "Half (two per row)" },
+            { "value": "third", "label": "Third (three per row)" }
+          ],
+          "default": "half"
         },
-        {
-          "type": "image_picker",
-          "id": "image",
-          "label": "Image (Shopify Files — preferred)"
-        },
-        {
-          "type": "url",
-          "id": "image_url",
-          "label": "External image URL (fallback when image picker is empty)"
-        },
-        {
-          "type": "text",
-          "id": "alt",
-          "label": "Alt text"
-        }
+        { "type": "image_picker", "id": "image", "label": "Image (Shopify Files)" },
+        { "type": "url", "id": "image_url", "label": "External image URL (fallback)" },
+        { "type": "text", "id": "title", "label": "Alt text" }
+      ]
+    },
+    {
+      "type": "footer",
+      "name": "Footer",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "represented_label", "label": "Left label", "default": "Represented by" },
+        { "type": "text", "id": "title", "label": "Representing company", "default": "MISC Distribution" },
+        { "type": "text", "id": "represented_region", "label": "Territories", "default": "Netherlands & Germany" },
+        { "type": "text", "id": "discover_label", "label": "Right label", "default": "Discover more" },
+        { "type": "text", "id": "website_label", "label": "Website link label" },
+        { "type": "url", "id": "website_url", "label": "Website link URL" }
       ]
     }
   ],
@@ -286,13 +194,15 @@
     {
       "name": "MISC Brand Page",
       "blocks": [
+        { "type": "heading" },
         { "type": "fact" },
         { "type": "fact" },
         { "type": "fact" },
-        { "type": "paragraph" },
+        { "type": "text" },
         { "type": "image" },
         { "type": "image" },
-        { "type": "image" }
+        { "type": "image" },
+        { "type": "footer" }
       ]
     }
   ]

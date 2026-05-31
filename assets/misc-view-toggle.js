@@ -319,7 +319,13 @@
      section with Trade's centred page header. Bail out and strip the
      polluting params so a back-button visit lands cleanly. */
   function isCatalogPage() {
-    return !!document.querySelector('#ProductGridContainer, .product-grid, .product-list');
+    // Key off catalogue-only markup. Trade's search page (and the homepage's
+    // featured collections) also render #ProductGridContainer + .product-grid,
+    // so keying off those would treat them as the catalogue and let the
+    // grid/list preference hide their grid with no .product-list to replace it.
+    // The MISC catalogue (forked main-collection grid) always renders a
+    // .product-list and a .view-toggle control; nothing else does.
+    return !!document.querySelector('.product-list, .view-toggle');
   }
 
   function stripCatalogParams() {
@@ -386,8 +392,10 @@
 
   // Re-apply after Trade's facets.js swaps the grid HTML, and after
   // any other DOM mutation that might rewrite pagination links.
+  // Guarded to the catalogue: on search, #ProductGridContainer exists too, and
+  // re-running applyLayout() there would re-hide the grid on every facet swap.
   var container = document.querySelector('#ProductGridContainer');
-  if (container && window.MutationObserver) {
+  if (isCatalogPage() && container && window.MutationObserver) {
     new MutationObserver(function () {
       applyLayout(currentLayout());
       preservePaginationParams();

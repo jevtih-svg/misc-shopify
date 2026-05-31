@@ -172,7 +172,13 @@ search-form.misc-site-header__search { display: block; }
   overflow-y: auto;
   display: none;
 }
-.misc-site-header__predictive:not(:empty) { display: block; }
+/* Visibility is driven by the [open] state on the custom element, NOT by
+   :not(:empty). Trade's JS leaves the rendered markup in place when it closes
+   the dropdown (it only drops the [open] attribute), so an :not(:empty) rule
+   would keep stale results, e.g. a leftover "Search for X" row, pinned open
+   after blur/clear, and the overlay would swallow clicks on the page beneath
+   it. [open] is set by the JS only once results are ready to render, so the box
+   never flashes empty during the fetch. */
 predictive-search[open] .misc-site-header__predictive { display: block; }
 
 /* ----- Predictive results: MISC brand treatment -----

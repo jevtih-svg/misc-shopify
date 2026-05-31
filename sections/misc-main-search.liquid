@@ -1,0 +1,238 @@
+{%- comment -%}
+  ============================================================
+  MISC search results — fork of Trade's sections/main-search.liquid.
+
+  Forked: 2026-05-31
+  Source: Trade theme, sections/main-search.liquid
+
+  Why a fork (not an edit): Trade's main-search renders a centred
+  heading, a duplicate search field, and product results via Trade's
+  card-product with an "adapt" image ratio — so every cell is a
+  different height and the page doesn't match the catalogue. This fork
+  renders the results with the SAME building blocks as the catalogue
+  grid (misc-facets sidebar + misc-card-product cells inside
+  .collection > ul.product-grid), so search looks identical to the
+  catalogue's grid view: uniform square cells, hairline grid, vendor /
+  SKU / price / stock / stepper.
+
+  What we reuse (all already global via theme.liquid / proven on the
+  catalogue):
+    - snippets/misc-facets.liquid     — handles the search object out of
+      the box (injects hidden q so filtering preserves the query).
+    - snippets/misc-search-filter-bar.liquid — trimmed top bar.
+    - snippets/misc-card-product.liquid — the uniform grid cell.
+    - assets/misc-collection.css      — styles every class used here.
+    - assets/facets.js                — AJAX filtering; keys off
+      #product-grid[data-id] and swaps #ProductGridContainer.
+  ============================================================
+{%- endcomment -%}
+
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+{{ 'component-facets.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+{%- assign per_page = section.settings.products_per_page | plus: 0 -%}
+
+<div class="section-{{ section.id }}-padding gradient">
+
+  {%- comment -%} Slim, on-brand results head: refine field + result line. {%- endcomment -%}
+  <div class="misc-search-head page-width">
+    <form action="{{ routes.search_url }}" method="get" role="search" class="misc-search-head__form">
+      <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <circle cx="8" cy="8" r="6"/><path d="M16 16l-3.5-3.5"/>
+      </svg>
+      <input
+        type="search"
+        name="q"
+        value="{{ search.terms | escape }}"
+        placeholder="Search products, SKUs, brands"
+        aria-label="Search"
+      >
+      <input type="hidden" name="options[prefix]" value="last">
+    </form>
+    {%- if search.performed -%}
+      <p class="misc-search-head__meta">
+        {%- if search.results_count > 0 -%}
+          {{ search.results_count }} results for &ldquo;{{ search.terms | escape }}&rdquo;
+        {%- else -%}
+          No results for &ldquo;{{ search.terms | escape }}&rdquo;
+        {%- endif -%}
+      </p>
+    {%- endif -%}
+  </div>
+
+  {%- if search.performed -%}
+    {%- paginate search.results by per_page -%}
+
+      {%- comment -%} Top filter bar (search variant). {%- endcomment -%}
+      {% render 'misc-search-filter-bar', search: search %}
+
+      <div class="facets-vertical page-width">
+
+        {%- comment -%}
+          facets.js satisfier elements. facets.js calls
+          #FacetFiltersFormMobile.closest('menu-drawer').bindEvents()
+          unconditionally on every AJAX filter change; without this hidden
+          satisfier the call throws and the filter refresh breaks. The empty
+          .active-facets-mobile satisfies facets.js's active-facets selector
+          list. The desktop active-facets element is the .misc-filter-bar
+          above (it carries the active-facets-desktop class).
+        {%- endcomment -%}
+        <menu-drawer hidden class="misc-facets-js-satisfier" aria-hidden="true">
+          <div id="FacetFiltersFormMobile"></div>
+        </menu-drawer>
+        <div class="active-facets-mobile" hidden aria-hidden="true"></div>
+
+        <div class="sidebar-backdrop" data-close-drawer aria-hidden="true"></div>
+
+        <aside
+          aria-labelledby="verticalTitle"
+          class="facets-wrapper"
+          id="main-search-filters"
+          data-id="{{ section.id }}"
+        >
+          <div class="sidebar__mobile-header">
+            <span class="sidebar__mobile-title">Filters</span>
+            <button type="button" class="sidebar__mobile-close" data-close-drawer aria-label="Close filters">
+              {{- 'icon-close.svg' | inline_asset_content -}}
+            </button>
+          </div>
+
+          {% render 'misc-facets',
+            results: search,
+            enable_filtering: true,
+            enable_sorting: true,
+            paginate: paginate
+          %}
+
+          <div class="sidebar__mobile-footer">
+            <button type="button" class="sidebar__mobile-apply" data-close-drawer>
+              Show {{ search.results_count }} results
+            </button>
+          </div>
+        </aside>
+
+        <div
+          class="product-grid-container"
+          id="ProductGridContainer"
+          data-active-layout="grid-3"
+        >
+          {%- if search.results.size == 0 -%}
+            <div class="collection collection--empty" id="product-grid" data-id="{{ section.id }}">
+              <div class="loading-overlay gradient"></div>
+              <div class="misc-search-empty">
+                <p class="misc-search-empty__title">No results found.</p>
+                <p class="misc-search-empty__hint">Try a different term, or clear the filters to widen the search.</p>
+              </div>
+            </div>
+          {%- else -%}
+            <div class="collection">
+              <div class="loading-overlay gradient"></div>
+
+              <ul
+                id="product-grid"
+                data-id="{{ section.id }}"
+                class="product-grid"
+              >
+                {%- for item in search.results -%}
+                  {%- assign lazy_load = false -%}
+                  {%- if forloop.index > 6 -%}
+                    {%- assign lazy_load = true -%}
+                  {%- endif -%}
+                  <li>
+                    {%- case item.object_type -%}
+                      {%- when 'product' -%}
+                        {% render 'misc-card-product',
+                          card_product: item,
+                          lazy_load: lazy_load,
+                          section_id: section.id
+                        %}
+                      {%- else -%}
+                        {%- comment -%} Article / page / collection result. {%- endcomment -%}
+                        <a href="{{ item.url }}" class="misc-search-result-generic">
+                          <span class="misc-search-result-generic__kind">{{ item.object_type }}</span>
+                          <span class="misc-search-result-generic__title">{{ item.title | escape }}</span>
+                        </a>
+                    {%- endcase -%}
+                  </li>
+                {%- endfor -%}
+              </ul>
+
+              {%- if paginate.pages > 1 -%}
+                {% render 'pagination', paginate: paginate %}
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endpaginate -%}
+  {%- else -%}
+    <div class="misc-search-prompt page-width">
+      <p>Search the catalogue by product name, SKU, or brand.</p>
+    </div>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "MISC search results",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Display"
+    },
+    {
+      "type": "select",
+      "id": "products_per_page",
+      "default": "24",
+      "label": "Results per page",
+      "options": [
+        { "value": "12", "label": "12" },
+        { "value": "24", "label": "24" },
+        { "value": "48", "label": "48" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 36
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,591 @@
+{
+  "sections": {
+    "main": {
+      "type": "misc-client-assets",
+      "settings": {
+        "eyebrow": "Image Bank & Catalogues",
+        "heading": "Client Assets",
+        "lead": "<p>Brand photography and product catalogues for your store, web shop and marketing, organised by brand, for MISC wholesale partners.</p>",
+        "show_password": true,
+        "password_value": "MISC-Wholesale-2026",
+        "password_hint": "Use this to open any image bank or catalogue link below.",
+        "show_filter": true,
+        "show_overview": true,
+        "max_width": 1240,
+        "padding_top": 24,
+        "padding_bottom": 56
+      },
+      "blocks": {
+        "brand_hibi": {
+          "type": "misc-ca-brand",
+          "settings": {
+            "name": "Hibi",
+            "category": "Incense",
+            "description": "10-minute incense matches. Kobe-made, smokeless, quietly modern.",
+            "show_view": true,
+            "brand_page": "/pages/hibi"
+          },
+          "blocks": {
+            "asset_hibi_1": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "image_bank",
+                "name": "All Collections",
+                "meta": "Product photography",
+                "link": "https://ln5.sync.com/dl/8b6cc3570#7f62qmkh-6a5idtpd-yr9rimuc-pffata3p",
+                "tag": "Photos",
+                "new_tab": true
+              }
+            }
+          },
+          "block_order": [
+            "asset_hibi_1"
+          ]
+        },
+        "brand_hightide": {
+          "type": "misc-ca-brand",
+          "settings": {
+            "name": "Hightide",
+            "category": "Stationery & Lifestyle",
+            "description": "Osaka design house. Stationery, tools and lifestyle goods. Home of Penco & Nähe.",
+            "show_view": true,
+            "brand_page": "/pages/hightide"
+          },
+          "blocks": {
+            "asset_hightide_1": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "image_bank",
+                "name": "Nähe",
+                "meta": "Product photography",
+                "link": "https://ln5.sync.com/dl/5e70cb810#duyirdqk-trdewgkz-jzherpwy-a6ij9um3",
+                "tag": "Photos",
+                "new_tab": true
+              }
+            },
+            "asset_hightide_2": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "image_bank",
+                "name": "Penco",
+                "meta": "Product photography",
+                "link": "https://ln5.sync.com/dl/564ed58d0#gpu2sg53-f9vrgqju-xpqh639c-493as7hn",
+                "tag": "Photos",
+                "new_tab": true
+              }
+            },
+            "asset_hightide_3": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "image_bank",
+                "name": "All Collections",
+                "meta": "Product photography",
+                "link": "https://ln5.sync.com/dl/540a2b300#g4sg9h8v-axzkfyct-pf7cfqhu-4txipabv",
+                "tag": "Photos",
+                "new_tab": true
+              }
+            },
+            "asset_hightide_4": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Nähe",
+                "meta": "Catalogue folder",
+                "link": "https://ln5.sync.com/dl/c5d8565d0/5rqu3jaa-rw826hma-qiwze8jd-5qnx36v4",
+                "tag": "Folder",
+                "new_tab": true
+              }
+            },
+            "asset_hightide_5": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Penco",
+                "meta": "Catalogue folder",
+                "link": "https://ln5.sync.com/dl/51066dc80/8hew52wh-hrp9xxu3-8yaqgvji-ky88ctv8",
+                "tag": "Folder",
+                "new_tab": true
+              }
+            },
+            "asset_hightide_6": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Hightide Outdoor",
+                "meta": "Catalogue folder",
+                "link": "https://ln5.sync.com/dl/e94e02e90/5senrti7-9f3gm2na-vt6hx9qc-8qbfcgty",
+                "tag": "Folder",
+                "new_tab": true
+              }
+            }
+          },
+          "block_order": [
+            "asset_hightide_1",
+            "asset_hightide_2",
+            "asset_hightide_3",
+            "asset_hightide_4",
+            "asset_hightide_5",
+            "asset_hightide_6"
+          ]
+        },
+        "brand_ito_bindery": {
+          "type": "misc-ca-brand",
+          "settings": {
+            "name": "Ito Bindery",
+            "category": "Notebooks & Paper",
+            "description": "Tokyo bindery. Pared-back notebooks and everyday paper goods.",
+            "show_view": true,
+            "brand_page": "/pages/ito-bindery"
+          },
+          "blocks": {
+            "asset_ito_bindery_1": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "image_bank",
+                "name": "All Collections",
+                "meta": "Product photography",
+                "link": "https://ln5.sync.com/dl/8b4f94280/hxg7ieku-77x729hv-q7dwvb3a-4zqqtysa",
+                "tag": "Photos",
+                "new_tab": true
+              }
+            }
+          },
+          "block_order": [
+            "asset_ito_bindery_1"
+          ]
+        },
+        "brand_kokuyo": {
+          "type": "misc-ca-brand",
+          "settings": {
+            "name": "Kokuyo",
+            "category": "Stationery",
+            "description": "One of Japan's largest stationers. Campus notebooks and desk tools.",
+            "show_view": true,
+            "brand_page": "/pages/kokuyo"
+          },
+          "blocks": {
+            "asset_kokuyo_1": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "image_bank",
+                "name": "All Collections",
+                "meta": "Product photography",
+                "link": "https://ln5.sync.com/dl/e07a2f890#pnj7fpw3-75qkxgxa-hges84uz-83iee48w",
+                "tag": "Photos",
+                "new_tab": true
+              }
+            },
+            "asset_kokuyo_2": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Various",
+                "meta": "Catalogue folder",
+                "link": "https://ln5.sync.com/dl/708019a80/bzdjzcg8-997azt86-thqc5ymr-4mab9e7b",
+                "tag": "Folder",
+                "new_tab": true
+              }
+            }
+          },
+          "block_order": [
+            "asset_kokuyo_1",
+            "asset_kokuyo_2"
+          ]
+        },
+        "brand_midori": {
+          "type": "misc-ca-brand",
+          "settings": {
+            "name": "Midori",
+            "category": "Stationery & Paper",
+            "description": "Designphil's flagship. MD Paper, letter sets, stamps and stickers.",
+            "show_view": true,
+            "brand_page": "/pages/midori"
+          },
+          "blocks": {
+            "asset_midori_1": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "image_bank",
+                "name": "All Collections",
+                "meta": "Product photography",
+                "link": "https://ln5.sync.com/dl/6cefb2a70#nx2av85p-2gktknvh-e5qeyfej-q9tcre9n",
+                "tag": "Photos",
+                "new_tab": true
+              }
+            },
+            "asset_midori_2": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Bookband Cases",
+                "meta": "PDF catalogue",
+                "link": "https://usercontent.one/wp/misc-distribution.com/wp-content/uploads/2021/09/Bookband-Case.pdf?media=1707139413",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_midori_3": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Clips",
+                "meta": "PDF catalogue",
+                "link": "http://misc-distribution.com/wp-content/uploads/2015/12/CLIPS.pdf",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_midori_4": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "CL Stationery",
+                "meta": "PDF catalogue",
+                "link": "http://misc-distribution.com/wp-content/uploads/2015/11/2014_01_cl.pdf",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_midori_5": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Diary Stickers",
+                "meta": "PDF catalogue",
+                "link": "http://misc-distribution.com/wp-content/uploads/2015/11/2014_01_cl.pdf",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_midori_6": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Giving Letter Paper",
+                "meta": "PDF catalogue",
+                "link": "https://usercontent.one/wp/misc-distribution.com/wp-content/uploads/2021/09/Midori-Giving-Letter-Paper.pdf?media=1707139413",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_midori_7": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "MD",
+                "meta": "PDF catalogue · 2021",
+                "link": "https://usercontent.one/wp/misc-distribution.com/wp-content/uploads/2021/09/2021-MD-Catalogue.pdf?media=1707139413",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_midori_8": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "MD Newness",
+                "meta": "PDF · Sticky Memo & Journal",
+                "link": "https://usercontent.one/wp/misc-distribution.com/wp-content/uploads/2021/09/2021-MD-Sticky-Memo-Pad-Journal-Catalogue.pdf?media=1707139413",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_midori_9": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "New Items",
+                "meta": "PDF catalogue · Sept 2021",
+                "link": "https://usercontent.one/wp/misc-distribution.com/wp-content/uploads/2021/09/Midori-New-Items-September-2021.pdf?media=1707139413",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_midori_10": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Origami Origami",
+                "meta": "PDF catalogue",
+                "link": "http://misc-distribution.com/wp-content/uploads/2015/11/2015_09_origami.pdf",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_midori_11": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Petit Gift",
+                "meta": "PDF catalogue",
+                "link": "http://misc-distribution.com/wp-content/uploads/2015/11/2015_09_petitgift.pdf",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_midori_12": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Stamps",
+                "meta": "PDF catalogue · 2021",
+                "link": "https://usercontent.one/wp/misc-distribution.com/wp-content/uploads/2021/09/Midori-Stamp-2021.pdf?media=1707139413",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_midori_13": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Stickers",
+                "meta": "PDF catalogue · 2021",
+                "link": "https://usercontent.one/wp/misc-distribution.com/wp-content/uploads/2021/09/Midori-Sticker-2021.pdf?media=1707139413",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_midori_14": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Tape Cutter",
+                "meta": "PDF catalogue",
+                "link": "https://usercontent.one/wp/misc-distribution.com/wp-content/uploads/2021/09/Midori-Tape-Cutter.pdf?media=1707139413",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_midori_15": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "XS Compact Punch",
+                "meta": "PDF catalogue",
+                "link": "https://usercontent.one/wp/misc-distribution.com/wp-content/uploads/2021/09/Midori-XS-Compact-Punch.pdf?media=1707139413",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            }
+          },
+          "block_order": [
+            "asset_midori_1",
+            "asset_midori_2",
+            "asset_midori_3",
+            "asset_midori_4",
+            "asset_midori_5",
+            "asset_midori_6",
+            "asset_midori_7",
+            "asset_midori_8",
+            "asset_midori_9",
+            "asset_midori_10",
+            "asset_midori_11",
+            "asset_midori_12",
+            "asset_midori_13",
+            "asset_midori_14",
+            "asset_midori_15"
+          ]
+        },
+        "brand_stalogy": {
+          "type": "misc-ca-brand",
+          "settings": {
+            "name": "Stálogy",
+            "category": "Notebooks",
+            "description": "Editor's Series notebooks. Minimal, grid-ruled, quietly refined.",
+            "show_view": true,
+            "brand_page": "/pages/stalogy"
+          },
+          "blocks": {
+            "asset_stalogy_1": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "image_bank",
+                "name": "All Collections",
+                "meta": "Product photography",
+                "link": "https://ln5.sync.com/dl/bd9935030#fvgyv6f2-k8uc9ucc-98g9zug9-u2te4tg8",
+                "tag": "Photos",
+                "new_tab": true
+              }
+            }
+          },
+          "block_order": [
+            "asset_stalogy_1"
+          ]
+        },
+        "brand_studio_unto": {
+          "type": "misc-ca-brand",
+          "settings": {
+            "name": "Studio Unto",
+            "category": "Paper Goods",
+            "description": "Contemporary paper objects and colour-led stationery.",
+            "show_view": true,
+            "brand_page": "/pages/studio-unto"
+          },
+          "blocks": {
+            "asset_studio_unto_1": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "image_bank",
+                "name": "All Collections",
+                "meta": "Product photography",
+                "link": "https://ln5.sync.com/dl/ad22a6940/wksf4my7-jntkfibv-d8x4vkeu-qfkef7fp",
+                "tag": "Photos",
+                "new_tab": true
+              }
+            },
+            "asset_studio_unto_2": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Color Gems",
+                "meta": "Catalogue folder",
+                "link": "https://ln5.sync.com/dl/82c232f30/48auhhte-3phz3q8e-iehnhcvn-uennx9ue",
+                "tag": "Folder",
+                "new_tab": true
+              }
+            }
+          },
+          "block_order": [
+            "asset_studio_unto_1",
+            "asset_studio_unto_2"
+          ]
+        },
+        "brand_travelers_company": {
+          "type": "misc-ca-brand",
+          "settings": {
+            "name": "Traveler's Company",
+            "category": "Notebooks & Travel",
+            "description": "Makers of the TRAVELER'S notebook. Leather covers, refills and brass.",
+            "show_view": true,
+            "brand_page": "/pages/travelers-company"
+          },
+          "blocks": {
+            "asset_travelers_company_1": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "image_bank",
+                "name": "All Collections",
+                "meta": "Product photography",
+                "link": "https://ln5.sync.com/dl/63d6af010/2dqxbz9m-sgvtnesr-pv84b9c2-2ggn9n8f",
+                "tag": "Photos",
+                "new_tab": true
+              }
+            },
+            "asset_travelers_company_2": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "New Items · Camel Cover",
+                "meta": "PDF catalogue",
+                "link": "http://misc-distribution.com/wp-content/uploads/2016/02/TRV_newitems.pdf",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_travelers_company_3": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Brass",
+                "meta": "PDF catalogue",
+                "link": "http://misc-distribution.com/wp-content/uploads/2015/11/2012_04_brass.pdf",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_travelers_company_4": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Customize!",
+                "meta": "PDF catalogue",
+                "link": "http://misc-distribution.com/wp-content/uploads/2015/11/2014_03_customize.pdf",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_travelers_company_5": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Kraft",
+                "meta": "PDF catalogue",
+                "link": "http://misc-distribution.com/wp-content/uploads/2015/11/2012_04_envelope.pdf",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_travelers_company_6": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Spiral Ring",
+                "meta": "PDF catalogue",
+                "link": "http://misc-distribution.com/wp-content/uploads/2015/11/2012_04_spiral.pdf",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_travelers_company_7": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Traveler's Notebook",
+                "meta": "PDF catalogue",
+                "link": "http://misc-distribution.com/wp-content/uploads/2015/11/2014_07_travelers.pdf",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_travelers_company_8": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Traveler's Notebook · Diaries",
+                "meta": "PDF catalogue",
+                "link": "http://misc-distribution.com/wp-content/uploads/2015/11/2015_09_tr.pdf",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            },
+            "asset_travelers_company_9": {
+              "type": "misc-ca-asset",
+              "settings": {
+                "group": "catalogue",
+                "name": "Traveler's Notebook · Limited",
+                "meta": "PDF catalogue",
+                "link": "http://misc-distribution.com/wp-content/uploads/2015/11/2015_03_trEurope.pdf",
+                "tag": "PDF",
+                "new_tab": true
+              }
+            }
+          },
+          "block_order": [
+            "asset_travelers_company_1",
+            "asset_travelers_company_2",
+            "asset_travelers_company_3",
+            "asset_travelers_company_4",
+            "asset_travelers_company_5",
+            "asset_travelers_company_6",
+            "asset_travelers_company_7",
+            "asset_travelers_company_8",
+            "asset_travelers_company_9"
+          ]
+        }
+      },
+      "block_order": [
+        "brand_hibi",
+        "brand_hightide",
+        "brand_ito_bindery",
+        "brand_kokuyo",
+        "brand_midori",
+        "brand_stalogy",
+        "brand_studio_unto",
+        "brand_travelers_company"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

@@ -287,6 +287,15 @@
     <script>
       (function () {
         try {
+          {%- comment -%}
+            MISC: the layout (grid/list) + filter-collapse preferences only
+            apply to the catalogue. Emitting these classes on other page types
+            (notably search, which uses Trade's main-search with a .product-grid
+            but no .product-list) would let `html.misc-prefer-list .product-grid`
+            hide the results with nothing to show in their place. Gate on the
+            collection page type so the classes never reach non-catalogue pages.
+          {%- endcomment -%}
+          {%- if request.page_type == 'collection' -%}
           var params = new URLSearchParams(window.location.search);
           var layout = params.get('layout');
           if (layout !== 'grid-3' && layout !== 'grid-5' && layout !== 'list') {
@@ -300,6 +309,7 @@
           if (localStorage.getItem('misc_filters_hidden') === '1') {
             document.documentElement.classList.add('misc-hide-filters');
           }
+          {%- endif -%}
         } catch (e) { /* localStorage unavailable; default render */ }
       })();
     </script>

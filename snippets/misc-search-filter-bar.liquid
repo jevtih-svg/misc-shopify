@@ -1,0 +1,113 @@
+{%- comment -%}
+  ============================================================
+  MISC search filter bar — trimmed variant of misc-filter-bar
+  for the search results page.
+
+  Differences from the catalogue bar (snippets/misc-filter-bar.liquid):
+    - No per-page dropdown (search has no ?view= template variants).
+    - No Grid/List view toggle (search has no list view; the toggle
+      machinery is scoped out of search in misc-view-toggle.js).
+    - Counts + Clear all + pill remove URLs are built from the search
+      object (results_count, terms) instead of a collection.
+
+  Reuses the SAME class names as the catalogue bar so misc-collection.css
+  styles it identically — no new CSS needed.
+
+  The `active-facets-desktop` class is required so Trade's facets.js can
+  swap this bar's contents (pills, count) on every AJAX filter change.
+
+  Inputs:
+    - search : the search results object
+  ============================================================
+{%- endcomment -%}
+
+{%- liquid
+  assign active_count = 0
+  for filter in search.filters
+    if filter.type == 'price_range'
+      if filter.min_value.value != blank or filter.max_value.value != blank
+        assign active_count = active_count | plus: 1
+      endif
+    else
+      assign active_count = active_count | plus: filter.active_values.size
+    endif
+  endfor
+  assign current_sort = search.sort_by | default: search.default_sort_by
+  assign terms = search.terms | escape
+  assign clear_url = '?q=' | append: terms | append: '&options%5Bprefix%5D=last'
+-%}
+
+<div class="misc-filter-bar active-facets-desktop">
+
+  {%- comment -%} Mobile-only trigger (hidden on desktop via CSS). {%- endcomment -%}
+  <button type="button" class="filter-bar__mobile-trigger" data-mobile-filter-trigger aria-label="Open filters">
+    {{- 'icon-filter.svg' | inline_asset_content -}}
+    <span>Filter</span>
+    {%- if active_count > 0 -%}
+      <span class="misc-filter-bar__count">{{ active_count }}</span>
+    {%- endif -%}
+  </button>
+
+  <div class="misc-filter-bar__left">
+    <h2 class="misc-filter-bar__title">
+      Filter
+      {%- if active_count > 0 -%}
+        <span class="misc-filter-bar__count">{{ active_count }}</span>
+      {%- endif -%}
+    </h2>
+    <div class="misc-filter-bar__left-actions">
+      {%- if active_count > 0 -%}
+        <a href="{{ clear_url }}" class="misc-filter-bar__clear">Clear all</a>
+      {%- endif -%}
+      <button type="button" class="misc-filters-toggle" data-misc-filters-toggle aria-expanded="true" aria-label="Hide filters" title="Hide filters">
+        <span class="misc-filters-toggle__label">Show filters</span>
+        <svg class="misc-filters-toggle__chevron" width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+          <path d="M6.5 1.5 3 5l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="misc-filter-bar__right">
+    <div class="misc-filter-bar__pills">
+      {%- if active_count > 0 -%}
+        <span class="misc-filter-bar__label">Active</span>
+        {%- for filter in search.filters -%}
+          {%- if filter.type == 'price_range' -%}
+            {%- if filter.min_value.value != blank or filter.max_value.value != blank -%}
+              <a href="{{ filter.url_to_remove }}" class="misc-applied-pill">
+                {{ filter.min_value.value | default: 0 | money }}&ndash;{{ filter.max_value.value | default: filter.range_max | money }}
+                <span class="misc-applied-pill__close" aria-hidden="true">&times;</span>
+              </a>
+            {%- endif -%}
+          {%- else -%}
+            {%- for value in filter.active_values -%}
+              <a href="{{ value.url_to_remove }}" class="misc-applied-pill">
+                {{ value.label }}
+                <span class="misc-applied-pill__close" aria-hidden="true">&times;</span>
+              </a>
+            {%- endfor -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+    <div class="misc-filter-bar__tools">
+      {%- comment -%} Sort change handler is the document-level delegate in
+                     misc-view-toggle.js (bound on every page, keyed to
+                     #MiscSortBy), which navigates preserving ?q=. {%- endcomment -%}
+      <div class="sort-control">
+        <label class="sort-control__label" for="MiscSortBy">Sort by:</label>
+        <select id="MiscSortBy" class="sort-control__select">
+          {%- for option in search.sort_options -%}
+            <option value="{{ option.value | escape }}"{% if option.value == current_sort %} selected{% endif %}>
+              {{- option.name | escape -}}
+            </option>
+          {%- endfor -%}
+        </select>
+      </div>
+
+      <span class="sort-control__count">{{ search.results_count }} results</span>
+    </div>
+  </div>
+</div>
