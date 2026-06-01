@@ -69,38 +69,22 @@
         "aria_label": "Our brands"
       }
     },
-    "trade-shows": {
-      "type": "misc-trade-shows",
-      "blocks": {
-        "show-ambiente": {
-          "type": "show",
-          "settings": {
-            "month": "Feb",
-            "days": "06 – 10",
-            "name": "Ambiente",
-            "venue": "Messe Frankfurt, Frankfurt am Main",
-            "stand": "Hall 4.2 · Stand H.29",
-            "stand_is_tbc": false
-          }
-        },
-        "show-mo": {
-          "type": "show",
-          "settings": {
-            "month": "Sep",
-            "days": "10 – 14",
-            "name": "Maison & Objet",
-            "venue": "Villepinte Exhibition Centre, Paris Nord",
-            "stand": "Hall & stand to be confirmed",
-            "stand_is_tbc": true
-          }
-        }
-      },
-      "block_order": ["show-ambiente", "show-mo"],
+    "events-home": {
+      "type": "misc-events-home",
       "settings": {
         "eyebrow": "Meet us in person",
-        "title": "Trade shows 2026",
-        "image_alt": "Penco display at trade fair",
+        "title": "Where to find us",
         "fallback_asset": "misc-home-trade-shows.jpg"
+      }
+    },
+    "news-feed": {
+      "type": "misc-news-feed",
+      "settings": {
+        "blog": "news",
+        "count": 3,
+        "eyebrow": "MISC · Journal",
+        "title": "Latest news",
+        "cta_label": "Read the Journal"
       }
     },
     "who-we-are": {
@@ -113,5 +97,5 @@
       }
     }
   },
-  "order": ["hero", "brand-portfolio", "trade-shows", "who-we-are"]
+  "order": ["hero", "brand-portfolio", "events-home", "news-feed", "who-we-are"]
 }
