@@ -106,6 +106,19 @@
     <div class="misc-product-card__sku">{{ primary_variant.sku }}</div>
   {%- endif -%}
 
+  {%- comment -%} Second image (the first one that isn't the featured) for the hover swap. {%- endcomment -%}
+  {%- liquid
+    assign second_image = blank
+    if card_product.images.size > 1
+      assign featured_id = card_product.featured_image.id
+      for image in card_product.images
+        if image.id != featured_id
+          assign second_image = image
+          break
+        endif
+      endfor
+    endif
+  -%}
   <a
     href="{{ card_product.url }}"
     class="misc-product-card__media"
@@ -126,6 +139,23 @@
         loading="{% if lazy_load %}lazy{% else %}eager{% endif %}"
         class="misc-product-card__image"
       >
+      {%- if second_image != blank -%}
+        <img
+          src="{{ second_image | image_url: width: 800 }}"
+          srcset="
+            {{ second_image | image_url: width: 400 }} 400w,
+            {{ second_image | image_url: width: 600 }} 600w,
+            {{ second_image | image_url: width: 800 }} 800w
+          "
+          sizes="(min-width: 990px) 20vw, (min-width: 750px) 33vw, 50vw"
+          alt=""
+          aria-hidden="true"
+          width="800"
+          height="{{ 800 | divided_by: ratio | round }}"
+          loading="lazy"
+          class="misc-product-card__image misc-product-card__image--secondary"
+        >
+      {%- endif -%}
     {%- else -%}
       {%- comment -%}
         No media: a clean "no image" placeholder (subtle panel +

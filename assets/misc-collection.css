@@ -830,11 +830,26 @@ html.misc-hide-filters .misc-filters-toggle__chevron { transform: rotate(180deg)
   height: 100%;
   object-fit: contain;
   background: var(--c-bg);
-  transition: transform 200ms ease;
 }
 
-.misc-product-card__media:hover .misc-product-card__image {
-  transform: scale(1.02);
+/* Hover (or keyboard focus) reveals the second product image instead
+   of zooming. The secondary sits on top of the primary and fades in.
+   Only present when the product has a second image. */
+.misc-product-card__image--secondary {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+.misc-product-card__media:hover .misc-product-card__image--secondary,
+.misc-product-card__media:focus-visible .misc-product-card__image--secondary {
+  opacity: 1;
+}
+
+/* No hover on touch, and mobile uses the small horizontal card, so skip
+   the second image there (it is not shown or fetched). */
+@media (max-width: 1023px) {
+  .misc-product-card__image--secondary { display: none; }
 }
 
 /* No-image placeholder: subtle panel, faint centred image glyph,

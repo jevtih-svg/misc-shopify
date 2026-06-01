@@ -29,26 +29,35 @@
 
   <div class="misc-curated-index__grid">
     {%- for coll in shop.metaobjects.curated_collection.values -%}
-      {%- assign first = coll.items.value.first -%}
-      {%- assign fv = first.variant.value -%}
-      <a class="misc-curated-index__card" href="{{ coll.system.url }}">
-        <figure class="misc-curated-index__media">
-          {%- if fv.product.featured_image -%}
-            {{ fv.product.featured_image | image_url: width: 800 | image_tag:
-                loading: 'lazy',
-                widths: '320, 480, 800',
-                sizes: '(max-width: 900px) 100vw, 33vw',
-                alt: coll.title.value }}
-          {%- endif -%}
-        </figure>
-        <div class="misc-curated-index__body">
-          {%- if coll.brand.value != blank -%}
-            <p class="misc-curated__eyebrow">{{ coll.brand.value }}</p>
-          {%- endif -%}
-          <h2 class="misc-curated-index__name">{{ coll.title.value }}</h2>
-          <span class="misc-curated-index__count">{{ coll.items.value.count }} items</span>
-        </div>
-      </a>
+      {%- unless coll.active.value == false -%}
+        {%- assign first = coll.items.value.first -%}
+        {%- assign fv = first.variant.value -%}
+        {%- assign cover = coll.image.value -%}
+        <a class="misc-curated-index__card" href="{{ coll.system.url }}">
+          <figure class="misc-curated-index__media">
+            {%- if cover -%}
+              {{ cover | image_url: width: 800 | image_tag:
+                  loading: 'lazy',
+                  widths: '320, 480, 800',
+                  sizes: '(max-width: 900px) 100vw, 33vw',
+                  alt: coll.title.value }}
+            {%- elsif fv.product.featured_image -%}
+              {{ fv.product.featured_image | image_url: width: 800 | image_tag:
+                  loading: 'lazy',
+                  widths: '320, 480, 800',
+                  sizes: '(max-width: 900px) 100vw, 33vw',
+                  alt: coll.title.value }}
+            {%- endif -%}
+          </figure>
+          <div class="misc-curated-index__body">
+            {%- if coll.brand.value != blank -%}
+              <p class="misc-curated__eyebrow">{{ coll.brand.value }}</p>
+            {%- endif -%}
+            <h2 class="misc-curated-index__name">{{ coll.title.value }}</h2>
+            <span class="misc-curated-index__count">{{ coll.items.value.count }} items</span>
+          </div>
+        </a>
+      {%- endunless -%}
     {%- endfor -%}
   </div>
 </section>

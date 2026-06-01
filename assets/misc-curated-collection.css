@@ -162,3 +162,5 @@
 .misc-curated-index__count { font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: var(--ls-caps); color: var(--c-ink-mute); font-weight: var(--fw-medium); margin-top: auto; }
 .misc-curated-index__card:hover .misc-curated-index__name { color: var(--c-ink-mute); }
 @media (max-width: 900px) { .misc-curated-index__grid { grid-template-columns: 1fr; } }
+
+.misc-curated__unavailable { max-width: var(--max-width-page); margin: 0 auto; padding: var(--space-8) var(--space-5); text-align: center; color: var(--c-ink-mute); font-size: var(--fs-md); }

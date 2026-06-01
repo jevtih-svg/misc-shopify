@@ -30,6 +30,13 @@
     assign is_mo = true
   endif
 
+  assign cc_inactive = false
+  if is_mo
+    if metaobject.active.value == false
+      assign cc_inactive = true
+    endif
+  endif
+
   assign cc_eyebrow = section.settings.eyebrow | default: 'Curated'
   assign total_cents = 0
   assign total_units = 0
@@ -69,6 +76,9 @@
   assign items_json = items_json | remove_first: ','
 -%}
 
+{%- if cc_inactive -%}
+<section class="misc-curated"><p class="misc-curated__unavailable">This collection isn&rsquo;t available right now.</p></section>
+{%- else -%}
 <section
   class="misc-curated"
   style="--misc-cc-rule: {{ rule }}px; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
@@ -118,6 +128,7 @@
     {%- endif -%}
   </div>
 </section>
+{%- endif -%}
 
 {% schema %}
 {
