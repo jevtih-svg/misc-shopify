@@ -1,34 +1,27 @@
 {%- comment -%}
-  ============================================================
-  MISC news article single — boxed reading column.
-  Rendered by templates/article.json for blog posts.
-  ============================================================
+  MISC news article single — boxed reading column. templates/article.json.
 {%- endcomment -%}
 {{ 'misc-journal.css' | asset_url | stylesheet_tag }}
 
-<div class="misc-post">
-  <div class="misc-post__top">
-    <a class="misc-post__back" href="{{ blog.url }}">Back to {{ blog.title }}</a>
-    <span class="misc-post__kicker">{{ blog.title }}</span>
-  </div>
+<div class="misc-jx">
+  <div class="backbar"><div class="page"><div class="wrap"><div class="backbar__in">
+    <a class="backbar__link" href="{{ blog.url }}">← Back to {{ blog.title }}</a>
+    <span class="backbar__kicker">{{ blog.title }}</span>
+  </div></div></div></div>
 
-  <article>
-    <div class="misc-post__head">
-      {%- if article.tags.size > 0 -%}<span class="misc-post__cat">{{ article.tags.first }}</span>{%- endif -%}
-      <h1 class="misc-post__title">{{ article.title }}</h1>
-      <div class="misc-post__meta">
-        {{ article.published_at | date: '%Y · %m · %d' }}{% if article.author != blank %} · {{ article.author }}{% endif %}
-      </div>
-    </div>
-
-    {%- if article.image -%}
-      <div class="misc-post__media">
-        <img src="{{ article.image | image_url: width: 1600 }}" alt="{{ article.image.alt | escape }}" loading="lazy" width="1600">
-      </div>
-    {%- endif -%}
-
-    <div class="misc-post__body">{{ article.content }}</div>
-  </article>
+  <div class="page"><div class="wrap">
+    <article class="article__in">
+      {%- if article.tags.size > 0 -%}<span class="article__cat">{{ article.tags.first }}</span>{%- endif -%}
+      <h1 class="article__title">{{ article.title }}</h1>
+      <div class="article__meta">{{ article.published_at | date: '%d · %m · %Y' }}{% if article.author != blank %} — {{ article.author }}{% endif %}</div>
+      {%- if article.image -%}
+        <div class="article__img"><img src="{{ article.image | image_url: width: 1600 }}" alt="{{ article.image.alt | escape }}" width="1600"></div>
+      {%- else -%}
+        <div class="article__rule"></div>
+      {%- endif -%}
+      <div class="article__body">{{ article.content }}</div>
+    </article>
+  </div></div>
 </div>
 
 {% schema %}

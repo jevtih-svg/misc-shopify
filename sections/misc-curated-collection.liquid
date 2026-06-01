@@ -38,7 +38,7 @@
   if is_mo
     assign cc_title = metaobject.title.value
     assign cc_brand = metaobject.brand.value
-    assign cc_desc = metaobject.description.value
+    assign cc_desc = metaobject.description
     assign cc_addlabel = metaobject.add_all_label.value | default: 'Add collection to cart'
     for item in metaobject.items.value
       assign v = item.variant.value
@@ -105,7 +105,7 @@
       {%- for item in metaobject.items.value -%}
         {%- assign v = item.variant.value -%}
         {%- if v -%}
-          {%- render 'misc-curated-cell', product: v.product, v: v, size: item.display_size.value, desc: item.description_override.value, brand: cc_brand -%}
+          {%- render 'misc-curated-cell', product: v.product, v: v, size: item.display_size.value, desc: item.description_override, brand: cc_brand -%}
         {%- endif -%}
       {%- endfor -%}
     {%- else -%}

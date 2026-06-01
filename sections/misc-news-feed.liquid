@@ -1,0 +1,70 @@
+{%- comment -%}
+  MISC home — News feed ("Latest news").
+  Pulls the most recent articles from the selected blog (Journal),
+  image-led 3-card grid: image, date DD · MM · YYYY, first tag, title, excerpt.
+  Styles live in misc-home.css (.misc-news*).
+{%- endcomment -%}
+
+{{ 'misc-home.css' | asset_url | stylesheet_tag }}
+
+{%- assign blog = blogs[section.settings.blog] -%}
+{%- assign limit = section.settings.count | default: 3 -%}
+
+{%- if blog.articles_count > 0 -%}
+  <section class="misc-news" aria-label="{{ section.settings.title | default: 'Latest news' }}">
+    <div class="misc-news__head">
+      <div>
+        {%- if section.settings.eyebrow != blank -%}
+          <div class="misc-news__eyebrow">{{ section.settings.eyebrow }}</div>
+        {%- endif -%}
+        {%- if section.settings.title != blank -%}
+          <h2 class="misc-news__title">{{ section.settings.title }}</h2>
+        {%- endif -%}
+      </div>
+      {%- if blog.url != blank -%}
+        <a href="{{ blog.url }}" class="misc-news__all">
+          {{ section.settings.cta_label | default: 'Read the Journal' }}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      {%- endif -%}
+    </div>
+
+    <div class="misc-news__grid">
+      {%- for article in blog.articles limit: limit -%}
+        <a href="{{ article.url }}" class="misc-news-card">
+          <div class="misc-news-card__media">
+            {%- if article.image -%}
+              {{ article.image | image_url: width: 800 | image_tag:
+                loading: 'lazy',
+                widths: '400, 600, 800',
+                sizes: '(min-width: 900px) 33vw, 100vw',
+                alt: article.title }}
+            {%- endif -%}
+          </div>
+          <div class="misc-news-card__meta">
+            <span>{{ article.published_at | date: '%d · %m · %Y' }}</span>
+            {%- if article.tags.size > 0 -%}<span class="misc-news-card__tag">{{ article.tags.first }}</span>{%- endif -%}
+          </div>
+          <h3 class="misc-news-card__title">{{ article.title }}</h3>
+          {%- if article.excerpt_or_content != blank -%}
+            <p class="misc-news-card__excerpt">{{ article.excerpt_or_content | strip_html | truncatewords: 22 }}</p>
+          {%- endif -%}
+        </a>
+      {%- endfor -%}
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "MISC News Feed",
+  "settings": [
+    { "type": "blog", "id": "blog", "label": "Blog" },
+    { "type": "range", "id": "count", "label": "Articles to show", "min": 3, "max": 6, "step": 1, "default": 3 },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "MISC · Journal" },
+    { "type": "text", "id": "title", "label": "Title", "default": "Latest news" },
+    { "type": "text", "id": "cta_label", "label": "Link label", "default": "Read the Journal" }
+  ],
+  "presets": [{ "name": "MISC News Feed" }]
+}
+{% endschema %}

@@ -1,0 +1,88 @@
+{%- comment -%}
+  MISC event single — renders an `event` metaobject.
+  Hero + unified image/facts block + CTA links + body.
+  Used by templates/metaobject/event.json.
+{%- endcomment -%}
+{{ 'misc-journal.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign ex = metaobject
+  assign sd = ex.start_date.value
+  assign ed = ex.end_date.value | default: sd
+  assign now_ts = 'now' | date: '%s' | plus: 0
+  assign start_ts = sd | date: '%s' | plus: 0
+  assign end_ts = ed | date: '%s' | plus: 0
+  if end_ts < now_ts
+    assign status = 'past'
+  elsif start_ts <= now_ts
+    assign status = 'now'
+  else
+    assign status = 'upcoming'
+  endif
+  assign d1 = sd | date: '%-d'
+  assign d2 = ed | date: '%-d'
+  assign mony = sd | date: '%B %Y'
+  if ed != sd and d2 != d1
+    assign when = d1 | append: '–' | append: d2 | append: ' ' | append: mony
+  else
+    assign when = sd | date: '%-d %B %Y'
+  endif
+  if ex.time.value != blank
+    assign when = when | append: ' · ' | append: ex.time.value
+  endif
+  assign has_image = false
+  if ex.image.value != blank
+    assign has_image = true
+  endif
+  assign has_booth = false
+  if ex.booth.value != blank
+    assign has_booth = true
+  endif
+-%}
+
+<div class="misc-jx">
+  <div class="backbar"><div class="page"><div class="wrap"><div class="backbar__in">
+    <a class="backbar__link" href="{{ pages.events.url }}">← Back to Events</a>
+    <span class="backbar__kicker">Event</span>
+  </div></div></div></div>
+
+  <div class="page"><div class="wrap">
+    <section class="hero">
+      <p class="hero__eyebrow">Journal · Events{% if ex.event_type.value != blank %} · {{ ex.event_type.value }}{% endif %}</p>
+      <h1 class="ev-hero__title">{{ ex.title.value }}
+        {%- if status == 'now' -%}<span class="pill pill--now">On now</span>
+        {%- elsif status == 'past' -%}<span class="pill pill--past">Past</span>
+        {%- else -%}<span class="pill pill--up">Upcoming</span>{%- endif -%}
+      </h1>
+      {%- if ex.summary.value != blank -%}<p class="hero__lead">{{ ex.summary.value }}</p>{%- endif -%}
+    </section>
+
+    <div class="eventcard">
+      {%- if has_image -%}<div class="eventcard__media"><img src="{{ ex.image.value | image_url: width: 1400 }}" alt="{{ ex.title.value | escape }}" loading="lazy" width="1400"></div>{%- endif -%}
+      <div class="fact"><span class="fact__k">When</span><span class="fact__v">{{ when }}</span></div>
+      <div class="fact{% unless has_booth %} fact--wide{% endunless %}"><span class="fact__k">Where</span><span class="fact__v">{{ ex.location.value }}</span></div>
+      {%- if has_booth -%}<div class="fact"><span class="fact__k">Stand / Booth</span><span class="fact__v">{{ ex.booth.value }}</span></div>{%- endif -%}
+      <div class="fact"><span class="fact__k">Status</span><span class="fact__v">{% if status == 'past' %}Finished{% else %}Confirmed{% endif %}</span></div>
+    </div>
+
+    {%- assign links_raw = ex.links.value -%}
+    {%- if links_raw != blank -%}
+      <div class="cta">
+        {%- assign lines = links_raw | strip | split: '
+' -%}
+        {%- for line in lines -%}
+          {%- assign parts = line | split: '|' -%}
+          {%- assign label = parts.first | strip -%}
+          {%- assign url = parts.last | strip -%}
+          {%- if label != blank and url != blank -%}<a class="btn{% if forloop.first %} btn--solid{% endif %}" href="{{ url }}">{{ label }}</a>{%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- if ex.description.value != blank -%}<div class="ev-body">{{ ex.description | metafield_tag }}</div>{%- endif -%}
+  </div></div>
+</div>
+
+{% schema %}
+{ "name": "MISC Event", "settings": [] }
+{% endschema %}

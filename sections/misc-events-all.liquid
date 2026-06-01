@@ -1,0 +1,99 @@
+{%- comment -%}
+  MISC all-events page. Lists every `event` metaobject.
+  Page 1 = all upcoming + the 3 most recent past; later pages = past only.
+  (Metaobject lists aren't paginate-able in Liquid, so paging is client-side,
+  exactly mirroring the approved mockup.)
+  Used by templates/page.misc-events.json.
+{%- endcomment -%}
+{{ 'misc-journal.css' | asset_url | stylesheet_tag }}
+{%- assign events = shop.metaobjects.event.values -%}
+
+<div class="misc-jx"><div class="page"><div class="wrap">
+
+  <section class="hero hero--ruled">
+    <p class="hero__eyebrow">Journal · Where to find us</p>
+    <h1 class="hero__title">{{ section.settings.heading | default: 'Events' }}</h1>
+    {%- if section.settings.intro != blank -%}<p class="hero__lead">{{ section.settings.intro }}</p>{%- endif -%}
+  </section>
+
+  <div class="ex-main">
+    <div class="overview">
+      <div class="stat"><div class="stat-n" id="s-up">—</div><div class="stat-l">Upcoming</div></div>
+      <div class="stat"><div class="stat-n" id="s-next">—</div><div class="stat-l">Next appearance</div></div>
+      <div class="stat"><div class="stat-n" id="s-total">—</div><div class="stat-l">Events listed</div></div>
+    </div>
+    <div id="page-body"></div>
+    <div id="pager" class="pager"></div>
+  </div>
+
+</div></div></div>
+
+<script>
+(function(){
+  var EVENTS=[
+  {%- for ex in events -%}
+    {%- assign sd = ex.start_date.value -%}{%- assign ed = ex.end_date.value | default: sd -%}
+    {%- assign d1 = sd | date: '%-d' -%}{%- assign d2 = ed | date: '%-d' -%}
+    {%- assign days = d1 -%}{%- if ed != sd and d2 != d1 -%}{%- assign days = d1 | append: '–' | append: d2 -%}{%- endif -%}
+    {ts:{{ sd | date: '%s' }},et:{{ ed | date: '%s' }},type:{{ ex.event_type.value | json }},days:{{ days | json }},mon:{{ sd | date: '%B' | json }},yr:{{ sd | date: '%Y' | json }},fair:{{ ex.title.value | json }},city:{{ ex.location.value | json }},booth:{{ ex.booth.value | json }},url:{{ ex.system.url | json }}}{%- unless forloop.last -%},{%- endunless -%}
+  {%- endfor -%}
+  ];
+  var NOW = {{ 'now' | date: '%s' }};
+  var PER=6, MAXP1=3;
+  var up = EVENTS.filter(function(e){return e.et>=NOW;}).sort(function(a,b){return a.ts-b.ts;});
+  var past = EVENTS.filter(function(e){return e.et<NOW;}).sort(function(a,b){return b.ts-a.ts;});
+
+  function ev(e){
+    var stand = e.booth ? '<span class="fact"><span class="fact__k">Stand</span><span class="fact__v">'+e.booth+'</span></span>' : '';
+    return '<a class="exev" href="'+e.url+'">'+
+      '<span class="exev__date"><span class="exev__d">'+e.days+'</span><span class="exev__mon">'+e.mon+'</span><span class="exev__yr">'+e.yr+'</span></span>'+
+      '<span class="exev__main"><span class="exev__type">'+e.type+'</span><span class="exev__fair">'+e.fair+'</span>'+
+        '<span class="exev__facts"><span class="fact"><span class="fact__k">Where</span><span class="fact__v">'+e.city+'</span></span>'+stand+'</span></span>'+
+      '<span class="exev__aside"><span class="exev__det">Details →</span></span></a>';
+  }
+  function group(title, items, isPast){
+    return '<section class="exg'+(isPast?' exg--past':'')+'"><div class="exg__head"><h2>'+title+'</h2><span class="ct">'+items.length+' events</span></div>'+
+      '<div>'+items.map(ev).join('')+'</div></section>';
+  }
+  function pastPages(){ return 1 + Math.ceil(Math.max(0, past.length - MAXP1)/PER); }
+  function render(page){
+    var body='';
+    if(page===1){
+      if(up.length) body += group('Upcoming', up, false);
+      body += group('Past appearances', past.slice(0, MAXP1), true);
+    } else {
+      var start = MAXP1 + (page-2)*PER;
+      body += group('Past appearances', past.slice(start, start+PER), true);
+    }
+    document.getElementById('page-body').innerHTML = body;
+    pager(page);
+    window.scrollTo(0,0);
+  }
+  function pager(page){
+    var pages = pastPages(), el=document.getElementById('pager');
+    if(pages<=1){ el.innerHTML=''; return; }
+    var h = page>1 ? '<a class="page-step" data-go="'+(page-1)+'" href="#">← Newer</a>' : '<span class="page-step page-step--off">← Newer</span>';
+    h += '<div class="pager__pages">';
+    for(var i=1;i<=pages;i++){ h += (i===page) ? '<span class="page-num" aria-current="page">'+i+'</span>' : '<a class="page-num" data-go="'+i+'" href="#">'+i+'</a>'; }
+    h += '</div>';
+    h += page<pages ? '<a class="page-step" data-go="'+(page+1)+'" href="#">Older →</a>' : '<span class="page-step page-step--off">Older →</span>';
+    el.innerHTML = h;
+  }
+  document.getElementById('pager').addEventListener('click', function(e){ var a=e.target.closest('[data-go]'); if(!a) return; e.preventDefault(); render(parseInt(a.dataset.go,10)); });
+  document.getElementById('s-up').textContent = up.length;
+  document.getElementById('s-total').textContent = EVENTS.length;
+  document.getElementById('s-next').textContent = up.length ? up[0].mon.slice(0,3).toUpperCase() : '—';
+  render(1);
+})();
+</script>
+
+{% schema %}
+{
+  "name": "MISC Events (all)",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Events" },
+    { "type": "textarea", "id": "intro", "label": "Intro text", "default": "Every trade fair and event we attend, across the year. Come and see the full MISC range in person, place opening orders at show pricing, and meet the team." }
+  ],
+  "presets": [{ "name": "MISC Events (all)" }]
+}
+{% endschema %}
