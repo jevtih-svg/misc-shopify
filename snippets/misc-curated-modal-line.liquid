@@ -1,0 +1,24 @@
+{%- comment -%}
+  One row in the "Add collection to cart" review modal.
+  Inputs: product, v (variant), q (default quantity), brand.
+  data-price (cents) + data-default drive the JS recompute/reset.
+{%- endcomment -%}
+<div class="misc-curated-modal__line">
+  <figure class="misc-curated-modal__thumb">
+    {%- if product.featured_image -%}
+      {{ product.featured_image | image_url: width: 160 | image_tag: loading: 'lazy', widths: '120, 160, 240', sizes: '56px', alt: product.title }}
+    {%- endif -%}
+  </figure>
+  <div class="misc-curated-modal__info">
+    <p class="misc-curated-modal__name">{{ product.title }}</p>
+    <p class="misc-curated-modal__meta">{{ brand | default: product.vendor }} &middot; {{ v.price | money }} each</p>
+  </div>
+  <div class="misc-curated-modal__right">
+    <div class="misc-qty-stepper misc-qty-stepper--mini misc-curated-modal__stepper" data-variant-id="{{ v.id }}" data-price="{{ v.price }}" data-default="{{ q }}">
+      <button type="button" class="misc-qty-stepper__btn" data-cc-mstep="-1" aria-label="Decrease quantity">&minus;</button>
+      <input type="number" class="misc-qty-stepper__input misc-curated-modal__qty" min="0" value="{{ q }}" inputmode="numeric" aria-label="Quantity for {{ product.title | escape }}">
+      <button type="button" class="misc-qty-stepper__btn" data-cc-mstep="1" aria-label="Increase quantity">+</button>
+    </div>
+    <span class="misc-curated-modal__sub" data-cc-sub>{{ v.price | times: q | money }}</span>
+  </div>
+</div>

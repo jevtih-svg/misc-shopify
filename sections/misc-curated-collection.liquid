@@ -127,6 +127,52 @@
       {%- endfor -%}
     {%- endif -%}
   </div>
+
+  {%- if items_json != blank -%}
+    <div class="misc-curated-modal" id="MiscCuratedModal" hidden role="dialog" aria-modal="true" aria-labelledby="MiscCuratedModalTitle" data-money-format="{{ shop.money_format | escape }}">
+      <div class="misc-curated-modal__card">
+        <div class="misc-curated-modal__head">
+          <button type="button" class="misc-curated-modal__x" data-cc-close aria-label="Close">&times;</button>
+          {%- if settings.curated_review_eyebrow != blank -%}
+            <p class="misc-curated-modal__eyebrow">{{ settings.curated_review_eyebrow }}</p>
+          {%- endif -%}
+          <h2 class="misc-curated-modal__title" id="MiscCuratedModalTitle">{{ settings.curated_review_heading | default: 'Review your order' }}</h2>
+          {%- if settings.curated_review_message != blank -%}
+            <div class="misc-curated-modal__msg">{{ settings.curated_review_message }}</div>
+          {%- endif -%}
+        </div>
+        <div class="misc-curated-modal__list">
+          {%- if is_mo -%}
+            {%- for item in metaobject.items.value -%}
+              {%- assign v = item.variant.value -%}
+              {%- if v -%}
+                {%- assign q = item.default_quantity.value | default: 1 -%}
+                {%- render 'misc-curated-modal-line', product: v.product, v: v, q: q, brand: cc_brand -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- else -%}
+            {%- for block in section.blocks -%}
+              {%- assign v = block.settings.product.selected_or_first_available_variant -%}
+              {%- if v -%}
+                {%- assign q = block.settings.add_qty | default: 1 -%}
+                {%- render 'misc-curated-modal-line', product: block.settings.product, v: v, q: q, brand: cc_brand -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endif -%}
+        </div>
+        <div class="misc-curated-modal__foot">
+          <div class="misc-curated-modal__totals" id="MiscCuratedModalTotals"></div>
+          <div class="misc-curated-modal__actions">
+            <button type="button" class="misc-curated-modal__cancel" data-cc-close>Cancel</button>
+            <button type="button" class="misc-curated-modal__confirm" id="MiscCuratedModalConfirm">{{ settings.curated_review_confirm | default: 'Add to cart' }} &rarr;</button>
+          </div>
+          {%- if settings.curated_review_note != blank -%}
+            <p class="misc-curated-modal__note">{{ settings.curated_review_note }}</p>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  {%- endif -%}
 </section>
 {%- endif -%}
 

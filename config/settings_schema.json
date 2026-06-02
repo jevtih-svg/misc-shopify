@@ -1451,5 +1451,17 @@
         "default": "scheme-1"
       }
     ]
+  },
+  {
+    "name": "Curated collections",
+    "settings": [
+      { "type": "header", "content": "Add-collection review modal" },
+      { "type": "paragraph", "content": "Universal copy for the \"Add collection to cart\" review step shown on every curated collection page." },
+      { "type": "text", "id": "curated_review_eyebrow", "label": "Eyebrow", "default": "Before you add" },
+      { "type": "text", "id": "curated_review_heading", "label": "Heading", "default": "Our recommended order" },
+      { "type": "richtext", "id": "curated_review_message", "label": "Message", "default": "<p>This is the mix we would put on your shelves to cover the collection well. Adjust any quantity below, then add it to your cart in one go.</p>" },
+      { "type": "text", "id": "curated_review_confirm", "label": "Confirm button label", "default": "Add to cart" },
+      { "type": "text", "id": "curated_review_note", "label": "Footer note", "default": "You can still change anything in your cart afterwards." }
+    ]
   }
 ]
