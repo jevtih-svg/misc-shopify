@@ -132,13 +132,21 @@
 
 .misc-curated__actions { margin-top: auto; display: flex; align-items: center; gap: var(--space-3); padding-top: var(--space-5); }
 .misc-curated__qtylabel { font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: var(--ls-caps); color: var(--c-ink-mute); font-weight: var(--fw-medium); }
-.misc-curated__stepper { display: inline-flex; align-items: stretch; height: 52px; border: 2px solid var(--c-ink); }
-.misc-curated__stepper button { width: 52px; background: var(--c-bg); color: var(--c-ink); border: none; font-size: 22px; line-height: 1; cursor: pointer; }
-.misc-curated__stepper button:hover { background: var(--c-bg-subtle); }
-.misc-curated__qty { width: 60px; border: none; border-left: 2px solid var(--c-ink); border-right: 2px solid var(--c-ink); text-align: center; font-size: var(--fs-md); font-variant-numeric: tabular-nums; -moz-appearance: textfield; }
-.misc-curated__qty::-webkit-outer-spin-button, .misc-curated__qty::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.misc-curated__product--third .misc-curated__stepper { height: 44px; }
-.misc-curated__product--third .misc-curated__stepper button { width: 44px; font-size: 18px; }
+/* Reuse the catalogue / single-product stepper (.misc-qty-stepper):
+   grid 48 | 1fr | 48, clean single ink frame, no inner dividers,
+   buttons hover-invert, input chrome fully reset. Ported here
+   because misc-collection.css isn't loaded on the curated page. */
+.misc-curated__actions .misc-qty-stepper { margin-top: 0; width: 176px; }
+.misc-qty-stepper { display: grid; grid-template-columns: 48px 1fr 48px; align-items: stretch; height: 52px; border: 2px solid var(--c-ink); border-radius: var(--radius-sm); overflow: hidden; background: var(--c-bg); box-sizing: border-box; }
+.misc-qty-stepper__btn, .misc-qty-stepper__input { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; margin: 0; padding: 0; background: var(--c-bg); color: var(--c-ink); font-family: var(--font-sans); font-weight: var(--fw-medium); line-height: 1; border: 0; border-radius: 0; box-shadow: none; outline: none; cursor: pointer; }
+.misc-qty-stepper__btn { font-size: var(--fs-xl); transition: background 100ms ease, color 100ms ease; }
+.misc-qty-stepper__btn:hover { background: var(--c-ink); color: var(--c-bg); }
+.misc-qty-stepper__input { appearance: none !important; -webkit-appearance: none !important; -moz-appearance: textfield; border: 0 !important; box-shadow: none !important; outline: none !important; text-align: center !important; font-variant-numeric: tabular-nums; font-size: var(--fs-lg) !important; cursor: text; line-height: 48px !important; padding: 0 !important; height: 100%; min-height: 0; box-sizing: border-box; }
+.misc-qty-stepper__input::-webkit-outer-spin-button, .misc-qty-stepper__input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+/* The global `input[type="number"]` rule (misc-tokens.css: height 36px, padding 0 12px,
+   1px border, radius) out-specifies the class above and was shrinking/offsetting the
+   field inside the 48px cell. Force it to fill the cell so the digit is dead-centre. */
+.misc-curated .misc-qty-stepper__input { height: 100% !important; width: 100% !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; text-align: center !important; text-indent: 0 !important; line-height: 48px !important; }
 
 @media (max-width: 1000px) {
   .misc-curated__grid { grid-template-columns: 1fr; }

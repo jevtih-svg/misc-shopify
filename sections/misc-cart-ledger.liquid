@@ -920,9 +920,12 @@
     {%- comment -%} ===== STICKY ACTION BAR ===== {%- endcomment -%}
     <div class="misc-cart-ledger__action-bar">
       <div class="misc-cart-ledger__action-bar-inner">
-        <div class="misc-cart-ledger__action-totals">
-          Order total<strong>{{ cart.total_price | money }}</strong>
-          <span class="misc-cart-ledger__action-meta">{{ cart.item_count }} {{ cart.item_count | pluralize: 'product', 'products' }} &middot; {{ unique_brands.size }} {{ unique_brands.size | pluralize: 'brand', 'brands' }}</span>
+        <div class="misc-cart-ledger__action-left">
+          <div class="misc-cart-ledger__action-totals">
+            Order total<strong>{{ cart.total_price | money }}</strong>
+            <span class="misc-cart-ledger__action-meta">{{ cart.item_count }} {{ cart.item_count | pluralize: 'product', 'products' }} &middot; {{ unique_brands.size }} {{ unique_brands.size | pluralize: 'brand', 'brands' }}</span>
+          </div>
+          <button type="button" class="misc-cart-ledger__clear" data-action="clear-cart">Clear cart</button>
         </div>
         <button type="submit" name="checkout" form="misc-cart-ledger-form" class="misc-cart-ledger__btn-confirm">Confirm order</button>
       </div>

@@ -30,7 +30,10 @@
     var stateFilter = { in: true, inbound: true, backorder: true };
     var brandFilter = {};
 
-    var brandChips = page.querySelectorAll('[data-brand]');
+    /* Scope to the brand CHIPS only. Product rows and image items also
+       carry data-brand, so a bare [data-brand] selector would bind the
+       brand-filter click handler to every line too. */
+    var brandChips = page.querySelectorAll('.misc-cart-ledger__chip[data-brand]');
     brandChips.forEach(function (chip) {
       var b = chip.getAttribute('data-brand');
       if (b) brandFilter[b] = true;
@@ -445,17 +448,20 @@
       return n;
     }
 
-    /* ---------- Quantity stepper + remove ---------- */
-    function fetchAndReplaceSection(payload) {
-      return fetch('/cart/change.js', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(Object.assign({ sections: page.getAttribute('data-section-id') ? null : '' }, payload))
-      });
+    /* ---------- Quantity stepper, remove, clear ---------- */
+
+    /* Swap the whole section for freshly-rendered HTML and re-init. */
+    function applySectionHtml(html) {
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+      var fresh = doc.querySelector('.misc-cart-ledger');
+      if (fresh) {
+        page.replaceWith(fresh);
+        init(fresh);
+      } else {
+        window.location.reload();
+      }
     }
+
     function changeQty(variantId, newQty) {
       var sectionId = page.getAttribute('data-section-id');
       return fetch('/cart/change.js?sections=' + encodeURIComponent(sectionId), {
@@ -464,18 +470,33 @@
         body: JSON.stringify({ id: variantId, quantity: newQty })
       }).then(function (r) { return r.json(); }).then(function (data) {
         if (data && data.sections && data.sections[sectionId]) {
-          var parser = new DOMParser();
-          var doc = parser.parseFromString(data.sections[sectionId], 'text/html');
-          var fresh = doc.querySelector('.misc-cart-ledger');
-          if (fresh) {
-            page.replaceWith(fresh);
-            init(fresh);
-          }
+          applySectionHtml(data.sections[sectionId]);
         } else {
-          // Fallback: reload the page so cart state is consistent.
           window.location.reload();
         }
       }).catch(function () { window.location.reload(); });
+    }
+
+    /* Optimistically drop a line from BOTH views the instant Remove is
+       clicked. Without this the deleted row lingers on screen during the
+       network round-trip (no optimistic feedback, unlike the steppers),
+       and then the full re-render swaps the list back in — the "flash"
+       the buyer sees. Removing it now makes deletion feel instant; the
+       server re-render that follows just reconciles the totals. */
+    function removeLineFromDom(variantId) {
+      var prow = page.querySelector('.misc-cart-ledger__product-row[data-variant-id="' + variantId + '"]');
+      if (prow) {
+        var sib = prow.nextElementSibling;
+        while (sib && sib.classList.contains('misc-cart-ledger__avail-row')) {
+          var next = sib.nextElementSibling;
+          sib.parentNode.removeChild(sib);
+          sib = next;
+        }
+        prow.parentNode.removeChild(prow);
+      }
+      var item = page.querySelector('.misc-cart-ledger__image-item[data-variant-id="' + variantId + '"]');
+      if (item) item.parentNode.removeChild(item);
+      apply();
     }
 
     page.querySelectorAll('.misc-cart-ledger__step-btn').forEach(function (btn) {
@@ -509,9 +530,31 @@
     page.querySelectorAll('.misc-cart-ledger__remove, .misc-cart-ledger__image-remove').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var vid = btn.getAttribute('data-variant-id');
-        if (vid) changeQty(vid, 0);
+        if (!vid) return;
+        removeLineFromDom(vid);
+        changeQty(vid, 0);
       });
     });
+
+    /* Clear the whole cart. Confirms first (destructive), clears via the
+       Cart API, then re-renders the section into its empty state. */
+    var clearBtn = page.querySelector('[data-action="clear-cart"]');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function () {
+        if (!window.confirm('Remove all items and start over?')) return;
+        var sectionId = page.getAttribute('data-section-id');
+        clearBtn.disabled = true;
+        fetch('/cart/clear.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
+        }).then(function () {
+          return fetch('/cart?sections=' + encodeURIComponent(sectionId));
+        }).then(function (r) { return r.json(); }).then(function (data) {
+          if (data && data[sectionId]) applySectionHtml(data[sectionId]);
+          else window.location.reload();
+        }).catch(function () { window.location.reload(); });
+      });
+    }
 
     /* ---------- Ship preference + cart attribute persistence ---------- */
     function updateCartAttributes(attrs) {

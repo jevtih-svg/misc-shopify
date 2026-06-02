@@ -40,10 +40,10 @@
     <div class="misc-curated__price">{{ v.price | money }}</div>
     <div class="misc-curated__actions">
       <span class="misc-curated__qtylabel">Qty</span>
-      <div class="misc-curated__stepper" data-variant-id="{{ v.id }}">
-        <button type="button" data-step="-1" aria-label="Decrease quantity">&minus;</button>
-        <input type="number" class="misc-curated__qty" value="0" min="0" inputmode="numeric" aria-label="Quantity for {{ product.title | escape }}">
-        <button type="button" data-step="1" aria-label="Increase quantity">+</button>
+      <div class="misc-qty-stepper misc-curated__stepper" data-variant-id="{{ v.id }}">
+        <button type="button" class="misc-qty-stepper__btn" data-step="-1" aria-label="Decrease quantity">&minus;</button>
+        <input type="number" class="misc-qty-stepper__input misc-curated__qty" value="0" min="0" inputmode="numeric" aria-label="Quantity for {{ product.title | escape }}">
+        <button type="button" class="misc-qty-stepper__btn" data-step="1" aria-label="Increase quantity">+</button>
       </div>
     </div>
   </div>

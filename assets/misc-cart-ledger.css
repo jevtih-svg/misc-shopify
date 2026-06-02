@@ -907,6 +907,21 @@
   text-decoration: underline;
 }
 .misc-cart-ledger__continue-link:hover { color: var(--misc-ink); }
+/* Clear cart — lives in the sticky bar next to the order total. Quiet
+   (ink-faint, reds on hover) so it never competes with Confirm. */
+.misc-cart-ledger__clear {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--misc-ink-faint);
+  text-decoration: underline;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.misc-cart-ledger__clear:hover { color: var(--misc-red); }
 
 .misc-cart-ledger__action-bar {
   position: fixed;
@@ -935,6 +950,13 @@
   justify-content: space-between;
   gap: 24px;
 }
+/* Left group: order total + meta, with Clear cart sitting beside it. */
+.misc-cart-ledger__action-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-width: 0;
+}
 .misc-cart-ledger__action-totals { font-size: 13px; color: var(--misc-ink-mute); }
 .misc-cart-ledger__action-totals strong {
   color: var(--misc-ink);
@@ -960,3 +982,11 @@
   min-width: 320px;
 }
 .misc-cart-ledger__btn-confirm:hover { background: #333; }
+
+/* Narrow screens: let the bar wrap so the total + Clear sit on one row
+   and Confirm spans full width beneath them. */
+@media (max-width: 600px) {
+  .misc-cart-ledger__action-bar-inner { flex-wrap: wrap; gap: 12px; }
+  .misc-cart-ledger__action-left { width: 100%; justify-content: space-between; gap: 12px; }
+  .misc-cart-ledger__btn-confirm { min-width: 0; width: 100%; padding: 18px; }
+}
