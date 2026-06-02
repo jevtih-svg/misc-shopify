@@ -28,7 +28,9 @@
   </div>
 
   <div class="misc-curated-index__grid">
-    {%- for coll in shop.metaobjects.curated_collection.values -%}
+    {%- comment -%} MISC: order the index by the Curated Builder's manual `position` (zero-padded text field); unset positions fall to the end {%- endcomment -%}
+    {%- assign misc_curated_sorted = shop.metaobjects.curated_collection.values | sort: 'position' -%}
+    {%- for coll in misc_curated_sorted -%}
       {%- unless coll.active.value == false -%}
         {%- assign first = coll.items.value.first -%}
         {%- assign fv = first.variant.value -%}
