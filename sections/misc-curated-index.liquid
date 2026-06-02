@@ -27,9 +27,16 @@
     {%- endif -%}
   </div>
 
-  <div class="misc-curated-index__grid">
-    {%- comment -%} MISC: order the index by the Curated Builder's manual `position` (zero-padded text field); unset positions fall to the end {%- endcomment -%}
-    {%- assign misc_curated_sorted = shop.metaobjects.curated_collection.values | sort: 'position' -%}
+  {%- comment -%} MISC: order the index by the Curated Builder's manual `position` (zero-padded text field); unset positions fall to the end {%- endcomment -%}
+  {%- assign misc_curated_sorted = shop.metaobjects.curated_collection.values | sort: 'position' -%}
+  {%- comment -%} MISC: count visible collections so the grid adapts its column count; a short last row then renders white, never as empty black cells {%- endcomment -%}
+  {%- assign misc_cc_count = 0 -%}
+  {%- for coll in misc_curated_sorted -%}
+    {%- unless coll.active.value == false -%}{%- assign misc_cc_count = misc_cc_count | plus: 1 -%}{%- endunless -%}
+  {%- endfor -%}
+  {%- assign misc_cc_cols = misc_cc_count | at_most: 3 -%}
+
+  <div class="misc-curated-index__grid{% if misc_cc_count == 1 %} misc-curated-index__grid--single{% endif %}" style="--misc-cc-cols: {{ misc_cc_cols }};">
     {%- for coll in misc_curated_sorted -%}
       {%- unless coll.active.value == false -%}
         {%- assign first = coll.items.value.first -%}
