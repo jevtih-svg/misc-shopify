@@ -25,15 +25,35 @@
 {%- endcomment -%}
 
 {%- liquid
+  comment
+    MISC: B2B access gate — normalise approved to false when not passed, so price/stock hiding fails safe.
+  endcomment
+  unless approved
+    assign approved = false
+  endunless
   assign active_count = 0
   for filter in collection.filters
-    if filter.type == 'price_range'
-      if filter.min_value.value != blank or filter.max_value.value != blank
-        assign active_count = active_count | plus: 1
+    assign misc_skip_filter = false
+    if approved == false
+      if filter.type == 'price_range'
+        assign misc_skip_filter = true
       endif
-    else
-      assign active_count = active_count | plus: filter.active_values.size
+      if filter.param_name contains 'availability'
+        assign misc_skip_filter = true
+      endif
+      if filter.param_name contains 'stock'
+        assign misc_skip_filter = true
+      endif
     endif
+    unless misc_skip_filter
+      if filter.type == 'price_range'
+        if filter.min_value.value != blank or filter.max_value.value != blank
+          assign active_count = active_count | plus: 1
+        endif
+      else
+        assign active_count = active_count | plus: filter.active_values.size
+      endif
+    endunless
   endfor
   assign current_sort = collection.sort_by | default: collection.default_sort_by
 -%}
@@ -100,6 +120,14 @@
       {%- if active_count > 0 -%}
         <span class="misc-filter-bar__label">Active</span>
         {%- for filter in collection.filters -%}
+          {%- comment -%} MISC: B2B access gate — no price/stock pills for unapproved (they reveal price/availability). {%- endcomment -%}
+          {%- assign misc_skip_pill = false -%}
+          {%- if approved == false -%}
+            {%- if filter.type == 'price_range' -%}{%- assign misc_skip_pill = true -%}{%- endif -%}
+            {%- if filter.param_name contains 'availability' -%}{%- assign misc_skip_pill = true -%}{%- endif -%}
+            {%- if filter.param_name contains 'stock' -%}{%- assign misc_skip_pill = true -%}{%- endif -%}
+          {%- endif -%}
+          {%- if misc_skip_pill -%}{%- continue -%}{%- endif -%}
           {%- if filter.type == 'price_range' -%}
             {%- if filter.min_value.value != blank or filter.max_value.value != blank -%}
               <a href="{{ filter.url_to_remove }}" class="misc-applied-pill">
@@ -129,6 +157,8 @@
         <label class="sort-control__label" for="MiscSortBy">Sort by:</label>
         <select id="MiscSortBy" class="sort-control__select">
           {%- for option in collection.sort_options -%}
+            {%- comment -%} MISC: B2B access gate — no price-based sort for unapproved (reveals relative pricing). {%- endcomment -%}
+            {%- if approved == false and option.value contains 'price' -%}{%- continue -%}{%- endif -%}
             <option value="{{ option.value | escape }}"{% if option.value == current_sort %} selected{% endif %}>
               {{- option.name | escape -}}
             </option>

@@ -64,7 +64,8 @@
         results_url: collection.url,
         active_view: active_view,
         per_page: per_page,
-        enable_list_view: section.settings.enable_list_view
+        enable_list_view: section.settings.enable_list_view,
+        approved: approved
       %}
     {%- endif -%}
 
@@ -117,7 +118,8 @@
             results: collection,
             enable_filtering: section.settings.enable_filtering,
             enable_sorting: section.settings.enable_sorting,
-            paginate: paginate
+            paginate: paginate,
+            approved: approved
           %}
 
           {%- comment -%} MISC: mobile drawer footer (hidden on desktop via CSS) {%- endcomment -%}

@@ -79,8 +79,14 @@
   {%- if search.performed -%}
     {%- paginate search.results by per_page -%}
 
+      {%- comment -%} MISC: B2B access gate — compute approval once for the filter bar, facets and cards. {%- endcomment -%}
+      {%- capture misc_access -%}{%- render 'misc-access' -%}{%- endcapture -%}
+      {%- assign misc_access = misc_access | strip -%}
+      {%- assign approved = false -%}
+      {%- if misc_access == 'true' -%}{%- assign approved = true -%}{%- endif -%}
+
       {%- comment -%} Top filter bar (search variant). {%- endcomment -%}
-      {% render 'misc-search-filter-bar', search: search %}
+      {% render 'misc-search-filter-bar', search: search, approved: approved %}
 
       <div class="facets-vertical page-width">
 
@@ -117,7 +123,8 @@
             results: search,
             enable_filtering: true,
             enable_sorting: true,
-            paginate: paginate
+            paginate: paginate,
+            approved: approved
           %}
 
           <div class="sidebar__mobile-footer">
