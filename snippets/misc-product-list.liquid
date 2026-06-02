@@ -138,6 +138,8 @@
           <span class="list-cell list-cell--upq">{{ v_upq }}</span>
           <span class="list-cell list-cell--hs">{{ hs_code | default: '' }}</span>
           <span class="list-cell list-cell--country">{{ origin | default: '' }}</span>
+          {%- comment -%} MISC: B2B access gate — commercial cells (stock, RRP, price, stepper) only for approved visitors; cells kept so the grid stays aligned. {%- endcomment -%}
+          {%- if approved -%}
           <span class="list-cell list-cell--stock">
             {%- if v_inv > 0 and v_inc > 0 -%}
               <span class="list-cell--stock-in">In stock {{ v_inv }}</span>
@@ -165,6 +167,12 @@
               <span class="misc-stepper-placeholder" aria-label="Out of stock, not available for purchase">Unavailable</span>
             {%- endif -%}
           </div>
+          {%- else -%}
+          <span class="list-cell list-cell--stock"></span>
+          <span class="list-cell list-cell--rrp"></span>
+          <span class="list-cell list-cell--price">{% render 'misc-access-prompt' %}</span>
+          <div class="list-cell list-cell--stepper"></div>
+          {%- endif -%}
         </li>
       {%- endfor -%}
 
@@ -191,6 +199,8 @@
         <span class="list-cell list-cell--upq">{{ upq }}</span>
         <span class="list-cell list-cell--hs">{{ hs_code | default: '' }}</span>
         <span class="list-cell list-cell--country">{{ origin | default: '' }}</span>
+        {%- comment -%} MISC: B2B access gate — commercial cells only for approved visitors; cells kept so the grid stays aligned. {%- endcomment -%}
+        {%- if approved -%}
         <span class="list-cell list-cell--stock">
           {%- if inv > 0 and inc_qty > 0 -%}
             <span class="list-cell--stock-in">In stock {{ inv }}</span>
@@ -218,6 +228,12 @@
             <span class="misc-stepper-placeholder" aria-label="Out of stock, not available for purchase">Unavailable</span>
           {%- endif -%}
         </div>
+        {%- else -%}
+        <span class="list-cell list-cell--stock"></span>
+        <span class="list-cell list-cell--rrp"></span>
+        <span class="list-cell list-cell--price">{% render 'misc-access-prompt' %}</span>
+        <div class="list-cell list-cell--stepper"></div>
+        {%- endif -%}
       </li>
     {%- endif -%}
 

@@ -40,11 +40,29 @@
 {%- assign open_invoices_cents = customer.metafields.account.open_invoices_total | default: 0 -%}
 {%- assign open_invoices_count = customer.metafields.account.open_invoices_count | default: 0 -%}
 
+{%- comment -%} MISC: B2B access gate — only approved trade accounts may use the cart (single source: snippets/misc-access). {%- endcomment -%}
+{%- capture misc_access -%}{%- render 'misc-access' -%}{%- endcapture -%}
+{%- assign misc_access = misc_access | strip -%}
+{%- assign approved = false -%}
+{%- if misc_access == 'true' -%}{%- assign approved = true -%}{%- endif -%}
+
 <main class="misc-cart-ledger"
       data-section-id="{{ section.id }}"
       data-currency-symbol="{{ cart.currency.symbol }}">
 
-  {%- if cart == empty -%}
+  {%- comment -%} MISC: B2B access gate — gated visitors get a sign-in panel instead of the ledger. {%- endcomment -%}
+  {%- if approved == false -%}
+
+    <div class="misc-cart-ledger__page">
+      <div class="misc-cart-ledger__title-row">
+        <h1 class="misc-cart-ledger__title">Your order</h1>
+      </div>
+      <p class="misc-cart-ledger__empty">
+        Sign in to your approved trade account to build an order. {% render 'misc-access-prompt' %}
+      </p>
+    </div>
+
+  {%- elsif cart == empty -%}
 
     {%- comment -%} Empty state. Quiet, no filters or summary. {%- endcomment -%}
     <div class="misc-cart-ledger__page">

@@ -1,0 +1,47 @@
+/* ============================================================
+   MISC: B2B access gate styling.
+   Loaded globally from layout/theme.liquid.
+   Covers the site-wide pending-approval banner and the inline
+   "sign in to view trade prices" prompt that replaces gated
+   commercial data. Tokens from misc-tokens.css.
+   ============================================================ */
+
+/* Pending-approval banner: shown to logged-in customers who are
+   not yet approved. Full-width ink strip under the header. */
+.misc-pending-banner {
+  background: var(--c-ink);
+  color: var(--c-bg);
+  text-align: center;
+  font-size: var(--fs-2xs);
+  line-height: var(--lh-ui);
+  letter-spacing: var(--ls-caps-sm);
+  padding: var(--space-2) var(--space-4);
+}
+
+.misc-pending-banner a {
+  color: var(--c-bg);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Inline prompt: replaces a price / RRP / stock line in cards,
+   list rows, the PDP and curated cells. */
+.misc-access-prompt {
+  display: inline-block;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  color: var(--c-ink-mute);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.misc-access-prompt:hover {
+  color: var(--c-ink);
+}
+
+/* Block variant for the product page, where the prompt stands in
+   for the whole price block and wants a little more presence. */
+.misc-access-prompt--block {
+  font-size: var(--fs-sm);
+  padding: var(--space-2) 0;
+}

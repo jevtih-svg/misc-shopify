@@ -32,6 +32,8 @@
       {%- endif -%}
     </div>
     {%- if v.sku != blank -%}<p class="misc-curated__sku">{{ v.sku }}</p>{%- endif -%}
+    {%- comment -%} MISC: B2B access gate — stock, price and ordering for approved visitors; else a sign-in prompt. {%- endcomment -%}
+    {%- if approved -%}
     {%- if v.available -%}
       <span class="misc-curated__state misc-curated__state--instock">In stock</span>
     {%- else -%}
@@ -46,5 +48,8 @@
         <button type="button" class="misc-qty-stepper__btn" data-step="1" aria-label="Increase quantity">+</button>
       </div>
     </div>
+    {%- else -%}
+    <div class="misc-curated__price">{% render 'misc-access-prompt' %}</div>
+    {%- endif -%}
   </div>
 </article>

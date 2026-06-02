@@ -1,0 +1,20 @@
+{%- comment -%}
+  ============================================================
+  snippets/misc-access-prompt.liquid
+  The replacement shown to unapproved visitors wherever a price,
+  RRP, stock line or ordering control would normally appear.
+
+  Keeps the wording and styling consistent everywhere. Links to
+  the sign-in flow (routes.account_login_url resolves to the new
+  customer accounts login and returns the visitor afterwards).
+
+  Optional params:
+    label   : override the text (default below)
+    variant : 'inline' (default) | 'block'  — styling hook only
+  ============================================================
+{%- endcomment -%}
+{%- assign _label = label | default: 'Sign in to view trade prices and stock' -%}
+{%- assign _variant = variant | default: 'inline' -%}
+<a class="misc-access-prompt misc-access-prompt--{{ _variant }}" href="{{ routes.account_login_url }}">
+  {{- _label -}}
+</a>

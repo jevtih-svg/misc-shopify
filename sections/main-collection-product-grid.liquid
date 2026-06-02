@@ -41,6 +41,12 @@
   {%- assign active_view = 'grid-3' -%}
 {%- endif -%}
 
+{%- comment -%} MISC: B2B access gate. Compute approval once here, pass `approved` down to the card and list snippets so price/stock/steppers hide for unapproved visitors. {%- endcomment -%}
+{%- capture misc_access -%}{%- render 'misc-access' -%}{%- endcapture -%}
+{%- assign misc_access = misc_access | strip -%}
+{%- assign approved = false -%}
+{%- if misc_access == 'true' -%}{%- assign approved = true -%}{%- endif -%}
+
 <div class="section-{{ section.id }}-padding gradient">
 
   {%- comment -%}
@@ -166,7 +172,8 @@
                   {% render 'misc-card-product',
                     card_product: product,
                     lazy_load: lazy_load,
-                    section_id: section.id
+                    section_id: section.id,
+                    approved: approved
                   %}
                 </li>
               {%- endfor -%}
@@ -176,7 +183,8 @@
             {%- if section.settings.enable_list_view -%}
               {% render 'misc-product-list',
                 collection: collection,
-                active_view: active_view
+                active_view: active_view,
+                approved: approved
               %}
             {%- endif -%}
 

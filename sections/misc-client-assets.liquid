@@ -20,6 +20,19 @@
   assign pt = section.settings.padding_top | default: 24
   assign pb = section.settings.padding_bottom | default: 56
   assign maxw = section.settings.max_width | default: 1240
+
+  comment
+    MISC: B2B access gate — the asset password shows only to approved
+    visitors (B2B member or `approved` tag). The page itself stays public.
+  endcomment
+  capture misc_access
+    render 'misc-access'
+  endcapture
+  assign misc_access = misc_access | strip
+  assign approved = false
+  if misc_access == 'true'
+    assign approved = true
+  endif
 -%}
 
 <section class="misc-ca" style="--ca-max: {{ maxw }}px; padding-top: {{ pt }}px; padding-bottom: {{ pb }}px;" aria-label="{{ section.settings.heading | default: 'Client assets' | escape }}">
@@ -40,7 +53,8 @@
       <div class="misc-ca__lead">{{ section.settings.lead }}</div>
     {%- endif -%}
 
-    {%- if section.settings.show_password and section.settings.password_value != blank -%}
+    {%- comment -%} MISC: B2B access gate — password to approved visitors; a sign-in prompt to everyone else. {%- endcomment -%}
+    {%- if section.settings.show_password and section.settings.password_value != blank and approved -%}
       <div class="misc-ca__pass">
         <div class="misc-ca__pass-label">
           <span class="misc-ca__pass-title">
@@ -58,6 +72,13 @@
             <span data-copy-label>{{ section.settings.copy_label | default: 'Copy' }}</span>
           </span>
         </button>
+      </div>
+    {%- elsif section.settings.show_password and section.settings.password_value != blank -%}
+      <div class="misc-ca__pass misc-ca__pass--gated">
+        <div class="misc-ca__pass-label">
+          <span class="misc-ca__pass-title">{{ section.settings.password_label | default: 'Asset password' }}</span>
+        </div>
+        {% render 'misc-access-prompt', label: 'Sign in to view the asset password' %}
       </div>
     {%- endif -%}
   </div>

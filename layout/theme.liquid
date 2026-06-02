@@ -272,6 +272,7 @@
     {{ 'misc-tokens.css' | asset_url | stylesheet_tag }}
     {{ 'misc-collection.css' | asset_url | stylesheet_tag }}
     {{ 'misc-shell.css' | asset_url | stylesheet_tag }}
+    {{ 'misc-access.css' | asset_url | stylesheet_tag }}{%- comment -%} MISC: B2B access gate styles (banner + sign-in prompts) {%- endcomment -%}
 
     {%- comment -%}
       MISC: inline synchronous layout-preference script. Runs
@@ -374,6 +375,17 @@
     {%- endif -%}
 
     {% sections 'header-group' %}
+
+    {%- comment -%} MISC: B2B access gate — pending-approval banner for signed-in customers who are not yet approved (B2B member or `approved` tag). {%- endcomment -%}
+    {%- assign misc_pending = false -%}
+    {%- if customer != blank -%}
+      {%- assign misc_pending = true -%}
+      {%- if customer.b2b? -%}{%- assign misc_pending = false -%}{%- endif -%}
+      {%- if customer.tags contains 'approved' -%}{%- assign misc_pending = false -%}{%- endif -%}
+    {%- endif -%}
+    {%- if misc_pending -%}
+      <div class="misc-pending-banner" role="status">Your account is awaiting approval. Trade prices, stock and ordering unlock once we approve you.</div>
+    {%- endif -%}
 
     <main id="MainContent" class="content-for-layout focus-none" role="main" tabindex="-1">
       {{ content_for_layout }}

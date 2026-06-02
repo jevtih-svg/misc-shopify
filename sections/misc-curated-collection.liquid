@@ -42,6 +42,19 @@
   assign total_units = 0
   assign items_json = ''
 
+  comment
+    MISC: B2B access gate — approved visitors (B2B member or `approved` tag)
+    see prices + ordering; everyone else sees a sign-in prompt.
+  endcomment
+  capture misc_access
+    render 'misc-access'
+  endcapture
+  assign misc_access = misc_access | strip
+  assign approved = false
+  if misc_access == 'true'
+    assign approved = true
+  endif
+
   if is_mo
     assign cc_title = metaobject.title.value
     assign cc_brand = metaobject.brand.value
@@ -99,7 +112,8 @@
       {%- endif -%}
     </div>
 
-    {%- if items_json != blank -%}
+    {%- comment -%} MISC: B2B access gate — the add-all button and total only for approved visitors. {%- endcomment -%}
+    {%- if items_json != blank and approved -%}
       <div class="misc-curated__addwrap">
         <button type="button" class="misc-curated__addall" id="MiscCuratedAddAll" data-items='[{{ items_json }}]'>
           <span class="misc-curated__addall-label">{{ cc_addlabel }}</span>
@@ -115,14 +129,14 @@
       {%- for item in metaobject.items.value -%}
         {%- assign v = item.variant.value -%}
         {%- if v -%}
-          {%- render 'misc-curated-cell', product: v.product, v: v, size: item.display_size.value, desc: item.description_override.value, brand: cc_brand -%}
+          {%- render 'misc-curated-cell', product: v.product, v: v, size: item.display_size.value, desc: item.description_override.value, brand: cc_brand, approved: approved -%}
         {%- endif -%}
       {%- endfor -%}
     {%- else -%}
       {%- for block in section.blocks -%}
         {%- assign v = block.settings.product.selected_or_first_available_variant -%}
         {%- if v -%}
-          {%- render 'misc-curated-cell', product: block.settings.product, v: v, size: block.settings.size, desc: block.settings.description, brand: cc_brand -%}
+          {%- render 'misc-curated-cell', product: block.settings.product, v: v, size: block.settings.size, desc: block.settings.description, brand: cc_brand, approved: approved -%}
         {%- endif -%}
       {%- endfor -%}
     {%- endif -%}

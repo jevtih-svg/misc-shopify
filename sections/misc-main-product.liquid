@@ -30,6 +30,19 @@
   assign variant_count = product.variants.size
 
   comment
+    MISC: B2B access gate. Approved visitors (B2B member or `approved` tag)
+    see price/stock/ordering; everyone else sees a sign-in prompt.
+  endcomment
+  capture misc_access
+    render 'misc-access'
+  endcapture
+  assign misc_access = misc_access | strip
+  assign approved = false
+  if misc_access == 'true'
+    assign approved = true
+  endif
+
+  comment
     Breadcrumb chain: Catalogue / Brand / Collection / Product.
 
     This store has no per-brand or per-series Shopify collections.
@@ -129,23 +142,33 @@
       PRICE + STOCK STATE always renders second.
     {%- endcomment -%}
     <section class="misc-pdp__section">
+      {%- comment -%} MISC: B2B access gate — price for approved visitors, else a sign-in prompt. {%- endcomment -%}
+      {%- if approved -%}
       {%- render 'misc-pdp-price',
          product: product,
          primary_variant: primary_variant,
          variant_count: variant_count
       -%}
+      {%- else -%}
+      {%- render 'misc-access-prompt', variant: 'block' -%}
+      {%- endif -%}
 
       {%- comment -%}
         Stock state line. For single-variant products: the four
         states from the design system. For multi-variant: the
         neutral summary line.
       {%- endcomment -%}
+      {%- comment -%} MISC: B2B access gate — stock state only for approved visitors. {%- endcomment -%}
+      {%- if approved -%}
       {%- render 'misc-pdp-stock-state',
          product: product,
          primary_variant: primary_variant,
          variant_count: variant_count
       -%}
+      {%- endif -%}
 
+      {%- comment -%} MISC: B2B access gate — ordering controls + stock notice hidden for unapproved visitors. {%- endcomment -%}
+      {%- if approved -%}
       {%- comment -%}
         Stepper (single-variant) OR variant table (multi-variant).
       {%- endcomment -%}
@@ -196,6 +219,8 @@
         Renders only when a notice condition fires.
       {%- endcomment -%}
       {%- render 'misc-pdp-notice', product: product, primary_variant: primary_variant -%}
+      {%- comment -%} MISC: close the B2B access gate around ordering controls + notice. {%- endcomment -%}
+      {%- endif -%}
     </section>
 
     {%- comment -%} ============================================================

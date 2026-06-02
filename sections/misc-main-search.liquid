@@ -149,6 +149,11 @@
                 data-id="{{ section.id }}"
                 class="product-grid"
               >
+                {%- comment -%} MISC: B2B access gate — compute once, pass to the card. {%- endcomment -%}
+                {%- capture misc_access -%}{%- render 'misc-access' -%}{%- endcapture -%}
+                {%- assign misc_access = misc_access | strip -%}
+                {%- assign approved = false -%}
+                {%- if misc_access == 'true' -%}{%- assign approved = true -%}{%- endif -%}
                 {%- for item in search.results -%}
                   {%- assign lazy_load = false -%}
                   {%- if forloop.index > 6 -%}
@@ -160,7 +165,8 @@
                         {% render 'misc-card-product',
                           card_product: item,
                           lazy_load: lazy_load,
-                          section_id: section.id
+                          section_id: section.id,
+                          approved: approved
                         %}
                       {%- else -%}
                         {%- comment -%} Article / page / collection result. {%- endcomment -%}

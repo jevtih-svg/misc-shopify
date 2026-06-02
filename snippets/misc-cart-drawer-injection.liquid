@@ -25,7 +25,10 @@
   ============================================================
 {%- endcomment -%}
 
-{%- if customer != blank -%}
+{%- comment -%} MISC: B2B access gate — inventory breakdown only for approved visitors (was customer != blank; single source: snippets/misc-access). {%- endcomment -%}
+{%- capture misc_access -%}{%- render 'misc-access' -%}{%- endcapture -%}
+{%- assign misc_access = misc_access | strip -%}
+{%- if misc_access == 'true' -%}
   {%- assign incoming = item.variant.metafields.custom.incoming_qty.value | default: 0 -%}
   {%- assign eta = item.variant.metafields.custom.incoming_eta.value -%}
 

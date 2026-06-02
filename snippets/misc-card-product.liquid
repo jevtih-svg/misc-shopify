@@ -188,6 +188,8 @@
       <span class="misc-product-card__pack">Single unit</span>
     {%- endif -%}
 
+    {%- comment -%} MISC: B2B access gate — price only for approved visitors, else a sign-in prompt. {%- endcomment -%}
+    {%- if approved -%}
     <div class="misc-product-card__price-row">
       <span class="misc-product-card__price">
         {%- if variant_count > 1 -%}from {% endif -%}
@@ -198,8 +200,14 @@
         {%- endif -%}
       </span>
     </div>
+    {%- else -%}
+    <div class="misc-product-card__price-row">
+      {% render 'misc-access-prompt' %}
+    </div>
+    {%- endif -%}
 
-    {%- if quick_add != 'none' -%}
+    {%- comment -%} MISC: B2B access gate — stock state + steppers/variant rows only for approved visitors. {%- endcomment -%}
+    {%- if quick_add != 'none' and approved -%}
 
       {%- comment -%}
         STOCK STATE LINE — always rendered below price.

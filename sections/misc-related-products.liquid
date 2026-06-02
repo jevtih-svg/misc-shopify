@@ -121,6 +121,11 @@
       class="product-grid is-cols-5 misc-related__grid"
       role="list"
     >
+      {%- comment -%} MISC: B2B access gate — compute once, pass to the card. {%- endcomment -%}
+      {%- capture misc_access -%}{%- render 'misc-access' -%}{%- endcapture -%}
+      {%- assign misc_access = misc_access | strip -%}
+      {%- assign approved = false -%}
+      {%- if misc_access == 'true' -%}{%- assign approved = true -%}{%- endif -%}
       {%- for recommendation in recommendations.products -%}
         <li>
           {%- render 'misc-card-product',
@@ -129,7 +134,8 @@
              show_vendor: true,
              lazy_load: true,
              quick_add: 'none',
-             section_id: section.id
+             section_id: section.id,
+             approved: approved
           -%}
         </li>
       {%- endfor -%}
