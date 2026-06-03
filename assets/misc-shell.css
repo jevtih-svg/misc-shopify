@@ -1,0 +1,739 @@
+/* ============================================================
+   MISC shell — global header + footer styles
+   Loaded from layout/theme.liquid on every page.
+   Inline tokens come from assets/misc-tokens.css (loaded before this).
+   ============================================================ */
+
+/* ============================================================
+   UTILITY BAR (email, phone, social)
+   ============================================================ */
+.misc-utility-bar {
+  background: var(--c-bg);
+  border-bottom: 1px solid var(--c-line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-6);
+  font-size: var(--fs-2xs);
+  color: var(--c-ink-mute);
+}
+
+.misc-utility-bar__left {
+  display: flex;
+  gap: var(--space-6);
+  align-items: center;
+}
+
+.misc-utility-bar__left a {
+  color: var(--c-ink-mute);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+}
+.misc-utility-bar__left a:hover { color: var(--c-ink); text-decoration: none; }
+
+.misc-utility-bar svg { width: 14px; height: 14px; }
+
+.misc-utility-bar__right a { color: var(--c-ink-mute); text-decoration: none; }
+.misc-utility-bar__right a:hover { color: var(--c-ink); }
+
+/* ============================================================
+   HEADER
+   Slim — 56px tall. Logo left, search middle (hairline only,
+   activates on focus), account state + cart right.
+   ============================================================ */
+/* The whole header sits above page content so the nav dropdown
+   overlays the catalog. Without a stacking context here, the catalog's
+   sticky list header (z 50) and list image popover (z 100) painted on
+   top of the open dropdown. */
+.shopify-section-group-header-group {
+  position: relative;
+  z-index: 300;
+}
+
+.misc-site-header {
+  background: var(--c-bg);
+  border-bottom: 1px solid var(--c-line);
+}
+
+.misc-site-header__main {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-3) var(--space-6);
+  min-height: 56px;
+}
+
+.misc-site-header__logo {
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-logo);
+  color: var(--c-ink);
+  justify-self: start;
+  text-decoration: none;
+}
+.misc-site-header__logo:hover { text-decoration: none; }
+/* MISC: logo is a wide wordmark (2564×230, ~11:1). Size by height and cap width so it stays a slim header mark; stepped down on mobile below. */
+.misc-site-header__logo img { max-height: 24px; width: auto; max-width: 280px; display: block; }
+
+.misc-site-header__search-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  justify-self: center;
+}
+
+/* The <predictive-search> / <search-form> custom element and the
+   inner <form> all share .misc-site-header__search so the layout
+   stays a single flex/grid item regardless of the wrapper. */
+.misc-site-header__search {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+predictive-search.misc-site-header__search,
+search-form.misc-site-header__search { display: block; }
+
+.misc-site-header__search input {
+  width: 100%;
+  height: 36px;
+  /* 36px both sides: search icon sits left, reset (×) button sits right */
+  padding: 0 36px 0 36px;
+  border: 0;
+  border-bottom: 1px solid var(--c-line);
+  border-radius: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-xs);
+  background: transparent;
+  color: var(--c-ink);
+  transition: border-color 100ms ease;
+}
+.misc-site-header__search input::placeholder {
+  color: var(--c-ink-faint);
+  font-size: var(--fs-xs);
+}
+.misc-site-header__search input:focus {
+  outline: none;
+  border-bottom-color: var(--c-ink);
+}
+
+/* Direct-child selector so only the search glyph (a direct child of the
+   form) is positioned left — not the reset button's nested svg. */
+.misc-site-header__search > svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+  color: var(--c-ink-mute);
+}
+
+/* Clear (×) button — required by Trade's SearchForm JS, styled to sit at the
+   right edge of the input. SearchForm toggles the .hidden class as the field
+   fills/empties. */
+.misc-site-header__search-reset {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--c-ink-faint);
+  cursor: pointer;
+  transition: color 100ms ease;
+}
+.misc-site-header__search-reset svg { width: 14px; height: 14px; }
+.misc-site-header__search-reset:hover { color: var(--c-ink); }
+
+/* Predictive-search results dropdown — sits below the input,
+   absolute-positioned so it doesn't push header height. */
+.misc-site-header__predictive {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--c-bg);
+  border: 1px solid var(--c-line);
+  border-top: 0;
+  max-height: 480px;
+  overflow-y: auto;
+  display: none;
+}
+/* Visibility is driven by the [open] state on the custom element, NOT by
+   :not(:empty). Trade's JS leaves the rendered markup in place when it closes
+   the dropdown (it only drops the [open] attribute), so an :not(:empty) rule
+   would keep stale results, e.g. a leftover "Search for X" row, pinned open
+   after blur/clear, and the overlay would swallow clicks on the page beneath
+   it. [open] is set by the JS only once results are ready to render, so the box
+   never flashes empty during the fetch. */
+predictive-search[open] .misc-site-header__predictive { display: block; }
+
+/* ----- Predictive results: MISC brand treatment -----
+   The dropdown markup is Trade's sections/predictive-search.liquid (group
+   headings, suggestion/product lists, "search for" footer). Trade's
+   component-predictive-search.css styles it for the default theme; these
+   rules, scoped to the header dropdown, restyle it to the monochrome,
+   hairline, small-caps system without touching Trade core. */
+.misc-site-header__predictive .predictive-search__results-groups-wrapper {
+  flex-direction: column;
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.misc-site-header__predictive .predictive-search__result-group { gap: 0; }
+
+.misc-site-header__predictive .predictive-search__heading {
+  margin: 0;
+  padding: var(--space-3) var(--space-4) var(--space-2);
+  border-bottom: 1px solid var(--c-line);
+  font-family: var(--font-sans);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--c-ink-mute);
+}
+
+.misc-site-header__predictive .predictive-search__item {
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-sans);
+  color: var(--c-ink);
+}
+.misc-site-header__predictive .predictive-search__item-heading {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-ui);
+}
+
+/* Hover / keyboard-selected row: subtle grey wash, no underline */
+.misc-site-header__predictive .predictive-search__list-item[aria-selected='true'] > *,
+.misc-site-header__predictive .predictive-search__list-item:hover > *,
+.misc-site-header__predictive .predictive-search__item[aria-selected='true'],
+.misc-site-header__predictive .predictive-search__item:hover {
+  background: var(--c-bg-subtle);
+  color: var(--c-ink);
+}
+.misc-site-header__predictive .predictive-search__list-item[aria-selected='true'] .predictive-search__item-heading,
+.misc-site-header__predictive .predictive-search__list-item:hover .predictive-search__item-heading {
+  text-decoration: none;
+}
+
+.misc-site-header__predictive .predictive-search__item-vendor {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  color: var(--c-ink-mute);
+  margin-bottom: 2px;
+}
+.misc-site-header__predictive .predictive-search__item .price {
+  font-size: var(--fs-2xs);
+  color: var(--c-ink-mute);
+  text-align: left;
+  margin-top: 2px;
+}
+
+/* Product thumbnails: small, hairline-framed, contained */
+.misc-site-header__predictive .predictive-search__item--link-with-thumbnail {
+  grid-template-columns: 40px 1fr;
+  grid-column-gap: var(--space-3);
+  align-items: center;
+}
+.misc-site-header__predictive .predictive-search__image {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--c-line);
+}
+
+/* "Search for <term>" footer row */
+.misc-site-header__predictive .predictive-search__item--term {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--c-line);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--c-ink);
+}
+.misc-site-header__predictive .predictive-search__item--term .svg-wrapper svg,
+.misc-site-header__predictive .predictive-search__item--term .icon-arrow {
+  width: 14px;
+  height: 14px;
+  color: var(--c-ink);
+}
+
+/* Account zone */
+.misc-site-header__right {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  justify-self: end;
+}
+
+.misc-site-header__account { display: inline-flex; align-items: center; gap: var(--space-3); }
+.misc-site-header__account-link {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  font-weight: var(--fw-medium);
+  color: var(--c-ink);
+  padding: 6px 0;
+  text-decoration: none;
+}
+.misc-site-header__account-link:hover { text-decoration: underline; }
+.misc-site-header__account-link--primary {
+  padding: 8px 14px;
+  background: var(--c-ink);
+  color: var(--c-bg);
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--c-ink);
+  transition: background 100ms ease, color 100ms ease;
+}
+.misc-site-header__account-link--primary:hover {
+  background: var(--c-bg);
+  color: var(--c-ink);
+  text-decoration: none;
+}
+
+.misc-site-header__account-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--c-line);
+}
+
+.misc-site-header__account-mine {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  font-weight: var(--fw-medium);
+  color: var(--c-ink);
+  padding: 6px 0;
+  text-decoration: none;
+}
+.misc-site-header__account-mine:hover { text-decoration: underline; }
+.misc-site-header__account-mine .misc-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--c-ink);
+  color: var(--c-bg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0;
+}
+
+/* Cart */
+.misc-site-header__cart {
+  position: relative;
+  background: none;
+  border: 0;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--c-ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: background 100ms ease;
+  text-decoration: none;
+}
+.misc-site-header__cart:hover { background: var(--c-bg-subtle); text-decoration: none; }
+.misc-site-header__cart svg { width: 20px; height: 20px; }
+
+.misc-site-header__cart-count {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: var(--c-ink);
+  color: var(--c-bg);
+  font-size: 10px;
+  font-weight: var(--fw-medium);
+  font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.misc-site-header__cart-count.is-empty { display: none; }
+
+/* ============================================================
+   PRIMARY NAV (top-level pages)
+   ============================================================ */
+.misc-site-nav {
+  border-bottom: 3px solid var(--c-ink);
+  background: var(--c-bg);
+}
+
+.misc-site-nav__inner {
+  display: flex;
+  align-items: stretch;
+  padding: 0 var(--space-6);
+  gap: var(--space-7);
+  list-style: none;
+  margin: 0;
+}
+
+.misc-site-nav__item {
+  padding: var(--space-3) 0;
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-weight: var(--fw-medium);
+  color: var(--c-ink);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: border-color 120ms ease;
+  text-decoration: none;
+}
+.misc-site-nav__item:hover { border-bottom-color: var(--c-ink); text-decoration: none; }
+
+/* MISC: active-page marker. The nav already has a 3px ink bottom frame, so a
+   bottom-border underline blends straight into it and the current page can't be
+   seen. Use a text underline offset up from the frame instead. The is-active
+   class is set in misc-header.liquid from link.active (top-level items + Home)
+   and link.active or link.child_active (parents, so a brand or other sub-page
+   underlines its parent menu item). Works for any future menu item too. */
+.misc-site-nav__item.is-active {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+/* No-destination parents render as a <button> with the chevron INSIDE, so a
+   plain underline would run under the caret. Scope it to the label span only.
+   (Parents with a real URL render as an <a> with the chevron as a separate
+   sibling button, so the rule above already underlines just their label.) */
+button.misc-site-nav__item--parent.is-active { text-decoration: none; }
+button.misc-site-nav__item--parent.is-active .misc-site-nav__label {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+
+/* ---- Primary nav: dropdown sub-menus ---- */
+.misc-site-nav__group {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.misc-site-nav__group .misc-site-nav__item { white-space: nowrap; }
+
+/* Parent (link OR button) keeps its label + chevron tight together so the
+   group occupies the same visual width as a plain nav item. */
+.misc-site-nav__item--parent {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+/* When the parent has no real destination it renders as a <button>; strip the
+   UA button chrome so it is indistinguishable from the anchor nav items. */
+button.misc-site-nav__item {
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.misc-site-nav__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0 0 -2px var(--space-1);
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--c-ink);
+  cursor: pointer;
+}
+.misc-site-nav__group:hover .misc-site-nav__item,
+.misc-site-nav__group:focus-within .misc-site-nav__item,
+.misc-site-nav__group.is-open .misc-site-nav__item,
+.misc-site-nav__group.is-open .misc-site-nav__toggle { border-bottom-color: var(--c-ink); }
+
+.misc-site-nav__chevron {
+  width: 10px;
+  height: 10px;
+  transition: transform 120ms ease;
+}
+.misc-site-nav__group:hover .misc-site-nav__chevron,
+.misc-site-nav__group.is-open .misc-site-nav__chevron { transform: rotate(180deg); }
+
+.misc-site-nav__dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  /* Above the catalog's sticky list header (z 50) and list image
+     popover (z 100). The header group also gets its own stacking
+     context (below) so the whole header sits over page content. */
+  z-index: 200;
+  min-width: 220px;
+  margin: 0;
+  padding: var(--space-2) 0;
+  list-style: none;
+  background: var(--c-bg);
+  border: var(--line-strong);
+}
+.misc-site-nav__group.is-open > .misc-site-nav__dropdown { display: block; }
+
+/* Open on hover for pointer devices on desktop. Touch and keyboard still use
+   the click toggle (a finger has no hover; focus-within covers Tab users). */
+@media (hover: hover) and (min-width: 901px) {
+  .misc-site-nav__group:hover > .misc-site-nav__dropdown,
+  .misc-site-nav__group:focus-within > .misc-site-nav__dropdown { display: block; }
+}
+
+.misc-site-nav__dropdown li + li { border-top: var(--line-hairline); }
+
+.misc-site-nav__sub {
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  font-weight: var(--fw-medium);
+  color: var(--c-ink);
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background 100ms ease;
+}
+.misc-site-nav__sub:hover,
+.misc-site-nav__sub.is-active { background: var(--c-bg-subtle); text-decoration: none; }
+
+/* On narrow viewports anchor the panel to the right so it never
+   clips off the right edge for the last nav items. */
+@media (max-width: 900px) {
+  .misc-site-nav__dropdown { left: auto; right: 0; }
+}
+
+/* ============================================================
+   FOOTER (4-column, dark ink)
+   ============================================================ */
+.misc-site-footer {
+  background: var(--c-ink);
+  color: var(--c-bg);
+  border-top: 3px solid var(--c-ink);
+}
+
+.misc-site-footer__cols {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  border-bottom: 1px solid #2a2a2a;
+}
+/* When customer portal column is hidden (logged-out), 3 cols only */
+.misc-site-footer__cols.is-3col {
+  grid-template-columns: 1.6fr 1fr 1fr;
+}
+
+.misc-site-footer__col {
+  padding: var(--space-7) var(--space-6);
+  border-right: 1px solid #2a2a2a;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.misc-site-footer__col:last-child { border-right: 0; }
+
+/* Brand block */
+.misc-site-footer__brand-mark {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-logo);
+  font-size: var(--fs-lg);
+  line-height: 1.1;
+  color: var(--c-bg);
+}
+.misc-site-footer__brand-mark .dot { color: var(--c-ink-faint); }
+
+.misc-site-footer__brand-statement {
+  /* MISC: enlarged to brand anchor after wordmark removal 2026-05-30 */
+  font-family: var(--font-sans);
+  font-size: clamp(1.625rem, 3.2vw, 2.625rem);
+  font-weight: var(--fw-regular);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--c-bg);
+  margin: 0;
+  max-width: 16ch;
+}
+
+.misc-site-footer__stamp {
+  display: inline-flex;
+  align-items: stretch;
+  margin-top: auto;
+  padding-top: var(--space-5);
+  border-top: 1px solid #2a2a2a;
+  gap: var(--space-5);
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--c-ink-faint);
+  font-weight: var(--fw-medium);
+}
+.misc-site-footer__stamp-block { display: flex; flex-direction: column; gap: 2px; }
+.misc-site-footer__stamp-label { font-size: 10px; color: #666; letter-spacing: var(--ls-caps); }
+.misc-site-footer__stamp-value { color: var(--c-bg); font-size: var(--fs-2xs); letter-spacing: var(--ls-caps-sm); }
+
+/* Column titles */
+.misc-site-footer__col-title {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--c-ink-faint);
+  font-weight: var(--fw-medium);
+  margin: 0 0 var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.misc-site-footer__col-title-flag {
+  font-size: 10px;
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-caps-sm);
+  color: var(--c-ink-faint);
+  padding: 2px 6px;
+  border: 1px solid #3a3a3a;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Link lists */
+.misc-site-footer__links { display: flex; flex-direction: column; }
+.misc-site-footer__links a {
+  color: var(--c-bg);
+  font-size: var(--fs-sm);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  text-decoration: none;
+}
+.misc-site-footer__links a:last-child { border-bottom: 0; }
+.misc-site-footer__links a:hover { color: var(--c-ink-faint); text-decoration: none; }
+.misc-site-footer__links a svg {
+  width: 12px; height: 12px;
+  color: var(--c-ink-faint);
+  opacity: 0;
+  transition: opacity 100ms ease, transform 100ms ease;
+  transform: translateX(-4px);
+}
+.misc-site-footer__links a:hover svg { opacity: 1; transform: translateX(0); }
+
+/* Contact details */
+.misc-site-footer__contact-list { display: flex; flex-direction: column; gap: 0; }
+.misc-site-footer__contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid #1a1a1a;
+  color: var(--c-bg);
+  text-decoration: none;
+}
+.misc-site-footer__contact-item:last-child { border-bottom: 0; }
+.misc-site-footer__contact-item:hover { text-decoration: none; }
+.misc-site-footer__contact-item svg {
+  width: 16px; height: 16px;
+  color: var(--c-ink-faint);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.misc-site-footer__contact-meta {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--c-ink-faint);
+  font-weight: var(--fw-medium);
+  display: block;
+}
+.misc-site-footer__contact-value {
+  font-size: var(--fs-sm);
+  color: var(--c-bg);
+  display: block;
+  margin-top: 2px;
+  transition: color 100ms ease;
+}
+.misc-site-footer__contact-item:hover .misc-site-footer__contact-value { color: var(--c-ink-faint); }
+
+/* Bottom bar */
+.misc-site-footer__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  font-size: var(--fs-2xs);
+  color: var(--c-ink-faint);
+}
+.misc-site-footer__bottom-links { display: flex; gap: var(--space-5); }
+.misc-site-footer__bottom-links a { color: var(--c-ink-faint); text-decoration: none; }
+.misc-site-footer__bottom-links a:hover { color: var(--c-bg); text-decoration: underline; }
+
+/* ============================================================
+   RESPONSIVE — header + footer
+   ============================================================ */
+@media (max-width: 900px) {
+  .misc-site-header__main { gap: var(--space-4); padding: var(--space-4); }
+  .misc-site-header__search { display: none; }
+  /* MISC: step the wordmark down so it doesn't span the narrower header */
+  .misc-site-header__logo img { max-height: 20px; }
+
+  /* Mobile auth zone: keep Sign In button + avatar, drop labels */
+  .misc-site-header__account-link:not(.misc-site-header__account-link--primary),
+  .misc-site-header__account-divider { display: none !important; }
+  .misc-site-header__account-mine { gap: 0; font-size: 0; }
+  .misc-site-header__account-mine .misc-avatar { width: 28px; height: 28px; font-size: 12px; }
+
+  .misc-site-footer__cols,
+  .misc-site-footer__cols.is-3col { grid-template-columns: 1fr 1fr; }
+  .misc-site-footer__col { border-bottom: 1px solid #2a2a2a; }
+  .misc-site-footer__col:nth-child(2n) { border-right: 0; }
+  .misc-site-footer__bottom { flex-direction: column; gap: var(--space-3); padding: var(--space-4) var(--space-5); }
+}
+
+@media (max-width: 560px) {
+  /* MISC: smallest phones. Keep the wordmark to ~18px tall and never wider than 60vw */
+  .misc-site-header__logo img { max-height: 18px; max-width: 60vw; }
+
+  .misc-utility-bar { padding: var(--space-2) var(--space-4); }
+  .misc-utility-bar__left { gap: var(--space-4); }
+  .misc-utility-bar__left a span { display: none; }
+  .misc-utility-bar svg { width: 16px; height: 16px; }
+
+  .misc-site-footer__cols,
+  .misc-site-footer__cols.is-3col { grid-template-columns: 1fr; }
+  .misc-site-footer__col { border-right: 0; }
+}

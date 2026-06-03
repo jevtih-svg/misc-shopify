@@ -41,16 +41,19 @@
   {%- assign active_view = 'grid-3' -%}
 {%- endif -%}
 
+{%- comment -%} MISC: B2B access gate. Compute approval once here, pass `approved` down to the card and list snippets so price/stock/steppers hide for unapproved visitors. {%- endcomment -%}
+{%- capture misc_access -%}{%- render 'misc-access' -%}{%- endcapture -%}
+{%- assign misc_access = misc_access | strip -%}
+{%- assign approved = false -%}
+{%- if misc_access == 'true' -%}{%- assign approved = true -%}{%- endif -%}
+
 <div class="section-{{ section.id }}-padding gradient">
 
   {%- comment -%}
-    MISC: "best on desktop" notice — only visible on mobile via
-    CSS (display:none on >=768px). Dismissible via misc-mobile.js.
+    MISC: the catalog is a first-class mobile experience now, so
+    the old "best experienced on desktop" notice was removed
+    2026-05-30. Do not reintroduce it.
   {%- endcomment -%}
-  <div class="mobile-desktop-notice" data-mobile-notice>
-    <span>Best experienced on desktop</span>
-    <button type="button" class="mobile-desktop-notice__close" data-mobile-notice-close aria-label="Dismiss">&times;</button>
-  </div>
 
   {%- paginate collection.products by per_page -%}
 
@@ -61,7 +64,8 @@
         results_url: collection.url,
         active_view: active_view,
         per_page: per_page,
-        enable_list_view: section.settings.enable_list_view
+        enable_list_view: section.settings.enable_list_view,
+        approved: approved
       %}
     {%- endif -%}
 
@@ -114,7 +118,8 @@
             results: collection,
             enable_filtering: section.settings.enable_filtering,
             enable_sorting: section.settings.enable_sorting,
-            paginate: paginate
+            paginate: paginate,
+            approved: approved
           %}
 
           {%- comment -%} MISC: mobile drawer footer (hidden on desktop via CSS) {%- endcomment -%}
@@ -169,7 +174,8 @@
                   {% render 'misc-card-product',
                     card_product: product,
                     lazy_load: lazy_load,
-                    section_id: section.id
+                    section_id: section.id,
+                    approved: approved
                   %}
                 </li>
               {%- endfor -%}
@@ -179,7 +185,8 @@
             {%- if section.settings.enable_list_view -%}
               {% render 'misc-product-list',
                 collection: collection,
-                active_view: active_view
+                active_view: active_view,
+                approved: approved
               %}
             {%- endif -%}
 

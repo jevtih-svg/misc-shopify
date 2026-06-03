@@ -42,6 +42,12 @@
 {%- endcomment -%}
 
 {%- liquid
+  comment
+    MISC: B2B access gate — normalise approved to false when not passed, so price/stock facet hiding fails safe.
+  endcomment
+  unless approved
+    assign approved = false
+  endunless
   if results.url
     assign results_url = results.url
   else
@@ -53,7 +59,13 @@
   assign show_more_threshold = 8
 -%}
 
-<facet-filters-form class="facets misc-sidebar small-hide" data-id="{{ section.id }}">
+{%- comment -%}
+  MISC: no Trade `small-hide` here. Our filter sidebar IS the mobile
+  drawer (the whole .facets-wrapper slides in on <1024px), so the
+  facet form must stay visible on phones too. Trade's `small-hide`
+  set display:none below 749px, which left the drawer body empty.
+{%- endcomment -%}
+<facet-filters-form class="facets misc-sidebar" data-id="{{ section.id }}">
   <form
     id="FacetFiltersForm"
     class="misc-sidebar__form"
@@ -72,6 +84,14 @@
       {%- endcomment -%}
 
       {%- for filter in results.filters -%}
+        {%- comment -%} MISC: B2B access gate — hide the price facet and the availability/stock facet for unapproved visitors (they indirectly reveal price and stock). {%- endcomment -%}
+        {%- assign misc_skip_filter = false -%}
+        {%- if approved == false -%}
+          {%- if filter.type == 'price_range' -%}{%- assign misc_skip_filter = true -%}{%- endif -%}
+          {%- if filter.param_name contains 'availability' -%}{%- assign misc_skip_filter = true -%}{%- endif -%}
+          {%- if filter.param_name contains 'stock' -%}{%- assign misc_skip_filter = true -%}{%- endif -%}
+        {%- endif -%}
+        {%- if misc_skip_filter -%}{%- continue -%}{%- endif -%}
         <details class="misc-filter-group js-filter" open data-index="{{ forloop.index }}">
           <summary class="misc-filter-group__summary">
             <span class="misc-filter-group__title">{{ filter.label | escape }}</span>

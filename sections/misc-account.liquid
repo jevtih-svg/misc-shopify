@@ -1,0 +1,232 @@
+{%- comment -%}
+  MISC: full replacement for the Shopify customer account page.
+  Renders our own sidebar-driven layout (Orders, Backordered Items,
+  Invoices, Support) plus a top strip with Credit Limit and My
+  Company Details. Replaces Trade's `main-account` section.
+
+  Hash-driven tab switching: /account#orders, /account#backorders,
+  /account#invoices. Default = orders. Support sits in the sidebar
+  but navigates out to /pages/support (see settings.misc_support_url).
+
+  Login gating: only renders for logged-in customers. Trade already
+  gates the /account route behind login, but we double-gate here
+  in case a future template change exposes the section publicly.
+{%- endcomment -%}
+
+{{ 'misc-account.css' | asset_url | stylesheet_tag }}
+
+{%- if customer == blank -%}
+  <section class="misc-account misc-account--logged-out">
+    <h1 class="misc-account__title">My Account</h1>
+    <p>
+      <a href="{{ routes.account_login_url }}?return_url={{ request.path | url_encode }}">
+        Log in
+      </a>
+      to view your account.
+    </p>
+  </section>
+{%- else -%}
+
+  {%- comment -%}
+    B2B context. Available on standard Shopify when customer is
+    attached to a Company (B2B opened to all paid plans April 2026).
+    `customer.b2b?` returns true if so. We surface company-level
+    data when present and fall back to customer-level data otherwise
+    (D2C-style accounts, not used in MISC's live deployment but
+    keeps the template working in dev).
+  {%- endcomment -%}
+  {%- assign misc_company = customer.current_company -%}
+  {%- assign misc_location = customer.current_location -%}
+
+  {%- comment -%}
+    Stok.ly-sourced metafields. TODO: wire these via the Stok.ly
+    Shopify connector once the customer/company sync ships. Until
+    then we display placeholder values so the panel is visible.
+    Namespace convention: `stokly.<field>`.
+  {%- endcomment -%}
+  {%- assign misc_credit_limit = customer.metafields.stokly.credit_limit.value | default: 25000 -%}
+  {%- assign misc_credit_used  = customer.metafields.stokly.credit_used.value  | default: 8420 -%}
+  {%- assign misc_credit_currency = customer.metafields.stokly.credit_currency.value | default: 'EUR' -%}
+  {%- assign misc_payment_terms = customer.metafields.stokly.payment_terms.value | default: 'Net 30' -%}
+
+  <section class="misc-account section-{{ section.id }}-padding">
+
+    {%- comment -%} ─── HEADER ROW ─── {%- endcomment -%}
+    <header class="misc-account__header">
+      <div class="misc-account__header-left">
+        <h1 class="misc-account__title">My Account</h1>
+        <p class="misc-account__welcome">
+          {%- if misc_company -%}
+            {{ misc_company.name }}
+            {%- if misc_location and misc_company.locations_count > 1 %} · {{ misc_location.name }}{% endif -%}
+          {%- else -%}
+            {{ customer.name | default: customer.email }}
+          {%- endif -%}
+        </p>
+      </div>
+      <div class="misc-account__header-right">
+        <a class="misc-account__logout" href="{{ routes.account_logout_url }}">Log out</a>
+      </div>
+    </header>
+
+    {%- comment -%} ─── TOP STRIP: Credit + Company ─── {%- endcomment -%}
+    <div class="misc-account__strip">
+      {%- render 'misc-account-credit',
+        credit_limit: misc_credit_limit,
+        credit_used: misc_credit_used,
+        credit_currency: misc_credit_currency,
+        payment_terms: misc_payment_terms
+      -%}
+      {%- render 'misc-account-company',
+        company: misc_company,
+        location: misc_location,
+        customer: customer
+      -%}
+    </div>
+
+    {%- comment -%} ─── BODY: sidebar + tab panels ─── {%- endcomment -%}
+    <div class="misc-account__body">
+      <nav class="misc-account__nav" aria-label="Account sections">
+        <ul class="misc-account__nav-list" role="tablist">
+          <li>
+            <a
+              href="#orders"
+              class="misc-account__nav-link is-active"
+              role="tab"
+              aria-controls="misc-panel-orders"
+              aria-selected="true"
+              data-panel="orders"
+            >
+              Orders
+              <span class="misc-account__nav-count">{{ customer.orders_count }}</span>
+            </a>
+          </li>
+          <li>
+            <a
+              href="#backorders"
+              class="misc-account__nav-link"
+              role="tab"
+              aria-controls="misc-panel-backorders"
+              aria-selected="false"
+              data-panel="backorders"
+            >
+              Backordered items
+            </a>
+          </li>
+          <li>
+            <a
+              href="#invoices"
+              class="misc-account__nav-link"
+              role="tab"
+              aria-controls="misc-panel-invoices"
+              aria-selected="false"
+              data-panel="invoices"
+            >
+              Invoices
+            </a>
+          </li>
+          <li>
+            <a
+              href="{{ section.settings.support_url | default: '/pages/support' }}"
+              class="misc-account__nav-link misc-account__nav-link--external"
+              data-panel="support"
+            >
+              Support
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="misc-account__panels">
+        <section
+          id="misc-panel-orders"
+          class="misc-account__panel is-active"
+          role="tabpanel"
+          aria-labelledby="orders"
+        >
+          {%- render 'misc-account-orders', customer: customer -%}
+        </section>
+
+        <section
+          id="misc-panel-backorders"
+          class="misc-account__panel"
+          role="tabpanel"
+          aria-labelledby="backorders"
+          hidden
+        >
+          {%- render 'misc-account-backorders', customer: customer -%}
+        </section>
+
+        <section
+          id="misc-panel-invoices"
+          class="misc-account__panel"
+          role="tabpanel"
+          aria-labelledby="invoices"
+          hidden
+        >
+          {%- render 'misc-account-invoices',
+            customer: customer,
+            currency: misc_credit_currency
+          -%}
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <script src="{{ 'misc-account.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "MISC Account",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Links"
+    },
+    {
+      "type": "url",
+      "id": "support_url",
+      "label": "Support page URL",
+      "info": "Where the Support sidebar item links to."
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 36
+    }
+  ]
+}
+{% endschema %}

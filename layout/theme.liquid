@@ -271,6 +271,8 @@
     {{ 'base.css' | asset_url | stylesheet_tag }}
     {{ 'misc-tokens.css' | asset_url | stylesheet_tag }}
     {{ 'misc-collection.css' | asset_url | stylesheet_tag }}
+    {{ 'misc-shell.css' | asset_url | stylesheet_tag }}
+    {{ 'misc-access.css' | asset_url | stylesheet_tag }}{%- comment -%} MISC: B2B access gate styles (banner + sign-in prompts) {%- endcomment -%}
 
     {%- comment -%}
       MISC: inline synchronous layout-preference script. Runs
@@ -286,6 +288,15 @@
     <script>
       (function () {
         try {
+          {%- comment -%}
+            MISC: the layout (grid/list) + filter-collapse preferences only
+            apply to the catalogue. Emitting these classes on other page types
+            (notably search, which uses Trade's main-search with a .product-grid
+            but no .product-list) would let `html.misc-prefer-list .product-grid`
+            hide the results with nothing to show in their place. Gate on the
+            collection page type so the classes never reach non-catalogue pages.
+          {%- endcomment -%}
+          {%- if request.page_type == 'collection' -%}
           var params = new URLSearchParams(window.location.search);
           var layout = params.get('layout');
           if (layout !== 'grid-3' && layout !== 'grid-5' && layout !== 'list') {
@@ -294,6 +305,12 @@
           if (layout === 'grid-5' || layout === 'list') {
             document.documentElement.classList.add('misc-prefer-' + layout);
           }
+          // MISC: collapsed-filter-sidebar preference (desktop). Applied
+          // before first paint so the table renders full-width with no flash.
+          if (localStorage.getItem('misc_filters_hidden') === '1') {
+            document.documentElement.classList.add('misc-hide-filters');
+          }
+          {%- endif -%}
         } catch (e) { /* localStorage unavailable; default render */ }
       })();
     </script>
@@ -302,6 +319,10 @@
     {%- comment -%} MISC: view toggle + mobile chrome JS {%- endcomment -%}
     <script src="{{ 'misc-view-toggle.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'misc-mobile.js' | asset_url }}" defer="defer"></script>
+    {%- comment -%} MISC: primary nav dropdown toggles {%- endcomment -%}
+    <script src="{{ 'misc-nav.js' | asset_url }}" defer="defer"></script>
+    {%- comment -%} MISC: list-view row hover highlight {%- endcomment -%}
+    <script src="{{ 'misc-row-hover.js' | asset_url }}" defer="defer"></script>
     <link rel="stylesheet" href="{{ 'component-cart-items.css' | asset_url }}" media="print" onload="this.media='all'">
 
     {%- if settings.cart_type == 'drawer' -%}
@@ -354,6 +375,17 @@
     {%- endif -%}
 
     {% sections 'header-group' %}
+
+    {%- comment -%} MISC: B2B access gate — pending-approval banner for signed-in customers who are not yet approved (B2B member or `approved` tag). {%- endcomment -%}
+    {%- assign misc_pending = false -%}
+    {%- if customer != blank -%}
+      {%- assign misc_pending = true -%}
+      {%- if customer.b2b? -%}{%- assign misc_pending = false -%}{%- endif -%}
+      {%- if customer.tags contains 'approved' -%}{%- assign misc_pending = false -%}{%- endif -%}
+    {%- endif -%}
+    {%- if misc_pending -%}
+      <div class="misc-pending-banner" role="status">Your account is awaiting approval. Trade prices, stock and ordering unlock once we approve you.</div>
+    {%- endif -%}
 
     <main id="MainContent" class="content-for-layout focus-none" role="main" tabindex="-1">
       {{ content_for_layout }}

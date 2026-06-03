@@ -1,0 +1,37 @@
+{%- comment -%}
+  ============================================================
+  snippets/misc-access.liquid
+  SINGLE SOURCE OF TRUTH for "is this visitor approved to see
+  commercial data" (prices, RRP, stock, ordering, asset password).
+
+  Emits the string "true" or "false". Nothing else.
+
+  Approved = the customer is a B2B company member (customer.b2b?)
+             OR carries the customer tag `approved`.
+
+  FAIL-SAFE: the result starts false and is only set true on a
+  positive match. If `customer` is ever nil (logged out, or an
+  unresolved session), this returns "false", so the worst case is
+  an approved buyer briefly seeing the gated view, never an
+  unapproved visitor seeing a price.
+
+  Usage (compute once in a section, pass `approved` down to snippets):
+    {%- capture misc_access -%}{%- render 'misc-access' -%}{%- endcapture -%}
+    {%- assign misc_access = misc_access | strip -%}
+    {%- assign approved = false -%}
+    {%- if misc_access == 'true' -%}{%- assign approved = true -%}{%- endif -%}
+
+  Trade-strict Liquid: no parentheses, no filter pipes inside if/elsif.
+  The approval tag is lower-case `approved`. To change the word,
+  change it here and in the banner block in layout/theme.liquid.
+  ============================================================
+{%- endcomment -%}
+{%- assign misc_is_approved = false -%}
+{%- if customer != blank -%}
+  {%- if customer.b2b? -%}
+    {%- assign misc_is_approved = true -%}
+  {%- elsif customer.tags contains 'approved' -%}
+    {%- assign misc_is_approved = true -%}
+  {%- endif -%}
+{%- endif -%}
+{{- misc_is_approved -}}

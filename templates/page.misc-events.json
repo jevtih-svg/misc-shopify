@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": {
+      "type": "misc-events-all",
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}

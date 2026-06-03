@@ -1,0 +1,144 @@
+{%- comment -%}
+  ============================================================
+  MISC Journal landing. News timeline-of-cards (image-led,
+  paginated) + "Where to find us" calendar sidebar built from
+  the `event` metaobject. Rendered by templates/blog.json.
+  ============================================================
+{%- endcomment -%}
+{{ 'misc-journal.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign per_page = section.settings.per_page | default: 12
+  assign max_past = section.settings.max_past | default: 3
+  assign heading = section.settings.heading | default: 'Journal'
+  assign events = shop.metaobjects.event.values
+  assign now_ts = 'now' | date: '%s' | plus: 0
+  assign cur_year = 'now' | date: '%Y'
+  assign MON = 'JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC' | split: ','
+-%}
+
+<div class="misc-jx"><div class="page"><div class="wrap">
+
+  <section class="hero hero--ruled">
+    <p class="hero__eyebrow">MISC · Journal</p>
+    <h1 class="hero__title">{{ heading }}</h1>
+    {%- if section.settings.intro != blank -%}<p class="hero__lead">{{ section.settings.intro }}</p>{%- endif -%}
+  </section>
+
+  <div class="jgrid">
+
+    {%- comment -%} NEWS (paginated) {%- endcomment -%}
+    <section class="block">
+      <div class="block__head"><h2>News &amp; Updates</h2></div>
+      {%- paginate blog.articles by per_page -%}
+        {%- for article in blog.articles -%}
+          {%- liquid
+            assign ex_text = article.excerpt | strip_html | strip
+            if ex_text == blank
+              assign ex_text = article.content | strip_html | truncatewords: 26
+            endif
+          -%}
+          <a class="nrow" href="{{ article.url }}">
+            <span class="nrow__media">{% if article.image %}<img src="{{ article.image | image_url: width: 600 }}" alt="{{ article.image.alt | escape }}" loading="lazy">{% endif %}</span>
+            <span class="nrow__body">
+              <span class="nrow__meta">
+                <span class="nrow__date">{{ article.published_at | date: '%d · %m · %Y' }}</span>
+                {%- if article.tags.size > 0 -%}<span class="nrow__cat">{{ article.tags.first }}</span>{%- endif -%}
+              </span>
+              <span class="nrow__title">{{ article.title }}</span>
+              <span class="nrow__ex">{{ ex_text }}</span>
+              <span class="nrow__more">Read →</span>
+            </span>
+          </a>
+        {%- else -%}
+          <div class="ag"><span class="ag__fair">No posts yet.</span></div>
+        {%- endfor -%}
+
+        {%- if paginate.pages > 1 -%}
+          <div class="jpager pager">
+            {%- if paginate.previous -%}<a class="page-step" href="{{ paginate.previous.url }}">← Newer</a>{%- else -%}<span class="page-step page-step--off">← Newer</span>{%- endif -%}
+            <div class="pager__pages">
+              {%- for part in paginate.parts -%}
+                {%- if part.is_link -%}<a class="page-num" href="{{ part.url }}">{{ part.title }}</a>{%- else -%}<span class="page-num" aria-current="page">{{ part.title }}</span>{%- endif -%}
+              {%- endfor -%}
+            </div>
+            {%- if paginate.next -%}<a class="page-step" href="{{ paginate.next.url }}">Older →</a>{%- else -%}<span class="page-step page-step--off">Older →</span>{%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endpaginate -%}
+    </section>
+
+    {%- comment -%} WHERE TO FIND US {%- endcomment -%}
+    <aside class="jaside">
+      {%- liquid
+        assign up_keys = ''
+        assign past_keys = ''
+        assign month_marks = ''
+        for ex in events
+          assign sd = ex.start_date.value
+          assign ed = ex.end_date.value | default: sd
+          assign end_ts = ed | date: '%s' | plus: 0
+          assign start_ts = sd | date: '%s' | plus: 0
+          assign ey = sd | date: '%Y'
+          if ey == cur_year
+            assign mi = sd | date: '%-m'
+            assign month_marks = month_marks | append: ',' | append: mi | append: ','
+          endif
+          if end_ts >= now_ts
+            assign up_keys = up_keys | append: start_ts | append: '#' | append: ex.system.handle | append: '||'
+          else
+            assign past_keys = past_keys | append: start_ts | append: '#' | append: ex.system.handle | append: '||'
+          endif
+        endfor
+        assign up_arr = up_keys | split: '||' | sort_natural
+        assign past_arr = past_keys | split: '||' | sort_natural | reverse
+      -%}
+      <div class="block">
+        <div class="block__head"><h2 class="sm">Where to find us</h2></div>
+        {%- if section.settings.show_calendar -%}
+          <div class="calcap">{{ cur_year }}</div>
+          <div class="yov">
+            {%- for m in (1..12) -%}
+              {%- assign needle = ',' | append: m | append: ',' -%}
+              <span class="yov__m">{{ MON[forloop.index0] }}{% if month_marks contains needle %}<span class="dot"></span>{% endif %}</span>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+
+        {%- for key in up_arr -%}
+          {%- assign h = key | split: '#' | last -%}
+          {%- assign ex = shop.metaobjects.event[h] -%}
+          {%- if ex != blank -%}
+            {%- render 'misc-event-agenda', ex: ex, past: false -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- assign past_total = past_arr | size -%}
+        {%- if past_total > 0 -%}
+          <div class="pastband">Past appearances</div>
+          {%- for key in past_arr limit: max_past -%}
+            {%- assign h = key | split: '#' | last -%}
+            {%- assign ex = shop.metaobjects.event[h] -%}
+            {%- if ex != blank -%}{%- render 'misc-event-agenda', ex: ex, past: true -%}{%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      </div>
+      <a class="allevents" href="{{ pages.events.url }}">All Events →</a>
+    </aside>
+
+  </div>
+</div></div></div>
+
+{% schema %}
+{
+  "name": "MISC Journal",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Journal" },
+    { "type": "textarea", "id": "intro", "label": "Intro text", "default": "What's new at MISC, and where to find us. Updates and brand arrivals for our wholesale partners, plus the trade fairs we're attending." },
+    { "type": "range", "id": "per_page", "min": 6, "max": 24, "step": 2, "label": "Posts per page", "default": 12 },
+    { "type": "range", "id": "max_past", "min": 0, "max": 6, "step": 1, "label": "Past events in sidebar", "default": 3 },
+    { "type": "checkbox", "id": "show_calendar", "label": "Show year calendar", "info": "12-month overview with dots on months that have events. Off by default.", "default": false }
+  ],
+  "presets": [{ "name": "MISC Journal" }]
+}
+{% endschema %}

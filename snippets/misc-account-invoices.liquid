@@ -1,0 +1,96 @@
+{%- comment -%}
+  Invoices panel. STUBBED for V1 prototype.
+
+  DATA SOURCE: Stok.ly (the source of truth for invoices because
+  Shopify B2B on the standard plan does not issue PDF invoices that
+  match Stok.ly's numbering/accounting).
+
+  Production options:
+    Option A — Customer metafield `stokly.invoices` JSON array of
+               { number, issue_date, due_date, total, currency,
+                 status: 'paid'|'open'|'overdue', pdf_url }.
+    Option B — Theme App Extension live-fetching from Stok.ly's
+               /customers/{id}/invoices endpoint with signed PDF URLs.
+
+    Recommended: B from the start because PDF URLs must be signed
+    short-lived links, which metafields can't store safely.
+
+  Inputs:
+    - customer : customer
+    - currency : 3-letter ISO from credit panel
+{%- endcomment -%}
+
+<header class="misc-panel__header">
+  <h2 class="misc-panel__title">Invoices</h2>
+  <span class="misc-panel__count misc-panel__count--stub">Demo data · Stok.ly TODO</span>
+</header>
+
+<div class="misc-panel__filters">
+  <span class="misc-chip is-active" data-filter="all">All</span>
+  <span class="misc-chip" data-filter="open">Open</span>
+  <span class="misc-chip" data-filter="overdue">Overdue</span>
+  <span class="misc-chip" data-filter="paid">Paid</span>
+</div>
+
+<table class="misc-table misc-table--invoices">
+  <thead>
+    <tr>
+      <th scope="col" class="misc-table__col--id">Invoice</th>
+      <th scope="col" class="misc-table__col--date">Issued</th>
+      <th scope="col" class="misc-table__col--date">Due</th>
+      <th scope="col" class="misc-table__col--num">Amount</th>
+      <th scope="col" class="misc-table__col--status">Status</th>
+      <th scope="col" class="misc-table__col--actions">PDF</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr data-status="overdue">
+      <td data-label="Invoice"><span class="misc-mono">INV-2026-0188</span></td>
+      <td data-label="Issued">2026-04-22</td>
+      <td data-label="Due">2026-05-22</td>
+      <td data-label="Amount" class="misc-table__cell--num">€ 2,840.00</td>
+      <td data-label="Status">
+        <span class="misc-badge misc-badge--backorder">Overdue · 8 days</span>
+      </td>
+      <td data-label="PDF"><a href="#" class="misc-link">Download</a></td>
+    </tr>
+    <tr data-status="open">
+      <td data-label="Invoice"><span class="misc-mono">INV-2026-0204</span></td>
+      <td data-label="Issued">2026-05-10</td>
+      <td data-label="Due">2026-06-09</td>
+      <td data-label="Amount" class="misc-table__cell--num">€ 1,490.00</td>
+      <td data-label="Status">
+        <span class="misc-badge misc-badge--inbound">Open</span>
+      </td>
+      <td data-label="PDF"><a href="#" class="misc-link">Download</a></td>
+    </tr>
+    <tr data-status="paid">
+      <td data-label="Invoice"><span class="misc-mono">INV-2026-0166</span></td>
+      <td data-label="Issued">2026-03-28</td>
+      <td data-label="Due">2026-04-27</td>
+      <td data-label="Amount" class="misc-table__cell--num">€ 980.00</td>
+      <td data-label="Status">
+        <span class="misc-badge misc-badge--instock">Paid</span>
+      </td>
+      <td data-label="PDF"><a href="#" class="misc-link">Download</a></td>
+    </tr>
+    <tr data-status="paid">
+      <td data-label="Invoice"><span class="misc-mono">INV-2026-0143</span></td>
+      <td data-label="Issued">2026-02-15</td>
+      <td data-label="Due">2026-03-17</td>
+      <td data-label="Amount" class="misc-table__cell--num">€ 3,210.00</td>
+      <td data-label="Status">
+        <span class="misc-badge misc-badge--instock">Paid</span>
+      </td>
+      <td data-label="PDF"><a href="#" class="misc-link">Download</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<footer class="misc-panel__footer">
+  <p class="misc-panel__hint">
+    Invoices are issued by Stok.ly and post to Xero. Questions on a
+    line item or payment? Reply to the invoice email or
+    <a href="{{ section.settings.support_url | default: '/pages/support' }}" class="misc-link">open a support ticket</a>.
+  </p>
+</footer>

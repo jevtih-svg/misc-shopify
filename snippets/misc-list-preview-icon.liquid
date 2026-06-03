@@ -43,21 +43,26 @@
   assign img_alt = img.alt | default: name_text
 -%}
 
-<button type="button" class="preview-trigger" aria-label="Preview image of {{ name_text | escape }}">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <rect x="3" y="3" width="18" height="18" rx="2"/>
-    <circle cx="9" cy="9" r="1.5"/>
-    <polyline points="21 15 16 10 5 21"/>
-  </svg>
-</button>
-<div class="preview-popover" role="tooltip">
-  <div class="preview-popover__image">
-    {%- if img -%}
+{%- comment -%}
+  No image, no icon. The leftmost cell stays empty (it still holds
+  the column for alignment) when the product/variant has no image,
+  so the table does not show a broken or pointless preview button.
+{%- endcomment -%}
+{%- if img -%}
+  <button type="button" class="preview-trigger" aria-label="Preview image of {{ name_text | escape }}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="2"/>
+      <circle cx="9" cy="9" r="1.5"/>
+      <polyline points="21 15 16 10 5 21"/>
+    </svg>
+  </button>
+  <div class="preview-popover" role="tooltip">
+    <div class="preview-popover__image">
       <img src="{{ img_url }}" alt="{{ img_alt | escape }}" loading="lazy" width="260" height="260">
-    {%- endif -%}
+    </div>
+    <div class="preview-popover__caption">
+      <span class="preview-popover__name">{{ name_text | escape }}</span>
+      <span class="preview-popover__sku">{{ sku_text | escape }}</span>
+    </div>
   </div>
-  <div class="preview-popover__caption">
-    <span class="preview-popover__name">{{ name_text | escape }}</span>
-    <span class="preview-popover__sku">{{ sku_text | escape }}</span>
-  </div>
-</div>
+{%- endif -%}

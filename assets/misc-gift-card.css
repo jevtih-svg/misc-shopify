@@ -1,0 +1,257 @@
+/* ============================================================
+   MISC: Gift card landing page (templates/gift_card.liquid)
+   Restyles Trade's standalone gift-card page to the MISC design
+   language (warm paper bg, white specimen card, ink buttons,
+   monospaced code, hairline borders, accessible focus).
+
+   Loaded as the LAST stylesheet in the gift_card.liquid <head>,
+   after template-giftcard.css, so these rules win without
+   !important. The page uses {% layout none %}, so misc-tokens.css
+   is NOT available here, and Trade resets html to font-size:62.5%
+   (1rem = 10px) which halves rem-based sizes. All sizes below are
+   therefore in PIXELS, immune to that reset (same approach as
+   misc-tokens.css). Fonts read --font-body-family /
+   --font-heading-family, which the page's inline {% style %} sets
+   from the store theme settings, so type matches the storefront.
+   ============================================================ */
+
+:root {
+  --misc-ink: #0A0A0A;
+  --misc-paper: #FFFFFF;
+  --misc-bg-subtle: #F7F6F3;
+  --misc-line: #E5E5E5;
+  --misc-line-strong: #C9C5BC;
+  --misc-muted: #7A7A7A;
+  --misc-accent-hover: #333333;
+  --misc-focus: #2B6CB0;
+  --misc-radius-md: 4px;
+  --misc-radius-lg: 10px;
+  --misc-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --misc-font-mono: "JetBrains Mono", "Menlo", "Consolas", monospace;
+}
+
+body.gift-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 48px 24px;
+  gap: 24px;
+  background: var(--misc-bg-subtle);
+  color: var(--misc-ink);
+  font-family: var(--font-body-family);
+  letter-spacing: 0;
+}
+
+/* Price / heading */
+.gift-card .gift-card__price {
+  margin: 0;
+  opacity: 1;
+  letter-spacing: 0;
+}
+
+.gift-card .gift-card__price h1 {
+  margin: 0;
+  font-family: var(--font-heading-family);
+  font-weight: 600;
+  font-size: clamp(32px, 6vw, 44px);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--misc-ink);
+}
+
+.gift-card .gift-card__price .gift-card__text {
+  margin: 4px 0 0;
+  color: var(--misc-muted);
+  font-size: 15px;
+  opacity: 1;
+}
+
+.gift-card .badge--expired {
+  display: inline-block;
+  margin: 8px 0 0;
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid var(--misc-line-strong);
+  border-radius: var(--misc-radius-md);
+  color: var(--misc-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Card (the <main> element) */
+.gift-card main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 420px;
+  margin: 0;
+  padding: 40px 32px;
+  background: var(--misc-paper);
+  border: 1px solid var(--misc-line);
+  border-radius: var(--misc-radius-lg);
+  box-shadow: var(--misc-shadow-md);
+  text-align: center;
+}
+
+.gift-card .gift-card__image-wrapper {
+  height: auto;
+  margin: 0 auto 24px;
+  max-width: 100%;
+}
+
+.gift-card .gift-card__image {
+  max-width: 100%;
+  height: auto;
+  max-height: 220px;
+}
+
+.gift-card main h2 {
+  margin: 0 0 8px;
+  font-family: var(--font-heading-family);
+  font-weight: 600;
+  font-size: 20px;
+  color: var(--misc-ink);
+}
+
+.gift-card .gift-card__text-wrapper {
+  max-width: 100%;
+  margin: 0 0 20px;
+}
+
+.gift-card .gift-card__text-wrapper .gift-card__text {
+  color: var(--misc-muted);
+  font-size: 14px;
+  opacity: 1;
+}
+
+/* Code */
+.gift-card .gift-card__number {
+  width: 100%;
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  background: var(--misc-bg-subtle);
+  border: 1px solid var(--misc-line-strong);
+  border-radius: var(--misc-radius-md);
+  color: var(--misc-ink);
+  font-family: var(--misc-font-mono);
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  text-align: center;
+  word-break: break-all;
+  opacity: 1;
+}
+
+/* QR */
+.gift-card .gift-card__qr-code {
+  display: inline-flex;
+  margin: 0 0 20px;
+  padding: 12px;
+  background: var(--misc-paper);
+  border: 1px solid var(--misc-line);
+  border-radius: var(--misc-radius-md);
+  line-height: 0;
+}
+
+.gift-card .gift_card__apple-wallet {
+  display: inline-flex;
+  margin: 0 0 20px;
+}
+
+/* Buttons */
+.gift-card .gift-card__buttons {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
+}
+
+.gift-card .gift-card__buttons > .button {
+  margin: 0;
+}
+
+.gift-card .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 0;
+  padding: 12px 24px;
+  border: 1px solid var(--misc-ink);
+  border-radius: var(--misc-radius-md);
+  background: var(--misc-ink);
+  box-shadow: none;
+  color: var(--misc-paper);
+  font-family: var(--font-body-family);
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: 0;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 200ms cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+              color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gift-card .button:hover {
+  background: var(--misc-accent-hover);
+  border-color: var(--misc-accent-hover);
+  box-shadow: none;
+}
+
+.gift-card .button--secondary {
+  background: transparent;
+  box-shadow: none;
+  color: var(--misc-ink);
+}
+
+.gift-card .button--secondary:hover {
+  background: var(--misc-bg-subtle);
+  color: var(--misc-ink);
+  border-color: var(--misc-ink);
+  box-shadow: none;
+}
+
+.gift-card .gift-card__copy-success {
+  display: flex;
+  width: 100%;
+  margin: 8px 0 0;
+  color: var(--misc-muted);
+  font-size: 14px;
+  opacity: 1;
+}
+
+/* Accessible focus ring (replaces Trade's heavy double-shadow ring) */
+.gift-card a:focus-visible,
+.gift-card button:focus-visible,
+.gift-card .button:focus-visible,
+.gift-card input:focus-visible {
+  outline: 2px solid var(--misc-focus);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+@media print {
+  body.gift-card {
+    background: var(--misc-paper);
+    padding: 0;
+  }
+
+  .gift-card main {
+    border: none;
+    box-shadow: none;
+  }
+
+  .no-print {
+    display: none;
+  }
+}

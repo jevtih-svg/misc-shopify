@@ -1,0 +1,163 @@
+{%- comment -%}
+  MISC Client Assets — image bank + catalogue download directory.
+
+  Theme-blocks version. The section renders the hero, password box,
+  filter bar and overview shell, then {% content_for "blocks" %} for
+  the Brand blocks. Each Brand block (blocks/misc-ca-brand.liquid)
+  renders its own card and {% content_for "blocks" %} for the Asset
+  blocks (blocks/misc-ca-asset.liquid) added into it.
+
+  Filter chips, per-brand counts, brand numbers and overview totals
+  are derived from the rendered blocks by misc-client-assets.js, since
+  a parent block can't count its children in Liquid.
+
+  Styles: assets/misc-client-assets.css   Behaviour: assets/misc-client-assets.js
+{%- endcomment -%}
+
+{{ 'misc-client-assets.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign pt = section.settings.padding_top | default: 24
+  assign pb = section.settings.padding_bottom | default: 56
+  assign maxw = section.settings.max_width | default: 1240
+
+  comment
+    MISC: B2B access gate — the asset password shows only to approved
+    visitors (B2B member or `approved` tag). The page itself stays public.
+  endcomment
+  capture misc_access
+    render 'misc-access'
+  endcapture
+  assign misc_access = misc_access | strip
+  assign approved = false
+  if misc_access == 'true'
+    assign approved = true
+  endif
+-%}
+
+<section class="misc-ca" style="--ca-max: {{ maxw }}px; padding-top: {{ pt }}px; padding-bottom: {{ pb }}px;" aria-label="{{ section.settings.heading | default: 'Client assets' | escape }}">
+
+  <svg width="0" height="0" class="misc-ca__defs" aria-hidden="true" focusable="false" style="position: absolute;">
+    <symbol id="misc-ca-img" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16"/><circle cx="8.5" cy="9.5" r="1.4"/><path d="M21 16l-5-5L5 20"/></symbol>
+    <symbol id="misc-ca-doc" viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/></symbol>
+  </svg>
+
+  <div class="misc-ca__wrap misc-ca__hero">
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="misc-ca__eyebrow">{{ section.settings.eyebrow }}</p>
+    {%- endif -%}
+    {%- if section.settings.heading != blank -%}
+      <h1 class="misc-ca__title">{{ section.settings.heading }}</h1>
+    {%- endif -%}
+    {%- if section.settings.lead != blank -%}
+      <div class="misc-ca__lead">{{ section.settings.lead }}</div>
+    {%- endif -%}
+
+    {%- comment -%} MISC: B2B access gate — password to approved visitors; a sign-in prompt to everyone else. {%- endcomment -%}
+    {%- if section.settings.show_password and section.settings.password_value != blank and approved -%}
+      <div class="misc-ca__pass">
+        <div class="misc-ca__pass-label">
+          <span class="misc-ca__pass-title">
+            <svg class="misc-ca__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="8" cy="15" r="4"/><path d="M10.85 12.15 21 2"/><path d="m18 5 3 3"/><path d="m15 8 3 3"/></svg>
+            {{ section.settings.password_label | default: 'Asset password' }}
+          </span>
+          {%- if section.settings.password_hint != blank -%}
+            <span class="misc-ca__pass-hint">{{ section.settings.password_hint }}</span>
+          {%- endif -%}
+        </div>
+        <button type="button" class="misc-ca__passfield" data-pass="{{ section.settings.password_value | escape }}" data-copied-label="{{ section.settings.copied_label | default: 'Copied' | escape }}" aria-label="{{ section.settings.password_label | default: 'Asset password' | escape }} — copy">
+          <span class="misc-ca__passfield-val">{{ section.settings.password_value }}</span>
+          <span class="misc-ca__passfield-btn">
+            <svg class="misc-ca__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+            <span data-copy-label>{{ section.settings.copy_label | default: 'Copy' }}</span>
+          </span>
+        </button>
+      </div>
+    {%- elsif section.settings.show_password and section.settings.password_value != blank -%}
+      <div class="misc-ca__pass misc-ca__pass--gated">
+        <div class="misc-ca__pass-label">
+          <span class="misc-ca__pass-title">{{ section.settings.password_label | default: 'Asset password' }}</span>
+        </div>
+        {% render 'misc-access-prompt', label: 'Sign in to view the asset password' %}
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- if section.settings.show_filter -%}
+    <div class="misc-ca__toolbar">
+      <div class="misc-ca__wrap">
+        {%- if section.settings.filter_label != blank -%}
+          <span class="misc-ca__toolbar-label">{{ section.settings.filter_label }}</span>
+        {%- endif -%}
+        <div class="misc-ca__facets" data-facets data-all-label="{{ section.settings.all_label | default: 'All' | escape }}"></div>
+        <div class="misc-ca__toolbar-meta">
+          <span class="misc-ca__result">{{ section.settings.showing_label | default: 'Showing' }} <b data-result></b> / <span data-total></span> {{ section.settings.brands_word | default: 'brands' }}</span>
+          <button type="button" class="misc-ca__clear" data-clear hidden>{{ section.settings.clear_label | default: 'Clear' }}</button>
+        </div>
+      </div>
+    </div>
+  {%- endif -%}
+
+  <div class="misc-ca__main">
+    <div class="misc-ca__wrap">
+      {%- if section.settings.show_overview -%}
+        <div class="misc-ca__overview">
+          <div class="misc-ca__stat"><div class="misc-ca__stat-n" data-stat-brands>0</div><div class="misc-ca__stat-l">{{ section.settings.stat_brands | default: 'Brands' }}</div></div>
+          <div class="misc-ca__stat"><div class="misc-ca__stat-n" data-stat-img>0</div><div class="misc-ca__stat-l">{{ section.settings.stat_img | default: 'Image sets' }}</div></div>
+          <div class="misc-ca__stat"><div class="misc-ca__stat-n" data-stat-cat>0</div><div class="misc-ca__stat-l">{{ section.settings.stat_cat | default: 'Catalogues' }}</div></div>
+          <div class="misc-ca__stat"><div class="misc-ca__stat-n" data-stat-files>0</div><div class="misc-ca__stat-l">{{ section.settings.stat_files | default: 'Files total' }}</div></div>
+        </div>
+      {%- endif -%}
+
+      <div class="misc-ca__brands" data-brands>
+        {% content_for "blocks" %}
+        <div class="misc-ca__empty" data-empty>{{ section.settings.empty_text | default: 'No brands match the selected filters.' }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="{{ 'misc-client-assets.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "MISC Client Assets",
+  "class": "misc-ca-section",
+  "max_blocks": 50,
+  "blocks": [{ "type": "misc-ca-brand" }],
+  "settings": [
+    { "type": "header", "content": "Intro" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Image Bank & Catalogues" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Client Assets" },
+    { "type": "richtext", "id": "lead", "label": "Intro text", "default": "<p>Brand photography and product catalogues for your store, web shop and marketing, organised by brand, for MISC wholesale partners.</p>" },
+    { "type": "header", "content": "Password" },
+    { "type": "paragraph", "content": "A static page can't check whether a visitor is signed in, so this password is shown to everyone. Login gating lives in the app layer." },
+    { "type": "checkbox", "id": "show_password", "label": "Show password box", "default": true },
+    { "type": "text", "id": "password_label", "label": "Label", "default": "Asset password" },
+    { "type": "text", "id": "password_value", "label": "Password", "default": "MISC-Wholesale-2026" },
+    { "type": "text", "id": "password_hint", "label": "Hint", "default": "Use this to open any image bank or catalogue link below." },
+    { "type": "text", "id": "copy_label", "label": "Copy button text", "default": "Copy" },
+    { "type": "text", "id": "copied_label", "label": "Copied confirmation text", "default": "Copied" },
+    { "type": "header", "content": "Filter bar" },
+    { "type": "checkbox", "id": "show_filter", "label": "Show brand filter", "default": true },
+    { "type": "text", "id": "filter_label", "label": "Filter label", "default": "Filter by brand" },
+    { "type": "text", "id": "all_label", "label": "\"All\" chip text", "default": "All" },
+    { "type": "text", "id": "showing_label", "label": "Result prefix", "default": "Showing" },
+    { "type": "text", "id": "brands_word", "label": "Result noun", "default": "brands" },
+    { "type": "text", "id": "clear_label", "label": "Clear button text", "default": "Clear" },
+    { "type": "header", "content": "Overview stats" },
+    { "type": "checkbox", "id": "show_overview", "label": "Show overview stats", "default": true },
+    { "type": "text", "id": "stat_brands", "label": "Brands label", "default": "Brands" },
+    { "type": "text", "id": "stat_img", "label": "Image sets label", "default": "Image sets" },
+    { "type": "text", "id": "stat_cat", "label": "Catalogues label", "default": "Catalogues" },
+    { "type": "text", "id": "stat_files", "label": "Total files label", "default": "Files total" },
+    { "type": "header", "content": "Other" },
+    { "type": "text", "id": "empty_text", "label": "Empty-filter message", "default": "No brands match the selected filters." },
+    { "type": "header", "content": "Layout" },
+    { "type": "range", "id": "max_width", "label": "Max content width", "min": 960, "max": 1600, "step": 20, "unit": "px", "default": 1240 },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 100, "step": 4, "unit": "px", "default": 24 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 }
+  ],
+  "presets": [{ "name": "MISC Client Assets" }]
+}
+{% endschema %}

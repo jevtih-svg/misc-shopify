@@ -1,0 +1,146 @@
+{%- comment -%}
+  My Company Details panel. Mirrors the data Shopify exposes for B2B
+  customer accounts. Where Shopify's own Customer Account UI surfaces:
+    - Company legal name
+    - Default location (name + role: HQ / Warehouse / Store)
+    - Default billing address
+    - Default shipping address
+    - Contact person on file
+    - Payment terms (from the location's payment_terms_template)
+    - Tax registration ID (VAT / EORI)
+
+  Inputs:
+    - company  : customer.current_company (or nil for D2C dev accounts)
+    - location : customer.current_location
+    - customer : customer
+
+  Edit buttons link to native Shopify account routes — they are the
+  fastest path to V1 since the forms already work. Replace with inline
+  edit once we ship a Theme App Extension.
+{%- endcomment -%}
+
+{%- assign misc_billing  = location.billing_address  | default: customer.default_address -%}
+{%- assign misc_shipping = location.shipping_address | default: customer.default_address -%}
+{%- assign misc_contact_name  = customer.name | default: customer.email -%}
+{%- assign misc_contact_email = customer.email -%}
+{%- assign misc_contact_phone = customer.phone | default: customer.default_address.phone -%}
+
+<div class="misc-card misc-card--company">
+  <header class="misc-card__header">
+    <h2 class="misc-card__title">My company details</h2>
+    <a
+      class="misc-card__action"
+      href="{{ routes.account_url }}"
+      aria-label="Edit company details"
+    >
+      Edit
+    </a>
+  </header>
+
+  <dl class="misc-company__grid">
+
+    {%- comment -%} ── Company identity ── {%- endcomment -%}
+    <div class="misc-company__field misc-company__field--wide">
+      <dt class="misc-company__label">Company</dt>
+      <dd class="misc-company__value">
+        {%- if company -%}
+          <strong>{{ company.name }}</strong>
+          {%- if location %}<br><span class="misc-company__sub">{{ location.name }}</span>{% endif -%}
+        {%- else -%}
+          <strong>{{ customer.last_name | default: customer.email }}</strong>
+          <br><span class="misc-company__sub">Individual account</span>
+        {%- endif -%}
+      </dd>
+    </div>
+
+    {%- comment -%} ── Contact on file ── {%- endcomment -%}
+    <div class="misc-company__field">
+      <dt class="misc-company__label">Contact</dt>
+      <dd class="misc-company__value">
+        {{ misc_contact_name }}<br>
+        <a href="mailto:{{ misc_contact_email }}">{{ misc_contact_email }}</a>
+        {%- if misc_contact_phone %}<br>{{ misc_contact_phone }}{% endif -%}
+      </dd>
+    </div>
+
+    {%- comment -%} ── Tax ID / VAT ── {%- endcomment -%}
+    <div class="misc-company__field">
+      <dt class="misc-company__label">Tax / VAT ID</dt>
+      <dd class="misc-company__value">
+        {%- if location.tax_registration_id -%}
+          {{ location.tax_registration_id }}
+        {%- else -%}
+          <span class="misc-company__empty">Not on file</span>
+        {%- endif -%}
+      </dd>
+    </div>
+
+    {%- comment -%} ── Billing address ── {%- endcomment -%}
+    <div class="misc-company__field">
+      <dt class="misc-company__label">
+        Billing address
+        <a class="misc-company__edit" href="{{ routes.account_addresses_url }}">Edit</a>
+      </dt>
+      <dd class="misc-company__value">
+        {%- if misc_billing -%}
+          {{ misc_billing | format_address }}
+        {%- else -%}
+          <span class="misc-company__empty">No billing address on file</span>
+        {%- endif -%}
+      </dd>
+    </div>
+
+    {%- comment -%} ── Shipping address ── {%- endcomment -%}
+    <div class="misc-company__field">
+      <dt class="misc-company__label">
+        Shipping address
+        <a class="misc-company__edit" href="{{ routes.account_addresses_url }}">Edit</a>
+      </dt>
+      <dd class="misc-company__value">
+        {%- if misc_shipping -%}
+          {{ misc_shipping | format_address }}
+        {%- else -%}
+          <span class="misc-company__empty">No shipping address on file</span>
+        {%- endif -%}
+      </dd>
+    </div>
+
+    {%- comment -%}
+      ── Additional locations (multi-location B2B) ──
+      Only shown when the company has more than one location. The
+      location switcher itself is Shopify's, surfaced in the header
+      via the account dropdown when applicable.
+    {%- endcomment -%}
+    {%- if company and company.locations_count > 1 -%}
+      <div class="misc-company__field misc-company__field--wide">
+        <dt class="misc-company__label">
+          All locations ({{ company.locations_count }})
+        </dt>
+        <dd class="misc-company__value">
+          <ul class="misc-company__locations">
+            {%- for loc in company.locations -%}
+              <li>
+                {{ loc.name }}
+                {%- if loc.id == location.id %} <span class="misc-company__badge">Current</span>{% endif -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+        </dd>
+      </div>
+    {%- endif -%}
+
+  </dl>
+
+  <footer class="misc-card__footer misc-card__footer--quiet">
+    {% comment -%}
+      Company-level data (legal name, tax ID, locations) is read-only
+      from the buyer side on Shopify B2B. Changes go via MISC's admin
+      team. The Edit buttons above only cover customer-editable fields
+      (addresses, contact). Surface a note when company is present.
+    {%- endcomment %}
+    {%- if company -%}
+      To change your company name, tax ID, or add a location, contact
+      <a href="{{ section.settings.support_url | default: '/pages/support' }}">MISC support</a>.
+    {%- endif -%}
+  </footer>
+</div>

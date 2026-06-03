@@ -40,28 +40,6 @@
   ============================================================
 {%- endcomment -%}
 
-{%- comment -%}
-  Price gate: prices, RRP, stepper, and variant rows render only
-  when the visitor is a logged-in customer, OR when the theme
-  setting `misc_dev_show_price` is TRUE.
-
-  The setting is defined in config/settings_schema.json under
-  "MISC: development" and defaults to FALSE. It must remain FALSE
-  on the published theme. Toggle locally via:
-    ./scripts/misc-preview.sh
-
-  The same gate pattern is rendered identically in:
-    - snippets/misc-product-list.liquid (list view)
-    - sections/misc-main-product.liquid (PDP — when forked)
-    - sections/misc-main-search.liquid (search — when forked)
-    - snippets/misc-cart-drawer-injection.liquid (cart drawer)
-  Keep these in sync if the gating logic ever changes.
-{%- endcomment -%}
-{%- assign misc_show_price = false -%}
-{%- if customer != blank or settings.misc_dev_show_price -%}
-  {%- assign misc_show_price = true -%}
-{%- endif -%}
-
 {%- liquid
   assign ratio = 1
   if media_aspect_ratio == 'portrait'
@@ -128,6 +106,19 @@
     <div class="misc-product-card__sku">{{ primary_variant.sku }}</div>
   {%- endif -%}
 
+  {%- comment -%} Second image (the first one that isn't the featured) for the hover swap. {%- endcomment -%}
+  {%- liquid
+    assign second_image = blank
+    if card_product.images.size > 1
+      assign featured_id = card_product.featured_image.id
+      for image in card_product.images
+        if image.id != featured_id
+          assign second_image = image
+          break
+        endif
+      endfor
+    endif
+  -%}
   <a
     href="{{ card_product.url }}"
     class="misc-product-card__media"
@@ -148,14 +139,37 @@
         loading="{% if lazy_load %}lazy{% else %}eager{% endif %}"
         class="misc-product-card__image"
       >
+      {%- if second_image != blank -%}
+        <img
+          src="{{ second_image | image_url: width: 800 }}"
+          srcset="
+            {{ second_image | image_url: width: 400 }} 400w,
+            {{ second_image | image_url: width: 600 }} 600w,
+            {{ second_image | image_url: width: 800 }} 800w
+          "
+          sizes="(min-width: 990px) 20vw, (min-width: 750px) 33vw, 50vw"
+          alt=""
+          aria-hidden="true"
+          width="800"
+          height="{{ 800 | divided_by: ratio | round }}"
+          loading="lazy"
+          class="misc-product-card__image misc-product-card__image--secondary"
+        >
+      {%- endif -%}
     {%- else -%}
       {%- comment -%}
-        No media: render the MISC unavailable placeholder (same
-        visual language as the PDP gallery placeholder). Replaces
-        Shopify's generic placeholder_svg_tag.
+        No media: a clean "no image" placeholder (subtle panel +
+        faint image glyph + label). This is a missing-image state
+        only and says nothing about stock — stock is shown by the
+        stock line and stepper below.
       {%- endcomment -%}
-      <div class="misc-product-card__image misc-product-card__image--placeholder misc-product-card__image--unavailable">
-        <span class="misc-product-card__unavailable-label">Unavailable</span>
+      <div class="misc-product-card__image misc-product-card__image--placeholder" aria-hidden="true">
+        <svg class="misc-product-card__placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <path d="M21 15l-5-5L5 21"/>
+        </svg>
+        <span class="misc-product-card__placeholder-label">No image</span>
       </div>
     {%- endif -%}
   </a>
@@ -174,22 +188,26 @@
       <span class="misc-product-card__pack">Single unit</span>
     {%- endif -%}
 
+    {%- comment -%} MISC: B2B access gate — price only for approved visitors, else a sign-in prompt. {%- endcomment -%}
+    {%- if approved -%}
     <div class="misc-product-card__price-row">
-      {%- if misc_show_price -%}
-        <span class="misc-product-card__price">
-          {%- if variant_count > 1 -%}from {% endif -%}
-          {%- if card_product.price_varies -%}
-            {{ card_product.price_min | money }}
-          {%- else -%}
-            {{ primary_variant.price | money }}
-          {%- endif -%}
-        </span>
-      {%- else -%}
-        {%- render 'misc-price-cta' -%}
-      {%- endif -%}
+      <span class="misc-product-card__price">
+        {%- if variant_count > 1 -%}from {% endif -%}
+        {%- if card_product.price_varies -%}
+          {{ card_product.price_min | money }}
+        {%- else -%}
+          {{ primary_variant.price | money }}
+        {%- endif -%}
+      </span>
     </div>
+    {%- else -%}
+    <div class="misc-product-card__price-row">
+      {% render 'misc-access-prompt' %}
+    </div>
+    {%- endif -%}
 
-    {%- if misc_show_price and quick_add != 'none' -%}
+    {%- comment -%} MISC: B2B access gate — stock state + steppers/variant rows only for approved visitors. {%- endcomment -%}
+    {%- if quick_add != 'none' and approved -%}
 
       {%- comment -%}
         STOCK STATE LINE — always rendered below price.
@@ -306,7 +324,7 @@
                   data-variant-id="{{ v.id }}"
                 >
                   <button type="button" class="misc-qty-stepper__btn" data-misc-qty="-1" aria-label="Remove one {{ v.title | escape }} from cart">&minus;</button>
-                  <input type="number" value="{{ v_cart_qty }}" min="0" step="1" class="misc-qty-stepper__input" aria-label="Quantity of {{ v.title | escape }} in cart" data-misc-qty-input readonly>
+                  <input type="text" inputmode="numeric" value="{{ v_cart_qty }}" class="misc-qty-stepper__input" aria-label="Quantity of {{ v.title | escape }} in cart" data-misc-qty-input readonly>
                   <button type="button" class="misc-qty-stepper__btn" data-misc-qty="+1" aria-label="Add one {{ v.title | escape }} to cart">+</button>
                 </div>
               </li>
@@ -368,10 +386,9 @@
               &minus;
             </button>
             <input
-              type="number"
+              type="text"
+              inputmode="numeric"
               value="{{ sv_cart_qty }}"
-              min="0"
-              step="1"
               class="misc-qty-stepper__input"
               aria-label="Quantity in cart"
               data-misc-qty-input

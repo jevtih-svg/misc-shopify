@@ -1,0 +1,238 @@
+{%- comment -%}
+  ============================================================
+  MISC Curated Collection — dual source
+  ------------------------------------------------------------
+  Renders a curated collection from EITHER:
+    A) a `curated_collection` metaobject (preferred) — used by
+       templates/metaobject/curated_collection.json. Managed in
+       Admin → Content → Metaobjects. Each item is a `curated_item`
+       metaobject (variant + default_quantity + display_size +
+       optional description_override).
+    B) section product blocks (legacy / Theme-Editor path).
+
+  Layout, "Add collection to cart", and the steppers are identical
+  for both. The add-all button posts every item's variant at its
+  default quantity to /cart/add.js (assets/misc-curated-collection.js).
+
+  CSS: assets/misc-curated-collection.css
+  JS:  assets/misc-curated-collection.js
+  Cell: snippets/misc-curated-cell.liquid
+  ============================================================
+{%- endcomment -%}
+
+{{ 'misc-curated-collection.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'misc-curated-collection.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign rule = section.settings.rule_weight | default: 3
+  assign is_mo = false
+  if metaobject != blank
+    assign is_mo = true
+  endif
+
+  assign cc_inactive = false
+  if is_mo
+    if metaobject.active.value == false
+      assign cc_inactive = true
+    endif
+  endif
+
+  assign cc_eyebrow = section.settings.eyebrow | default: 'Curated'
+  assign total_cents = 0
+  assign total_units = 0
+  assign items_json = ''
+
+  comment
+    MISC: B2B access gate — approved visitors (B2B member or `approved` tag)
+    see prices + ordering; everyone else sees a sign-in prompt.
+  endcomment
+  capture misc_access
+    render 'misc-access'
+  endcapture
+  assign misc_access = misc_access | strip
+  assign approved = false
+  if misc_access == 'true'
+    assign approved = true
+  endif
+
+  if is_mo
+    assign cc_title = metaobject.title.value
+    assign cc_brand = metaobject.brand.value
+    assign cc_desc = metaobject.description.value
+    assign cc_addlabel = metaobject.add_all_label.value | default: 'Add collection to cart'
+    for item in metaobject.items.value
+      assign v = item.variant.value
+      if v
+        assign q = item.default_quantity.value | default: 1
+        assign line = v.price | times: q
+        assign total_cents = total_cents | plus: line
+        assign total_units = total_units | plus: q
+        assign items_json = items_json | append: ',{"id":' | append: v.id | append: ',"quantity":' | append: q | append: '}'
+      endif
+    endfor
+  else
+    assign cc_title = section.settings.title
+    assign cc_brand = section.settings.brand
+    assign cc_desc = section.settings.description
+    assign cc_addlabel = section.settings.add_all_label | default: 'Add collection to cart'
+    for block in section.blocks
+      assign v = block.settings.product.selected_or_first_available_variant
+      if v
+        assign q = block.settings.add_qty | default: 1
+        assign line = v.price | times: q
+        assign total_cents = total_cents | plus: line
+        assign total_units = total_units | plus: q
+        assign items_json = items_json | append: ',{"id":' | append: v.id | append: ',"quantity":' | append: q | append: '}'
+      endif
+    endfor
+  endif
+  assign items_json = items_json | remove_first: ','
+-%}
+
+{%- if cc_inactive -%}
+<section class="misc-curated"><p class="misc-curated__unavailable">This collection isn&rsquo;t available right now.</p></section>
+{%- else -%}
+<section
+  class="misc-curated"
+  style="--misc-cc-rule: {{ rule }}px; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+  aria-label="{{ cc_title | default: 'Curated collection' | escape }}"
+>
+  <div class="misc-curated__head">
+    <div class="misc-curated__intro">
+      {%- if cc_eyebrow != blank or cc_brand != blank -%}
+        <p class="misc-curated__eyebrow">
+          {{- cc_eyebrow -}}
+          {%- if cc_eyebrow != blank and cc_brand != blank %} &middot; {% endif -%}
+          {{- cc_brand -}}
+        </p>
+      {%- endif -%}
+      <h1 class="misc-curated__title">{{ cc_title | default: 'Curated collection' }}</h1>
+      {%- if cc_desc != blank -%}
+        <div class="misc-curated__desc">{{ cc_desc | newline_to_br }}</div>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} MISC: B2B access gate — the add-all button and total only for approved visitors. {%- endcomment -%}
+    {%- if items_json != blank and approved -%}
+      <div class="misc-curated__addwrap">
+        <button type="button" class="misc-curated__addall" id="MiscCuratedAddAll" data-items='[{{ items_json }}]'>
+          <span class="misc-curated__addall-label">{{ cc_addlabel }}</span>
+          <span class="misc-curated__addall-total">{{ total_cents | money }}</span>
+        </button>
+        <p class="misc-curated__addnote">{{ total_units }} units &middot; you can always adjust quantities in the cart</p>
+      </div>
+    {%- endif -%}
+  </div>
+
+  <div class="misc-curated__grid">
+    {%- if is_mo -%}
+      {%- for item in metaobject.items.value -%}
+        {%- assign v = item.variant.value -%}
+        {%- if v -%}
+          {%- render 'misc-curated-cell', product: v.product, v: v, size: item.display_size.value, desc: item.description_override.value, brand: cc_brand, approved: approved -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- else -%}
+      {%- for block in section.blocks -%}
+        {%- assign v = block.settings.product.selected_or_first_available_variant -%}
+        {%- if v -%}
+          {%- render 'misc-curated-cell', product: block.settings.product, v: v, size: block.settings.size, desc: block.settings.description, brand: cc_brand, approved: approved -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+  </div>
+
+  {%- if items_json != blank -%}
+    <div class="misc-curated-modal" id="MiscCuratedModal" hidden role="dialog" aria-modal="true" aria-labelledby="MiscCuratedModalTitle" data-money-format="{{ shop.money_format | escape }}">
+      <div class="misc-curated-modal__card">
+        <div class="misc-curated-modal__head">
+          <button type="button" class="misc-curated-modal__x" data-cc-close aria-label="Close">&times;</button>
+          {%- if settings.curated_review_eyebrow != blank -%}
+            <p class="misc-curated-modal__eyebrow">{{ settings.curated_review_eyebrow }}</p>
+          {%- endif -%}
+          <h2 class="misc-curated-modal__title" id="MiscCuratedModalTitle">{{ settings.curated_review_heading | default: 'Review your order' }}</h2>
+          {%- if settings.curated_review_message != blank -%}
+            <div class="misc-curated-modal__msg">{{ settings.curated_review_message }}</div>
+          {%- endif -%}
+        </div>
+        <div class="misc-curated-modal__list">
+          {%- if is_mo -%}
+            {%- for item in metaobject.items.value -%}
+              {%- assign v = item.variant.value -%}
+              {%- if v -%}
+                {%- assign q = item.default_quantity.value | default: 1 -%}
+                {%- render 'misc-curated-modal-line', product: v.product, v: v, q: q, brand: cc_brand -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- else -%}
+            {%- for block in section.blocks -%}
+              {%- assign v = block.settings.product.selected_or_first_available_variant -%}
+              {%- if v -%}
+                {%- assign q = block.settings.add_qty | default: 1 -%}
+                {%- render 'misc-curated-modal-line', product: block.settings.product, v: v, q: q, brand: cc_brand -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endif -%}
+        </div>
+        <div class="misc-curated-modal__foot">
+          <div class="misc-curated-modal__totals" id="MiscCuratedModalTotals"></div>
+          <div class="misc-curated-modal__actions">
+            <button type="button" class="misc-curated-modal__cancel" data-cc-close>Cancel</button>
+            <button type="button" class="misc-curated-modal__confirm" id="MiscCuratedModalConfirm">{{ settings.curated_review_confirm | default: 'Add to cart' }} &rarr;</button>
+          </div>
+          {%- if settings.curated_review_note != blank -%}
+            <p class="misc-curated-modal__note">{{ settings.curated_review_note }}</p>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  {%- endif -%}
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "MISC Curated Collection",
+  "tag": "section",
+  "class": "misc-curated-section",
+  "max_blocks": 50,
+  "settings": [
+    { "type": "paragraph", "content": "On a curated_collection metaobject page this section reads the metaobject. The settings/blocks below are only used on a normal page template." },
+    { "type": "header", "content": "Header" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Curated" },
+    { "type": "text", "id": "brand", "label": "Brand", "default": "Penco" },
+    { "type": "text", "id": "title", "label": "Collection name (h1)", "default": "Analog Americana" },
+    { "type": "textarea", "id": "description", "label": "Intro description" },
+    { "type": "text", "id": "add_all_label", "label": "Add-all button label", "default": "Add collection to cart" },
+    { "type": "header", "content": "Layout" },
+    { "type": "range", "id": "rule_weight", "label": "Divider thickness", "min": 1, "max": 6, "step": 1, "unit": "px", "default": 3 },
+    { "type": "range", "id": "padding_top", "label": "Padding top", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "label": "Padding bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Product" },
+        {
+          "type": "select",
+          "id": "size",
+          "label": "Display size",
+          "options": [
+            { "value": "full", "label": "Full row (1 per row)" },
+            { "value": "half", "label": "Two per row" },
+            { "value": "third", "label": "Three per row" }
+          ],
+          "default": "half"
+        },
+        { "type": "number", "id": "add_qty", "label": "Add-all quantity", "default": 6 },
+        { "type": "richtext", "id": "description", "label": "Description override (optional)" }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "MISC Curated Collection", "blocks": [ { "type": "product" }, { "type": "product" }, { "type": "product" } ] }
+  ]
+}
+{% endschema %}

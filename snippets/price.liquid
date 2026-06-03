@@ -13,27 +13,6 @@
   {% render 'price', product: product %}
 {% endcomment %}
 
-{%- comment -%}
-  MISC: global B2B price gate. Every Trade surface that renders
-  price routes through this snippet (PDP, card-product, related-
-  products, featured-collection, search, collage). Gating here
-  guarantees no price text leaks to logged-out visitors anywhere.
-
-  When the visitor is not a logged-in customer AND the dev preview
-  setting is off, replace Trade's price block with our CTA snippet
-  and exit. Otherwise fall through to Trade's original code.
-
-  Refs: MISC_PDP_Implementation_Decisions.md D1, D3, D11.
-  Forking the 7+ call sites of this snippet would be worse than
-  one in-place edit; merge by hand at the next Trade upstream
-  update.
-{%- endcomment -%}
-{%- if customer == blank and settings.misc_dev_show_price != true -%}
-  {%- render 'misc-price-cta' -%}
-  {%- comment -%} Bail before Trade renders any money string. {%- endcomment -%}
-  {{- '' -}}
-{%- else -%}
-
 {%- liquid
   if use_variant
     assign target = product.selected_or_first_available_variant
@@ -145,4 +124,3 @@
     {%- endif -%}
   </div>
 {% endunless %}
-{%- endif -%}{%- comment -%} MISC: closes the customer gate at the top of this file {%- endcomment -%}

@@ -1,0 +1,45 @@
+{%- comment -%}
+  MISC Client Assets — Brand block.
+  Renders a brand card and accepts Asset child blocks, added into it
+  in the Theme Editor. Per-brand counts, the number and the filter
+  chip are filled in by misc-client-assets.js from the rendered assets.
+{%- endcomment -%}
+<section class="misc-ca__brand" data-brand="{{ block.settings.name | handleize }}" data-name="{{ block.settings.name | escape }}" {{ block.shopify_attributes }}>
+  <div class="misc-ca__brand-head">
+    <div class="misc-ca__brand-headmain">
+      <p class="misc-ca__brand-eyebrow"><span class="misc-ca__brand-num" data-num></span>{% if block.settings.category != blank %} · {{ block.settings.category }}{% endif %}</p>
+      <h2 class="misc-ca__brand-name">{{ block.settings.name }}</h2>
+      {%- if block.settings.description != blank -%}
+        <p class="misc-ca__brand-desc">{{ block.settings.description }}</p>
+      {%- endif -%}
+    </div>
+    <div class="misc-ca__brand-side">
+      {%- if block.settings.show_view and block.settings.brand_page != blank -%}
+        <a class="misc-ca__view" href="{{ block.settings.brand_page }}">View brand <span class="misc-ca__arr" aria-hidden="true">&#8599;</span></a>
+      {%- endif -%}
+      <div class="misc-ca__brand-counts" data-counts></div>
+    </div>
+  </div>
+  <div class="misc-ca__cols misc-ca__cols--single">
+    <div class="misc-ca__col">
+      <div class="misc-ca__list" data-list>
+        {% content_for "blocks" %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Brand",
+  "settings": [
+    { "type": "text", "id": "name", "label": "Brand name", "default": "Brand", "info": "Used as the heading and as the filter chip." },
+    { "type": "text", "id": "category", "label": "Category (eyebrow)" },
+    { "type": "textarea", "id": "description", "label": "Short description" },
+    { "type": "checkbox", "id": "show_view", "label": "Show \"View brand\" link", "default": true },
+    { "type": "url", "id": "brand_page", "label": "View-brand link", "info": "Link to this brand's page." }
+  ],
+  "blocks": [{ "type": "misc-ca-asset" }],
+  "presets": [{ "name": "Brand", "blocks": [{ "type": "misc-ca-asset" }] }]
+}
+{% endschema %}

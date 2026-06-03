@@ -1,0 +1,126 @@
+{%- comment -%}
+  MISC home — dynamic Events block ("Where to find us").
+  Reads `event` metaobjects, keeps upcoming (end_date >= today),
+  sorts soonest-first, shows the first 3. Banner image = the closest
+  upcoming event's image. Stand line is omitted when there is no booth
+  (Open house / Pop-up / Workshop). "See all events" → Events page.
+  Reuses the .misc-trade-shows* styles in misc-home.css.
+{%- endcomment -%}
+
+{{ 'misc-home.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign now_ts = 'now' | date: '%s' | plus: 0
+  assign rows = ''
+  for ev in shop.metaobjects.event.values
+    assign sdv = ev.start_date.value
+    assign edv = ev.end_date.value | default: sdv
+    assign end_ts = edv | date: '%s' | plus: 0
+    if end_ts >= now_ts
+      assign start_ts = sdv | date: '%s'
+      assign rows = rows | append: start_ts | append: ':' | append: ev.system.handle | append: '|'
+    endif
+  endfor
+  assign rows = rows | split: '|' | sort
+  assign upcoming_total = rows | size
+-%}
+
+<section class="misc-trade-shows" aria-label="{{ section.settings.title | default: 'Where to find us' }}">
+  <div class="misc-trade-shows__media">
+    {%- if upcoming_total > 0 -%}
+      {%- assign first_handle = rows.first | split: ':' | last -%}
+      {%- assign banner = shop.metaobjects.event[first_handle] -%}
+      {%- assign b_sd = banner.start_date.value -%}
+      {%- assign b_ed = banner.end_date.value | default: b_sd -%}
+      {%- assign b_mon = b_sd | date: '%b' -%}
+      {%- assign b_d1 = b_sd | date: '%-d' -%}
+      {%- assign b_d2 = b_ed | date: '%-d' -%}
+      {%- assign b_days = b_d1 -%}
+      {%- if b_ed != b_sd and b_d2 != b_d1 -%}{%- assign b_days = b_d1 | append: ' – ' | append: b_d2 -%}{%- endif -%}
+      {%- if banner.image.value != blank -%}
+        {{ banner.image.value | image_url: width: 1400 | image_tag:
+          loading: 'lazy',
+          widths: '600, 900, 1200, 1400',
+          sizes: '(min-width: 900px) 50vw, 100vw',
+          alt: banner.title.value }}
+      {%- elsif section.settings.fallback_asset != blank -%}
+        <img src="{{ section.settings.fallback_asset | asset_url }}" alt="{{ banner.title.value }}" loading="lazy">
+      {%- endif -%}
+      <span class="misc-trade-shows__media-tag">Next up · {{ b_days }} {{ b_mon }}</span>
+    {%- elsif section.settings.fallback_asset != blank -%}
+      <img src="{{ section.settings.fallback_asset | asset_url }}" alt="{{ section.settings.title }}" loading="lazy">
+    {%- endif -%}
+  </div>
+
+  <div class="misc-trade-shows__panel">
+    {%- if section.settings.eyebrow != blank -%}
+      <div class="misc-trade-shows__eyebrow">{{ section.settings.eyebrow }}</div>
+    {%- endif -%}
+    {%- if section.settings.title != blank -%}
+      <h2 class="misc-trade-shows__title">{{ section.settings.title }}</h2>
+    {%- endif -%}
+
+    {%- if upcoming_total > 0 -%}
+      <div>
+        {%- for row in rows limit: 3 -%}
+          {%- assign h = row | split: ':' | last -%}
+          {%- assign ev = shop.metaobjects.event[h] -%}
+          {%- assign sd = ev.start_date.value -%}
+          {%- assign ed = ev.end_date.value | default: sd -%}
+          {%- assign mon = sd | date: '%b' -%}
+          {%- assign d1 = sd | date: '%-d' -%}
+          {%- assign d2 = ed | date: '%-d' -%}
+          {%- assign days = d1 -%}
+          {%- if ed != sd and d2 != d1 -%}{%- assign days = d1 | append: ' – ' | append: d2 -%}{%- endif -%}
+          <a class="misc-trade-show-card" href="{{ ev.system.url }}">
+            <div class="misc-trade-show-card__date">
+              {{ mon }}
+              <span class="misc-trade-show-card__date-day">{{ days }}</span>
+            </div>
+            <div class="misc-trade-show-card__body">
+              {%- if ev.event_type.value != blank -%}
+                <div class="misc-trade-show-card__type">{{ ev.event_type.value }}</div>
+              {%- endif -%}
+              <div class="misc-trade-show-card__name">{{ ev.title.value }}</div>
+              {%- if ev.location.value != blank -%}
+                <div class="misc-trade-show-card__venue">{{ ev.location.value }}</div>
+              {%- endif -%}
+              {%- if ev.booth.value != blank -%}
+                <div class="misc-trade-show-card__stand">{{ ev.booth.value }}</div>
+              {%- endif -%}
+            </div>
+          </a>
+        {%- endfor -%}
+      </div>
+    {%- else -%}
+      <p class="misc-trade-shows__empty">No upcoming events scheduled right now. Check back soon.</p>
+    {%- endif -%}
+
+    {%- if pages.events.url != blank -%}
+      <a href="{{ pages.events.url }}" class="misc-events-home__see-all">
+        See all events
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "MISC Events (home)",
+  "settings": [
+    { "type": "header", "content": "Banner" },
+    {
+      "type": "text",
+      "id": "fallback_asset",
+      "label": "Fallback banner asset",
+      "info": "Used when the closest upcoming event has no image. e.g. misc-home-trade-shows.jpg",
+      "default": "misc-home-trade-shows.jpg"
+    },
+    { "type": "header", "content": "Text" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Meet us in person" },
+    { "type": "text", "id": "title", "label": "Title", "default": "Where to find us" }
+  ],
+  "presets": [{ "name": "MISC Events (home)" }]
+}
+{% endschema %}

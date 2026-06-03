@@ -1,0 +1,39 @@
+{%- comment -%}
+  MISC Client Assets — Asset block (one download row).
+  Added into a Brand block. The icon follows the "Type" setting.
+{%- endcomment -%}
+{%- liquid
+  assign is_cat = false
+  if block.settings.group == 'catalogue'
+    assign is_cat = true
+  endif
+  assign tgt = ''
+  if block.settings.new_tab
+    assign tgt = ' target="_blank" rel="noopener"'
+  endif
+  assign icon = 'misc-ca-img'
+  if is_cat
+    assign icon = 'misc-ca-doc'
+  endif
+-%}
+<a class="misc-ca__asset" data-group="{{ block.settings.group }}" href="{{ block.settings.link | default: '#' }}"{{ tgt }} {{ block.shopify_attributes }}>
+  <span class="misc-ca__asset-ic"><svg class="misc-ca__icon" aria-hidden="true" focusable="false"><use href="#{{ icon }}"></use></svg></span>
+  <span class="misc-ca__asset-text"><span class="misc-ca__asset-name">{{ block.settings.name | default: 'Untitled' }}</span>{% if block.settings.meta != blank %}<span class="misc-ca__asset-meta">{{ block.settings.meta }}</span>{% endif %}</span>
+  {%- if block.settings.tag != blank -%}<span class="misc-ca__asset-tag">{{ block.settings.tag }}</span>{%- endif -%}
+  <span class="misc-ca__asset-arrow" aria-hidden="true">&#8599;</span>
+</a>
+
+{% schema %}
+{
+  "name": "Asset link",
+  "settings": [
+    { "type": "select", "id": "group", "label": "Type", "options": [ { "value": "image_bank", "label": "Image Bank" }, { "value": "catalogue", "label": "Catalogue" } ], "default": "image_bank" },
+    { "type": "text", "id": "name", "label": "Name", "default": "All Collections" },
+    { "type": "text", "id": "meta", "label": "Sub-label", "default": "Product photography" },
+    { "type": "url", "id": "link", "label": "Download link" },
+    { "type": "select", "id": "tag", "label": "Tag", "options": [ { "value": "Photos", "label": "Photos" }, { "value": "PDF", "label": "PDF" }, { "value": "Folder", "label": "Folder" }, { "value": "", "label": "None" } ], "default": "Photos" },
+    { "type": "checkbox", "id": "new_tab", "label": "Open in new tab", "default": true }
+  ],
+  "presets": [{ "name": "Asset link" }]
+}
+{% endschema %}

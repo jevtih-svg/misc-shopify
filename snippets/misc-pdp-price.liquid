@@ -1,6 +1,6 @@
 {%- comment -%}
   ============================================================
-  MISC PDP price block. Gated on misc_show_price.
+  MISC PDP price block.
 
   Renders:
     - "from €N,NN" for multi-variant, else "€N,NN"
@@ -12,7 +12,6 @@
     - product
     - primary_variant
     - variant_count
-    - misc_show_price (boolean)
   ============================================================
 {%- endcomment -%}
 
@@ -23,27 +22,21 @@
 
 <div class="misc-pdp__price-block">
 
-  {%- if misc_show_price -%}
-    <div class="misc-pdp__price-row">
-      {%- if variant_count > 1 -%}
-        <span class="misc-pdp__price-from">from</span>
+  <div class="misc-pdp__price-row">
+    {%- if variant_count > 1 -%}
+      <span class="misc-pdp__price-from">from</span>
+    {%- endif -%}
+    <span class="misc-pdp__price">
+      {%- if product.price_varies -%}
+        {{ product.price_min | money }}
+      {%- else -%}
+        {{ primary_variant.price | money }}
       {%- endif -%}
-      <span class="misc-pdp__price">
-        {%- if product.price_varies -%}
-          {{ product.price_min | money }}
-        {%- else -%}
-          {{ primary_variant.price | money }}
-        {%- endif -%}
-      </span>
-      {%- if rrp != blank -%}
-        <span class="misc-pdp__rrp">RRP {{ rrp | money }}</span>
-      {%- endif -%}
-    </div>
-  {%- else -%}
-    <div class="misc-pdp__price-row misc-pdp__price-row--gated">
-      {%- render 'misc-price-cta' -%}
-    </div>
-  {%- endif -%}
+    </span>
+    {%- if rrp != blank -%}
+      <span class="misc-pdp__rrp">RRP {{ rrp | money }}</span>
+    {%- endif -%}
+  </div>
 
   <div class="misc-pdp__pack">
     {%- if variant_count > 1 -%}
@@ -53,7 +46,7 @@
     {%- else -%}
       Single unit
     {%- endif -%}
-    {%- if misc_show_price %} &middot; B2B trade price (ex. VAT){% endif -%}
+    &middot; B2B trade price (ex. VAT)
   </div>
 
 </div>

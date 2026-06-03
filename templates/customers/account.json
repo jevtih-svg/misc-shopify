@@ -1,8 +1,9 @@
 {
   "sections": {
     "main": {
-      "type": "main-account",
+      "type": "misc-account",
       "settings": {
+        "support_url": "/pages/support",
         "padding_top": 36,
         "padding_bottom": 36
       }

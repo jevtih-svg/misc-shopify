@@ -1,0 +1,175 @@
+/* ============================================================
+   MISC Brand Page (v3 — block-composed)
+   Section: sections/misc-brand-page.liquid
+   Template: templates/page.misc-*.json
+
+   Every element is a block rendered into one continuous ink
+   line-grid (6 columns). Block "Width" sets the column span
+   (full=6, half=3, third=2) via an inline style on each cell;
+   heading, fact and footer have fixed spans. Lines are the
+   --c-ink background showing through the grid gap.
+   Tokens from misc-tokens.css; local: --misc-brand-rule
+   (set inline from the schema) and the hero title size.
+   ============================================================ */
+
+.misc-brand-page {
+  --misc-brand-hero: clamp(48px, 9vw, 116px);
+  max-width: var(--max-width-page);
+  margin: 0 auto;
+  padding-left: var(--space-5);
+  padding-right: var(--space-5);
+  color: var(--c-ink);
+}
+
+.misc-brand-page__grid {
+  border: var(--misc-brand-rule, 3px) solid var(--c-ink);
+  background: var(--c-ink);
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--misc-brand-rule, 3px);
+}
+.misc-brand-page__grid > * { background: var(--c-bg); min-width: 0; }
+
+/* ----- Heading block ----- */
+.misc-brand-page__name {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-7) var(--space-7) var(--space-6);
+}
+.misc-brand-page__eyebrow {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--c-ink-mute);
+  font-weight: var(--fw-medium);
+  margin: 0;
+}
+.misc-brand-page__title {
+  font-size: var(--misc-brand-hero);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  font-weight: var(--fw-bold);
+  margin: 0;
+}
+.misc-brand-page__title--lower { text-transform: lowercase; }
+
+/* ----- Spec fact block ----- */
+.misc-brand-page__meta {
+  padding: var(--space-5) var(--space-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.misc-brand-page__meta-value {
+  margin: 0;
+  font-size: var(--fs-md);
+  font-weight: var(--fw-medium);
+  letter-spacing: -0.01em;
+}
+
+/* ----- Text block ----- */
+.misc-brand-page__text {
+  background: var(--c-bg-subtle);
+  padding: var(--space-7);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.misc-brand-page__prose { font-size: var(--fs-md); line-height: 1.6; color: var(--c-ink); }
+.misc-brand-page__prose p { margin: 0 0 var(--space-4); }
+.misc-brand-page__prose p:last-child { margin-bottom: 0; }
+.misc-brand-page__prose strong { font-weight: var(--fw-medium); }
+.misc-brand-page__prose a { color: var(--c-ink); text-decoration: underline; text-underline-offset: 2px; }
+
+/* ----- Image block ----- */
+.misc-brand-page__media {
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  background: var(--c-ink);
+}
+.misc-brand-page__media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.02);
+  backface-visibility: hidden;
+}
+.misc-brand-page__media--full { aspect-ratio: 16 / 9; }
+.misc-brand-page__media--half { aspect-ratio: 4 / 3; }
+.misc-brand-page__media--third { aspect-ratio: 1 / 1; }
+
+/* ----- Footer block (two cells split by the ink line) ----- */
+.misc-brand-page__foot {
+  background: var(--c-ink);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--misc-brand-rule, 3px);
+}
+.misc-brand-page__foot-cell {
+  background: var(--c-bg);
+  padding: var(--space-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.misc-brand-page__foot-org {
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 0;
+}
+.misc-brand-page__foot-region { font-size: var(--fs-md); color: var(--c-ink-mute); margin: 0; }
+.misc-brand-page__foot-link {
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--c-ink);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: fit-content;
+}
+.misc-brand-page__foot-arrow { transition: transform 0.25s ease; }
+.misc-brand-page__foot-link:hover { color: var(--c-ink-mute); text-decoration: none; }
+.misc-brand-page__foot-link:hover .misc-brand-page__foot-arrow { transform: translate(3px, -3px); }
+
+/* ----- Shop button block ----- */
+.misc-brand-page__shop { padding: var(--space-7); display: flex; }
+.misc-brand-page__shop-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--c-ink);
+  color: #fff;
+  border: 2px solid var(--c-ink);
+  padding: var(--space-4) var(--space-6);
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: var(--fw-medium);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.misc-brand-page__shop-btn:hover { background: var(--c-bg); color: var(--c-ink); }
+.misc-brand-page__shop-arrow { transition: transform 0.25s ease; }
+.misc-brand-page__shop-btn:hover .misc-brand-page__shop-arrow { transform: translateX(3px); }
+
+/* ----- Responsive ----- */
+@media (max-width: 900px) {
+  .misc-brand-page__grid { grid-template-columns: 1fr; }
+  .misc-brand-page__foot { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .misc-brand-page { padding-left: var(--space-4); padding-right: var(--space-4); }
+  .misc-brand-page__name { padding: var(--space-6) var(--space-5); }
+  .misc-brand-page__meta { padding: var(--space-4) var(--space-5); }
+  .misc-brand-page__text { padding: var(--space-6) var(--space-5); }
+  .misc-brand-page__foot-cell { padding: var(--space-6) var(--space-5); }
+}

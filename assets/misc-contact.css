@@ -1,0 +1,568 @@
+/* ============================================================
+   MISC contact page
+   Loaded by sections/misc-contact.liquid.
+   Tokens come from assets/misc-tokens.css (loaded globally).
+   All classes prefixed with .misc-contact* to avoid collisions.
+   Mirrors Mockups/misc-contact-mockup.html (design system v0.4).
+   ============================================================ */
+
+/* ============================================================
+   PAGE HEADER (breadcrumb + title + lede)
+   ============================================================ */
+.misc-contact-page-header {
+  background: var(--c-bg);
+  padding: var(--space-8) var(--space-6) var(--space-7);
+  border-bottom: 3px solid var(--c-ink);
+}
+
+.misc-contact-page-header__breadcrumb {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--c-ink-mute);
+  font-weight: var(--fw-medium);
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.misc-contact-page-header__breadcrumb a { color: var(--c-ink-mute); }
+.misc-contact-page-header__breadcrumb a:hover { color: var(--c-ink); text-decoration: none; }
+.misc-contact-page-header__breadcrumb span { color: var(--c-ink-faint); }
+
+.misc-contact-page-header__row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.misc-contact-page-header__title {
+  font-size: var(--fs-3xl);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.02em;
+  line-height: var(--lh-heading);
+  margin: 0;
+  color: var(--c-ink);
+}
+
+.misc-contact-page-header__lede {
+  max-width: 48ch;
+  font-size: var(--fs-md);
+  line-height: 1.55;
+  color: var(--c-ink);
+  margin: 0;
+}
+
+/* ============================================================
+   BODY: two-column line-separated grid
+   Left: info column (multiple stacked blocks)
+   Right: form column
+   ============================================================ */
+.misc-contact {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  background: var(--c-bg);
+  border-bottom: 3px solid var(--c-ink);
+}
+
+.misc-contact__info {
+  background: var(--c-bg);
+  border-right: 3px solid var(--c-ink);
+  display: flex;
+  flex-direction: column;
+}
+
+.misc-contact__form-col {
+  background: var(--c-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.misc-contact__block {
+  padding: var(--space-7);
+  border-bottom: 1px solid var(--c-line);
+}
+.misc-contact__block:last-child { border-bottom: 0; }
+
+.misc-contact__eyebrow {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--c-ink-mute);
+  font-weight: var(--fw-medium);
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.misc-contact__eyebrow::before {
+  content: "";
+  width: 40px;
+  height: 1.5px;
+  background: var(--c-ink);
+}
+
+.misc-contact__heading {
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.02em;
+  line-height: var(--lh-heading);
+  margin: 0 0 var(--space-4) 0;
+  color: var(--c-ink);
+}
+
+.misc-contact__body {
+  font-size: var(--fs-md);
+  color: var(--c-ink);
+  line-height: 1.6;
+  margin: 0;
+}
+.misc-contact__body p { margin: 0 0 var(--space-3) 0; }
+.misc-contact__body p:last-child { margin: 0; }
+
+/* ============================================================
+   Register block
+   ============================================================ */
+.misc-contact__register {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.misc-contact__register-actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.misc-contact__btn-primary,
+.misc-contact__btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 48px;
+  padding: 0 var(--space-5);
+  font-family: var(--font-sans);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 100ms ease, color 100ms ease;
+  white-space: nowrap;
+}
+.misc-contact__btn-primary {
+  background: var(--c-ink);
+  color: var(--c-bg);
+  border: 1.5px solid var(--c-ink);
+}
+.misc-contact__btn-primary:hover {
+  background: var(--c-bg);
+  color: var(--c-ink);
+  text-decoration: none;
+}
+.misc-contact__btn-secondary {
+  background: var(--c-bg);
+  color: var(--c-ink);
+  border: 1.5px solid var(--c-ink);
+}
+.misc-contact__btn-secondary:hover {
+  background: var(--c-ink);
+  color: var(--c-bg);
+  text-decoration: none;
+}
+.misc-contact__btn-primary svg,
+.misc-contact__btn-secondary svg { width: 14px; height: 14px; }
+
+.misc-contact__register-note {
+  font-size: var(--fs-2xs);
+  color: var(--c-ink-mute);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.misc-contact__register-note::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--c-state-instock);
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   Channels list
+   ============================================================ */
+.misc-contact__channels {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.misc-contact__channels li {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: var(--space-4);
+  align-items: flex-start;
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--c-line);
+}
+.misc-contact__channels li:first-child { padding-top: var(--space-2); }
+.misc-contact__channels li:last-child { padding-bottom: 0; border-bottom: 0; }
+
+.misc-contact__channel-icon {
+  width: 40px;
+  height: 40px;
+  border: 1.5px solid var(--c-ink);
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--c-ink);
+}
+.misc-contact__channel-icon svg { width: 18px; height: 18px; }
+
+.misc-contact__channel-meta {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--c-ink-mute);
+  font-weight: var(--fw-medium);
+  display: block;
+  margin-bottom: 4px;
+}
+.misc-contact__channel-value {
+  font-size: var(--fs-md);
+  color: var(--c-ink);
+  font-weight: var(--fw-medium);
+  display: block;
+}
+.misc-contact__channel-value a { color: var(--c-ink); }
+.misc-contact__channel-sub {
+  font-size: var(--fs-2xs);
+  color: var(--c-ink-mute);
+  margin-top: 4px;
+  display: block;
+}
+
+/* ============================================================
+   Address block
+   ============================================================ */
+.misc-contact__address {
+  font-style: normal;
+  font-size: var(--fs-md);
+  line-height: 1.6;
+  color: var(--c-ink);
+}
+.misc-contact__address strong {
+  font-weight: var(--fw-medium);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.misc-contact__hours {
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--c-line);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-3) var(--space-6);
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+}
+.misc-contact__hours dt {
+  color: var(--c-ink-mute);
+  font-weight: var(--fw-medium);
+  margin: 0;
+}
+.misc-contact__hours dd {
+  margin: 0;
+  color: var(--c-ink);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-medium);
+}
+
+/* ============================================================
+   FORM
+   ============================================================ */
+.misc-contact-form {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.misc-contact-form__header {
+  padding: var(--space-7);
+  border-bottom: 1px solid var(--c-line);
+}
+
+.misc-contact-form__body {
+  padding: var(--space-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4); /* MISC: tightened vertical rhythm between field rows (was --space-6 / 32px) */
+}
+
+/* Posted-success + error message blocks */
+.misc-contact-form__message {
+  margin: 0 0 var(--space-5);
+  padding: var(--space-4);
+  border: 1.5px solid var(--c-ink);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+}
+.misc-contact-form__message--success {
+  background: var(--c-bg);
+  color: var(--c-ink);
+  border-color: var(--c-state-instock);
+}
+.misc-contact-form__message--error {
+  background: var(--c-bg);
+  color: var(--c-state-backorder);
+  border-color: var(--c-state-backorder);
+}
+.misc-contact-form__message a {
+  color: inherit;
+  text-decoration: underline;
+}
+.misc-contact-form__message ul {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-5);
+}
+
+.misc-contact-form__field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+}
+
+.misc-contact-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.misc-contact-form__label {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-weight: var(--fw-medium);
+  color: var(--c-ink);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.misc-contact-form__label-required {
+  color: var(--c-ink-mute);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+  font-weight: var(--fw-medium);
+}
+
+.misc-contact-form__input,
+.misc-contact-form__select,
+.misc-contact-form__textarea {
+  /* MISC: explicit appearance reset so every field renders identically
+     regardless of UA defaults (macOS Safari fills selects with a system
+     gradient, Firefox autofill inserts a yellow tint). The combination
+     of appearance:none + flat white background keeps the prototype's
+     monochrome line-drawn look. */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  /* MISC: box-sizing:border-box so the declared 48px is the TOTAL height
+     (border included). Without it the theme has no global reset, fields
+     default to content-box, and Chrome renders <select> taller than
+     <input> at the same height — the cause of the uneven field heights. */
+  box-sizing: border-box;
+  width: 100%;
+  height: 48px;
+  padding: 0 var(--space-4);
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  line-height: 1.4;
+  color: var(--c-ink);
+  background: #FFFFFF;
+  background-color: #FFFFFF;
+  border: 1px solid var(--c-ink);
+  border-radius: var(--radius-sm);
+  outline: none;
+  box-shadow: none;
+  transition: box-shadow 100ms ease, border-color 100ms ease;
+}
+.misc-contact-form__input::placeholder,
+.misc-contact-form__textarea::placeholder { color: var(--c-ink-faint); opacity: 1; }
+.misc-contact-form__input:focus,
+.misc-contact-form__select:focus,
+.misc-contact-form__textarea:focus {
+  border-color: var(--c-ink);
+  box-shadow: inset 0 -2px 0 0 var(--c-ink);
+}
+
+/* MISC: Trade's base.css styles inputs via attribute selectors
+   (input[type="email"], [type="text"], [type="tel"] — specificity 0,1,1)
+   which outrank our single-class field rule (0,1,0) and repaint the
+   text/email/phone/company inputs with Trade's faint 55%-opacity grey
+   border. Selects and the textarea are only hit by Trade's bare element
+   selectors (0,0,1), so they already keep our border — which is why only
+   SOME fields looked wrong. Re-apply the prototype's solid 1px ink border
+   scoped under .misc-contact-form (specificity 0,2,0 / 0,3,0 on focus) so
+   every field type matches. Parent-selector specificity, no !important,
+   per MISC_Dev_Conventions.md. */
+.misc-contact-form .misc-contact-form__input,
+.misc-contact-form .misc-contact-form__select,
+.misc-contact-form .misc-contact-form__textarea {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  height: 48px;
+  background-color: #FFFFFF;
+  color: var(--c-ink);
+  border: 1px solid var(--c-ink);
+  border-radius: var(--radius-sm);
+}
+/* MISC: textarea is the only multi-line field — it must not be locked to
+   the 48px single-row height the inputs/selects share. */
+.misc-contact-form .misc-contact-form__textarea {
+  height: auto;
+  min-height: 160px;
+}
+.misc-contact-form .misc-contact-form__input:focus,
+.misc-contact-form .misc-contact-form__select:focus,
+.misc-contact-form .misc-contact-form__textarea:focus {
+  border-color: var(--c-ink);
+  box-shadow: inset 0 -2px 0 0 var(--c-ink);
+}
+
+/* Autofill: browsers inject their own yellow/blue background for
+   credential fields. Override with the design system white. The inset
+   box-shadow trick is the only reliable way to defeat -webkit-autofill
+   styling — direct background-color is overridden by the UA. */
+.misc-contact-form__input:-webkit-autofill,
+.misc-contact-form__input:-webkit-autofill:hover,
+.misc-contact-form__input:-webkit-autofill:focus,
+.misc-contact-form__select:-webkit-autofill,
+.misc-contact-form__textarea:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 60px #FFFFFF inset;
+  box-shadow: 0 0 0 60px #FFFFFF inset;
+  -webkit-text-fill-color: var(--c-ink);
+  caret-color: var(--c-ink);
+  transition: background-color 9999s ease-out 0s;
+}
+
+.misc-contact-form__select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%230A0A0A' stroke-width='1.5'><path d='M1 1l5 5 5-5'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 12px 8px;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+.misc-contact-form__textarea {
+  height: auto;
+  padding: var(--space-4);
+  line-height: var(--lh-body);
+  resize: vertical;
+  min-height: 160px;
+}
+
+.misc-contact-form__hint {
+  font-size: var(--fs-2xs);
+  color: var(--c-ink-mute);
+}
+
+.misc-contact-form__consent {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--c-line);
+  font-size: var(--fs-xs);
+  color: var(--c-ink-mute);
+  line-height: 1.55;
+}
+.misc-contact-form__consent input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  accent-color: var(--c-ink);
+  flex-shrink: 0;
+}
+.misc-contact-form__consent a { color: var(--c-ink); text-decoration: underline; }
+
+.misc-contact-form__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+.misc-contact-form__actions-note {
+  font-size: var(--fs-2xs);
+  color: var(--c-ink-mute);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps-sm);
+}
+
+/* Field-level error helper */
+.misc-contact-form__field--has-error .misc-contact-form__input,
+.misc-contact-form__field--has-error .misc-contact-form__select,
+.misc-contact-form__field--has-error .misc-contact-form__textarea {
+  border-color: var(--c-state-backorder);
+}
+.misc-contact-form__field-error {
+  font-size: var(--fs-2xs);
+  color: var(--c-state-backorder);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1100px) {
+  .misc-contact-page-header__title { font-size: var(--fs-2xl); }
+}
+
+@media (max-width: 900px) {
+  .misc-contact-page-header { padding: var(--space-6) var(--space-5) var(--space-5); }
+  .misc-contact-page-header__row { gap: var(--space-4); }
+  .misc-contact-page-header__title { font-size: var(--fs-2xl); }
+  .misc-contact-page-header__lede { font-size: var(--fs-sm); }
+
+  .misc-contact { grid-template-columns: 1fr; }
+  .misc-contact__info {
+    border-right: 0;
+    border-bottom: 3px solid var(--c-ink);
+  }
+  .misc-contact__block { padding: var(--space-6) var(--space-5); }
+  .misc-contact__heading { font-size: var(--fs-xl); }
+  .misc-contact__body,
+  .misc-contact__address,
+  .misc-contact__channel-value { font-size: var(--fs-sm); }
+
+  .misc-contact-form__header,
+  .misc-contact-form__body { padding: var(--space-6) var(--space-5); }
+  .misc-contact-form__field-grid { grid-template-columns: 1fr; gap: var(--space-4); }
+}
+
+@media (max-width: 560px) {
+  .misc-contact__block { padding: var(--space-5) var(--space-4); }
+  .misc-contact-form__header,
+  .misc-contact-form__body { padding: var(--space-5) var(--space-4); }
+
+  .misc-contact__register-actions { flex-direction: column; align-items: stretch; }
+  .misc-contact__btn-primary,
+  .misc-contact__btn-secondary { width: 100%; justify-content: center; }
+}

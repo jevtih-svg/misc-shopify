@@ -1,0 +1,92 @@
+{
+  "sections": {
+    "main": {
+      "type": "misc-brand-page",
+      "settings": {
+        "rule_weight": 3,
+        "padding_top": 48,
+        "padding_bottom": 64
+      },
+      "blocks": {
+        "heading": {
+          "type": "heading",
+          "settings": {
+            "eyebrow": "Brand",
+            "heading": "Nähe",
+            "force_lowercase": true
+          }
+        },
+        "text": {
+          "type": "text",
+          "settings": {
+            "width": "half",
+            "text": "<p>The stationery which you do not want to leave behind.</p><p>The brand is named after the German word for ‘close’, as the entire range consists of tools to keep your essential items near. A colorful series of pouches, pencases and holders for documents or iPad’s alike, providing you with various options of colors and purposes.</p><p>Nähe is a Hightide brand, and their attention to design can be seen throughout the entire Hightide range of casual everyday stationery.</p>"
+          }
+        },
+        "img_1": {
+          "type": "image",
+          "settings": {
+            "width": "half",
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/slide_nahe-1100x733.png?v=1780166229",
+            "title": "Nähe"
+          }
+        },
+        "img_2": {
+          "type": "image",
+          "settings": {
+            "width": "half",
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/nahe_block-1100x776.jpg?v=1780166228",
+            "title": "Nähe"
+          }
+        },
+        "img_3": {
+          "type": "image",
+          "settings": {
+            "width": "half",
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/mixall4-scaled-e1750940257782-1100x825.jpg?v=1780166228",
+            "title": "Nähe"
+          }
+        },
+        "img_4": {
+          "type": "image",
+          "settings": {
+            "width": "full",
+            "image_url": "https://cdn.shopify.com/s/files/1/1009/0659/8787/files/nahe-1-e1468072714226.jpg?v=1780166228",
+            "title": "Nähe"
+          }
+        },
+        "footer": {
+          "type": "footer",
+          "settings": {
+            "represented_label": "Represented by",
+            "title": "MISC Distribution",
+            "represented_region": "Benelux, Germany, France & Scandinavia",
+            "discover_label": "Discover more",
+            "website_label": "hightide.co.jp",
+            "website_url": "http://hightide.co.jp/product/list/nahe.php"
+          }
+        },
+        "shop": {
+          "type": "shop",
+          "settings": {
+            "label": "Shop Nähe",
+            "link": "/collections/all?filter.p.m.custom.brand=N%C3%A4he"
+          }
+        }
+      },
+      "block_order": [
+        "heading",
+        "text",
+        "img_1",
+        "img_2",
+        "img_3",
+        "img_4",
+        "shop",
+        "footer"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "sections": {
+    "main": {
+      "type": "misc-journal",
+      "settings": {
+        "news_blog": "news",
+        "per_page": 12,
+        "max_past": 2
+      }
+    }
+  },
+  "order": ["main"]
+}

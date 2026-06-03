@@ -25,19 +25,82 @@
 {{ 'misc-pdp.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'misc-pdp.js' | asset_url }}" defer="defer"></script>
 
-{%- comment -%}
-  Price gate flag — same convention as misc-card-product.liquid.
-  Reads the theme setting + customer state.
-{%- endcomment -%}
-{%- assign misc_show_price = false -%}
-{%- if customer != blank or settings.misc_dev_show_price -%}
-  {%- assign misc_show_price = true -%}
-{%- endif -%}
-
 {%- liquid
   assign primary_variant = product.selected_or_first_available_variant
   assign variant_count = product.variants.size
+
+  comment
+    MISC: B2B access gate. Approved visitors (B2B member or `approved` tag)
+    see price/stock/ordering; everyone else sees a sign-in prompt.
+  endcomment
+  capture misc_access
+    render 'misc-access'
+  endcapture
+  assign misc_access = misc_access | strip
+  assign approved = false
+  if misc_access == 'true'
+    assign approved = true
+  endif
+
+  comment
+    Breadcrumb chain: Catalogue / Brand / Collection / Product.
+
+    This store has no per-brand or per-series Shopify collections.
+    Brand and "collection" are encoded as product TAGS ("Hibi",
+    "Collection: Regular Large Box") and surfaced as facets on the
+    /collections/all catalogue grid. So the Brand and Collection
+    crumbs deep-link into that grid with a filter.p.tag query
+    pre-applied, mirroring the tag pills in misc-pdp-head.liquid.
+    Needs the "Product tag" filter enabled in Search and Discovery,
+    the same dependency the PDP tag pills already rely on.
+  endcomment
+
+  comment
+    Brand display value via the shared misc-brand fallback chain.
+  endcomment
+  capture misc_brand
+    render 'misc-brand', product: product
+  endcapture
+  assign misc_brand = misc_brand | strip
+
+  comment
+    Collection from the "Collection:" tag. The full tag is the
+    filter value; the stripped text is the display label.
+  endcomment
+  assign misc_collection_tag = ''
+  assign misc_collection_label = ''
+  for misc_t in product.tags
+    if misc_t contains 'Collection:'
+      assign misc_collection_tag = misc_t
+      assign misc_collection_label = misc_t | remove_first: 'Collection:' | strip
+      break
+    endif
+  endfor
+
+  assign catalogue_url = routes.collections_url | append: '/all'
 -%}
+
+{%- comment -%} ============================================================
+  PAGE HEADER — breadcrumb above the body. Mirrors the pattern from
+  sections/misc-contact.liquid so the top section is consistent
+  across pages (Home / parent / current).
+
+  Sits outside <section class="misc-pdp"> because that element is a
+  CSS grid; nesting the breadcrumb inside would make it a grid item.
+============================================================ {%- endcomment -%}
+<nav class="misc-pdp-page-header__breadcrumb" aria-label="Breadcrumb">
+  <a href="{{ catalogue_url }}">Catalogue</a>
+  {%- if misc_brand != blank -%}
+    <span aria-hidden="true">/</span>
+    <a href="{{ catalogue_url }}?filter.p.tag={{ misc_brand | url_encode }}">{{ misc_brand | escape }}</a>
+  {%- endif -%}
+  {%- if misc_collection_label != blank -%}
+    <span aria-hidden="true">/</span>
+    <a href="{{ catalogue_url }}?filter.p.tag={{ misc_collection_tag | url_encode }}">{{ misc_collection_label | escape }}</a>
+  {%- endif -%}
+  <span aria-hidden="true">/</span>
+  <span aria-current="page">{{ product.title | escape }}</span>
+</nav>
 
 <section
   class="misc-pdp"
@@ -76,89 +139,87 @@
     </section>
 
     {%- comment -%}
-      PRICE + STOCK STATE always renders second. The price slot is
-      gated; the stock state always renders (per D1: "stock should
-      be seen, rest hidden" for logged-out visitors).
+      PRICE + STOCK STATE always renders second.
     {%- endcomment -%}
     <section class="misc-pdp__section">
+      {%- comment -%} MISC: B2B access gate — price for approved visitors, else a sign-in prompt. {%- endcomment -%}
+      {%- if approved -%}
       {%- render 'misc-pdp-price',
          product: product,
          primary_variant: primary_variant,
-         variant_count: variant_count,
-         misc_show_price: misc_show_price
+         variant_count: variant_count
       -%}
+      {%- else -%}
+      {%- render 'misc-access-prompt', variant: 'block' -%}
+      {%- endif -%}
 
       {%- comment -%}
         Stock state line. For single-variant products: the four
         states from the design system. For multi-variant: the
         neutral summary line.
       {%- endcomment -%}
+      {%- comment -%} MISC: B2B access gate — stock state only for approved visitors. {%- endcomment -%}
+      {%- if approved -%}
       {%- render 'misc-pdp-stock-state',
          product: product,
          primary_variant: primary_variant,
          variant_count: variant_count
       -%}
+      {%- endif -%}
 
+      {%- comment -%} MISC: B2B access gate — ordering controls + stock notice hidden for unapproved visitors. {%- endcomment -%}
+      {%- if approved -%}
       {%- comment -%}
-        Stepper (single-variant) OR variant table (multi-variant)
-        OR CTA (logged-out).
+        Stepper (single-variant) OR variant table (multi-variant).
       {%- endcomment -%}
-      {%- if misc_show_price -%}
-        {%- if variant_count > 1 -%}
-          {%- render 'misc-pdp-variant-table',
-             product: product
-          -%}
-        {%- else -%}
-          {%- comment -%}
-            Orderable = has stock OR has incoming OR variant.available
-            (backorderable). True OOS variants (no stock, no incoming,
-            policy=deny) get the Unavailable placeholder instead of
-            a stepper, so they can't be added to the cart.
-          {%- endcomment -%}
-          {%- assign sv_inv = primary_variant.inventory_quantity | default: 0 -%}
-          {%- assign sv_inc = primary_variant.metafields.custom.incoming_qty.value | default: 0 | plus: 0 -%}
-          {%- assign sv_orderable = false -%}
-          {%- if sv_inv > 0 or sv_inc > 0 or primary_variant.available -%}
-            {%- assign sv_orderable = true -%}
-          {%- endif -%}
-
-          {%- if sv_orderable -%}
-            {%- assign sv_cart_qty = 0 -%}
-            {%- for line_item in cart.items -%}
-              {%- if line_item.variant_id == primary_variant.id -%}
-                {%- assign sv_cart_qty = line_item.quantity -%}
-                {%- break -%}
-              {%- endif -%}
-            {%- endfor -%}
-            <div
-              class="misc-qty-stepper misc-pdp__buy-stepper"
-              data-misc-qty-stepper
-              data-variant-id="{{ primary_variant.id }}"
-            >
-              <button type="button" class="misc-qty-stepper__btn" data-misc-qty="-1" aria-label="Remove one from cart">&minus;</button>
-              <input type="number" value="{{ sv_cart_qty }}" min="0" step="1" class="misc-qty-stepper__input" aria-label="Quantity in cart" data-misc-qty-input>
-              <button type="button" class="misc-qty-stepper__btn" data-misc-qty="+1" aria-label="Add one to cart">+</button>
-            </div>
-          {%- else -%}
-            <div class="misc-pdp__unavailable-slot" aria-disabled="true">
-              <span class="misc-pdp__unavailable-label">Unavailable</span>
-            </div>
-          {%- endif -%}
-        {%- endif -%}
-
-        {%- comment -%}
-          Notice block — split-shipment / incoming / backorder.
-          Renders only when a notice condition fires.
-        {%- endcomment -%}
-        {%- render 'misc-pdp-notice', product: product, primary_variant: primary_variant -%}
+      {%- if variant_count > 1 -%}
+        {%- render 'misc-pdp-variant-table',
+           product: product
+        -%}
       {%- else -%}
         {%- comment -%}
-          Logged-out: render a second CTA in the purchase slot per
-          D1. Same wording as the price CTA.
+          Orderable = has stock OR has incoming OR variant.available
+          (backorderable). True OOS variants (no stock, no incoming,
+          policy=deny) get the Unavailable placeholder instead of
+          a stepper, so they can't be added to the cart.
         {%- endcomment -%}
-        <div class="misc-pdp__buy-gate">
-          {%- render 'misc-price-cta' -%}
-        </div>
+        {%- assign sv_inv = primary_variant.inventory_quantity | default: 0 -%}
+        {%- assign sv_inc = primary_variant.metafields.custom.incoming_qty.value | default: 0 | plus: 0 -%}
+        {%- assign sv_orderable = false -%}
+        {%- if sv_inv > 0 or sv_inc > 0 or primary_variant.available -%}
+          {%- assign sv_orderable = true -%}
+        {%- endif -%}
+
+        {%- if sv_orderable -%}
+          {%- assign sv_cart_qty = 0 -%}
+          {%- for line_item in cart.items -%}
+            {%- if line_item.variant_id == primary_variant.id -%}
+              {%- assign sv_cart_qty = line_item.quantity -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+          <div
+            class="misc-qty-stepper misc-pdp__buy-stepper"
+            data-misc-qty-stepper
+            data-variant-id="{{ primary_variant.id }}"
+          >
+            <button type="button" class="misc-qty-stepper__btn" data-misc-qty="-1" aria-label="Remove one from cart">&minus;</button>
+            <input type="number" value="{{ sv_cart_qty }}" min="0" step="1" class="misc-qty-stepper__input" aria-label="Quantity in cart" data-misc-qty-input>
+            <button type="button" class="misc-qty-stepper__btn" data-misc-qty="+1" aria-label="Add one to cart">+</button>
+          </div>
+        {%- else -%}
+          <div class="misc-pdp__unavailable-slot" aria-disabled="true">
+            <span class="misc-pdp__unavailable-label">Unavailable</span>
+          </div>
+        {%- endif -%}
+      {%- endif -%}
+
+      {%- comment -%}
+        Notice block — split-shipment / incoming / backorder.
+        Renders only when a notice condition fires.
+      {%- endcomment -%}
+      {%- render 'misc-pdp-notice', product: product, primary_variant: primary_variant -%}
+      {%- comment -%} MISC: close the B2B access gate around ordering controls + notice. {%- endcomment -%}
       {%- endif -%}
     </section>
 
@@ -170,7 +231,7 @@
 
         {%- when 'specs' -%}
           <section class="misc-pdp__section" {{ block.shopify_attributes }}>
-            {%- render 'misc-pdp-specs', product: product, primary_variant: primary_variant, variant_count: variant_count, misc_show_price: misc_show_price -%}
+            {%- render 'misc-pdp-specs', product: product, primary_variant: primary_variant, variant_count: variant_count -%}
           </section>
 
         {%- when 'description' -%}
