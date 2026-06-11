@@ -20,7 +20,7 @@
     "spacing_sections": 0,
     "spacing_grid_horizontal": 12,
     "spacing_grid_vertical": 12,
-    "animations_reveal_on_scroll": true,
+    "animations_reveal_on_scroll": false,
     "animations_hover_elements": "default",
     "buttons_border_thickness": 1,
     "buttons_border_opacity": 100,
@@ -143,13 +143,6 @@
       }
     },
     "content_for_index": [],
-    "blocks": {
-      "2780066564730972057": {
-        "type": "shopify://apps/sp-hide-price-access/blocks/mp-access-control-embed/19eec9a7-4327-421e-96f6-ed656b5258cc",
-        "disabled": false,
-        "settings": {}
-      }
-    },
     "color_schemes": {
       "scheme-1": {
         "settings": {
