@@ -81,7 +81,7 @@
           data-img="{{ url }}"
           aria-label="View image {{ forloop.index }}"
         >
-          <img src="{{ url | replace: 'width=1200', 'width=160' }}" alt="" loading="lazy">
+          <img src="{{ url | replace: 'width=1200', 'width=160' }}" alt="" loading="lazy" width="160" height="160">
         </button>
       {%- endfor -%}
     </div>

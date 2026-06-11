@@ -47,7 +47,7 @@
                 alt: block.settings.image_alt | default: block.settings.title
               }}
             {%- elsif block.settings.fallback_asset != blank -%}
-              <img src="{{ block.settings.fallback_asset | asset_url }}" alt="{{ block.settings.image_alt | default: block.settings.title }}" loading="lazy">
+              <img src="{{ block.settings.fallback_asset | asset_url }}" alt="{{ block.settings.image_alt | default: block.settings.title }}" loading="lazy" width="1400" height="933">
             {%- endif -%}
           </div>
         </div>

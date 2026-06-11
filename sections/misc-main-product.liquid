@@ -46,13 +46,10 @@
     Breadcrumb chain: Catalogue / Brand / Collection / Product.
 
     This store has no per-brand or per-series Shopify collections.
-    Brand and "collection" are encoded as product TAGS ("Hibi",
-    "Collection: Regular Large Box") and surfaced as facets on the
-    /collections/all catalogue grid. So the Brand and Collection
-    crumbs deep-link into that grid with a filter.p.tag query
-    pre-applied, mirroring the tag pills in misc-pdp-head.liquid.
-    Needs the "Product tag" filter enabled in Search and Discovery,
-    the same dependency the PDP tag pills already rely on.
+    Brand is surfaced through the product custom.brand metafield
+    facet. "Collection" is still encoded as a product tag
+    ("Collection: Regular Large Box") and deep-links through the
+    product tag facet.
   endcomment
 
   comment
@@ -62,6 +59,10 @@
     render 'misc-brand', product: product
   endcapture
   assign misc_brand = misc_brand | strip
+  assign misc_brand_filter_value = product.metafields.custom.brand.value
+  if misc_brand_filter_value == blank
+    assign misc_brand_filter_value = misc_brand
+  endif
 
   comment
     Collection from the "Collection:" tag. The full tag is the
@@ -92,7 +93,7 @@
   <a href="{{ catalogue_url }}">Catalogue</a>
   {%- if misc_brand != blank -%}
     <span aria-hidden="true">/</span>
-    <a href="{{ catalogue_url }}?filter.p.tag={{ misc_brand | url_encode }}">{{ misc_brand | escape }}</a>
+    <a href="{{ catalogue_url }}?filter.p.m.custom.brand={{ misc_brand_filter_value | url_encode }}">{{ misc_brand | escape }}</a>
   {%- endif -%}
   {%- if misc_collection_label != blank -%}
     <span aria-hidden="true">/</span>
@@ -248,7 +249,7 @@
 {%- comment -%} Zoom overlay (rendered once, shared across the page) {%- endcomment -%}
 <div class="misc-zoom-overlay" data-misc-zoom-overlay aria-hidden="true">
   <button type="button" class="misc-zoom-overlay__close" data-misc-zoom-close aria-label="Close zoom">&times;</button>
-  <img src="" alt="" data-misc-zoom-img>
+  <img src="{{ 'square.svg' | asset_url }}" alt="" data-misc-zoom-img width="1200" height="1200">
 </div>
 
 {%- comment -%} Toast (rendered once) {%- endcomment -%}

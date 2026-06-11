@@ -58,7 +58,7 @@
     </section>
 
     <div class="eventcard">
-      {%- if has_image -%}<div class="eventcard__media"><img src="{{ ex.image.value | image_url: width: 1400 }}" alt="{{ ex.title.value | escape }}" loading="lazy" width="1400"></div>{%- endif -%}
+      {%- if has_image -%}<div class="eventcard__media"><img src="{{ ex.image.value | image_url: width: 1400 }}" alt="{{ ex.title.value | escape }}" loading="lazy" width="1400" height="788"></div>{%- endif -%}
       <div class="fact"><span class="fact__k">When</span><span class="fact__v">{{ when }}</span></div>
       <div class="fact{% unless has_booth %} fact--wide{% endunless %}"><span class="fact__k">Where</span><span class="fact__v">{{ ex.location.value }}</span></div>
       {%- if has_booth -%}<div class="fact"><span class="fact__k">Stand / Booth</span><span class="fact__v">{{ ex.booth.value }}</span></div>{%- endif -%}

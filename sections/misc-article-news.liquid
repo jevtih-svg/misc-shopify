@@ -15,7 +15,7 @@
       <h1 class="article__title">{{ article.title }}</h1>
       <div class="article__meta">{{ article.published_at | date: '%d · %m · %Y' }}{% if article.author != blank %} — {{ article.author }}{% endif %}</div>
       {%- if article.image -%}
-        <div class="article__img"><img src="{{ article.image | image_url: width: 1600 }}" alt="{{ article.image.alt | escape }}" width="1600"></div>
+        <div class="article__img"><img src="{{ article.image | image_url: width: 1600 }}" alt="{{ article.image.alt | escape }}" width="1600" height="900"></div>
       {%- else -%}
         <div class="article__rule"></div>
       {%- endif -%}

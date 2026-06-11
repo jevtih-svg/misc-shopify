@@ -52,6 +52,13 @@
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
         body: JSON.stringify(body)
+      }).then(function (response) {
+        if (!response.ok) {
+          return response.text().then(function (message) {
+            throw new Error("Cart API " + response.status + ": " + message);
+          });
+        }
+        return response.json();
       });
     }
     function notifyCart() {
@@ -69,7 +76,14 @@
           if (qty > 0) { return postJSON("/cart/add.js", { items: [{ id: Number(variantId), quantity: qty }] }); }
         })
         .then(function () { notifyCart(); })
-        .catch(function () {});
+        .catch(function (err) {
+          console.error("MISC curated cart sync failed", err);
+          return fetch("/cart.js").then(function (r) { return r.json(); }).then(function (cart) {
+            var line = (cart.items || []).find(function (i) { return String(i.variant_id) === String(variantId); });
+            var input = root.querySelector('.misc-curated__stepper[data-variant-id="' + variantId + '"] .misc-curated__qty');
+            if (input) { input.value = line ? line.quantity : 0; }
+          }).catch(function () {});
+        });
     }
     var debounces = {};
     root.addEventListener("click", function (e) {
@@ -174,9 +188,12 @@
       confirmBtn.disabled = true;
       confirmBtn.textContent = "Adding…";
       postJSON("/cart/add.js", { items: items })
-        .then(function (r) { return r.json(); })
         .then(function () { window.location.href = "/cart"; })
-        .catch(function () { confirmBtn.disabled = false; confirmBtn.textContent = original; });
+        .catch(function (err) {
+          console.error("MISC curated add-all failed", err);
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = original;
+        });
     });
   });
 })();

@@ -115,7 +115,6 @@
 .misc-pdp__gallery-main {
   aspect-ratio: 1 / 1;
   background: var(--c-bg-subtle);
-  border: 1px solid var(--c-line);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -145,11 +144,11 @@
   bottom: var(--space-3);
   right: var(--space-3);
   background: var(--c-bg);
-  border: 1px solid var(--c-ink);
+  border: 1.5px solid var(--c-ink);
   font-size: var(--fs-2xs);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps-sm);
-  padding: 2px var(--space-2);
+  padding: var(--space-2) var(--space-3);
   color: var(--c-ink);
   pointer-events: none;
 }
@@ -202,13 +201,19 @@
    Product head
 ============================================================ */
 .misc-pdp__brand {
-  display: block;
+  display: inline-block;
   font-size: var(--fs-2xs);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   font-weight: var(--fw-medium);
   color: var(--c-ink);
   margin: 0 0 var(--space-2) 0;
+  text-decoration: none;
+  text-underline-offset: 4px;
+}
+.misc-pdp__brand:hover,
+.misc-pdp__brand:focus-visible {
+  text-decoration: underline;
 }
 .misc-pdp__name {
   font-size: var(--fs-2xl);

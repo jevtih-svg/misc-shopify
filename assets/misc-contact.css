@@ -128,13 +128,14 @@
 .misc-contact__register {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: 0;
 }
 
 .misc-contact__register-actions {
   display: flex;
   gap: var(--space-3);
   flex-wrap: wrap;
+  margin-top: var(--space-4);
 }
 
 .misc-contact__btn-primary,
@@ -185,6 +186,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  margin-top: var(--space-4);
 }
 .misc-contact__register-note::before {
   content: "";

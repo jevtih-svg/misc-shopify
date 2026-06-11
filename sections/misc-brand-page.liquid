@@ -73,7 +73,7 @@
             {%- if block.settings.image != blank -%}
               {{ block.settings.image | image_url: width: 1400 | image_tag: loading: 'lazy', widths: '480, 720, 1000, 1400', sizes: '(max-width: 900px) 100vw, 50vw', alt: alt_text }}
             {%- elsif block.settings.image_url != blank -%}
-              <img src="{{ block.settings.image_url }}" alt="{{ alt_text | escape }}" loading="lazy">
+              <img src="{{ block.settings.image_url }}" alt="{{ alt_text | escape }}" loading="lazy" width="1400" height="933">
             {%- endif -%}
           </figure>
 
