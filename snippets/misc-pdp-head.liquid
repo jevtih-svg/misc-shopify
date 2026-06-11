@@ -48,7 +48,7 @@
 -%}
 
 {%- if misc_brand != blank -%}
-  <span class="misc-pdp__brand">{{ misc_brand | escape }}</span>
+  <a class="misc-pdp__brand" href="{{ routes.collections_url }}/all?filter.p.tag={{ misc_brand | url_encode }}">{{ misc_brand | escape }}</a>
 {%- endif -%}
 
 <h1 class="misc-pdp__name">{{ product.title | escape }}</h1>

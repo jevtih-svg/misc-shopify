@@ -202,13 +202,19 @@
    Product head
 ============================================================ */
 .misc-pdp__brand {
-  display: block;
+  display: inline-block;
   font-size: var(--fs-2xs);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   font-weight: var(--fw-medium);
   color: var(--c-ink);
   margin: 0 0 var(--space-2) 0;
+  text-decoration: none;
+  text-underline-offset: 4px;
+}
+.misc-pdp__brand:hover,
+.misc-pdp__brand:focus-visible {
+  text-decoration: underline;
 }
 .misc-pdp__name {
   font-size: var(--fs-2xl);
