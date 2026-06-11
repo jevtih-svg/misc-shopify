@@ -115,7 +115,6 @@
 .misc-pdp__gallery-main {
   aspect-ratio: 1 / 1;
   background: var(--c-bg-subtle);
-  border: 1px solid var(--c-line);
   display: flex;
   align-items: center;
   justify-content: center;
