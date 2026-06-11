@@ -39,7 +39,7 @@
             endif
           -%}
           <a class="nrow" href="{{ article.url }}">
-            <span class="nrow__media">{% if article.image %}<img src="{{ article.image | image_url: width: 600 }}" alt="{{ article.image.alt | escape }}" loading="lazy">{% endif %}</span>
+            <span class="nrow__media">{% if article.image %}<img src="{{ article.image | image_url: width: 600 }}" alt="{{ article.image.alt | escape }}" loading="lazy" width="600" height="338">{% endif %}</span>
             <span class="nrow__body">
               <span class="nrow__meta">
                 <span class="nrow__date">{{ article.published_at | date: '%d · %m · %Y' }}</span>

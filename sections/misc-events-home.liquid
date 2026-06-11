@@ -44,11 +44,11 @@
           sizes: '(min-width: 900px) 50vw, 100vw',
           alt: banner.title.value }}
       {%- elsif section.settings.fallback_asset != blank -%}
-        <img src="{{ section.settings.fallback_asset | asset_url }}" alt="{{ banner.title.value }}" loading="lazy">
+        <img src="{{ section.settings.fallback_asset | asset_url }}" alt="{{ banner.title.value }}" loading="lazy" width="1400" height="933">
       {%- endif -%}
       <span class="misc-trade-shows__media-tag">Next up · {{ b_days }} {{ b_mon }}</span>
     {%- elsif section.settings.fallback_asset != blank -%}
-      <img src="{{ section.settings.fallback_asset | asset_url }}" alt="{{ section.settings.title }}" loading="lazy">
+      <img src="{{ section.settings.fallback_asset | asset_url }}" alt="{{ section.settings.title }}" loading="lazy" width="1400" height="933">
     {%- endif -%}
   </div>
 

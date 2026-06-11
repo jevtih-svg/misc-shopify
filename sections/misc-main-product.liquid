@@ -248,7 +248,7 @@
 {%- comment -%} Zoom overlay (rendered once, shared across the page) {%- endcomment -%}
 <div class="misc-zoom-overlay" data-misc-zoom-overlay aria-hidden="true">
   <button type="button" class="misc-zoom-overlay__close" data-misc-zoom-close aria-label="Close zoom">&times;</button>
-  <img src="" alt="" data-misc-zoom-img>
+  <img src="{{ 'square.svg' | asset_url }}" alt="" data-misc-zoom-img width="1200" height="1200">
 </div>
 
 {%- comment -%} Toast (rendered once) {%- endcomment -%}

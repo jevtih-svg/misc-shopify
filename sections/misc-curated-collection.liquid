@@ -142,7 +142,7 @@
     {%- endif -%}
   </div>
 
-  {%- if items_json != blank -%}
+  {%- if items_json != blank and approved -%}
     <div class="misc-curated-modal" id="MiscCuratedModal" hidden role="dialog" aria-modal="true" aria-labelledby="MiscCuratedModalTitle" data-money-format="{{ shop.money_format | escape }}">
       <div class="misc-curated-modal__card">
         <div class="misc-curated-modal__head">
