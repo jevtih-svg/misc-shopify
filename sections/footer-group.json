@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "name": "t:sections.footer.name",
   "type": "footer",
@@ -12,7 +21,9 @@
         "stamp_label_right": "Since",
         "stamp_value_right": "2010",
         "portal_title": "Customer Portal",
-        "quick_title": "Quick Links",
+        "portal_menu": "",
+        "quick_title": "Policies",
+        "quick_menu": "footer-policies",
         "contact_title": "Contact",
         "contact_phone": "+31 20 261 38 66",
         "contact_email": "hello@misc-distribution.com",
