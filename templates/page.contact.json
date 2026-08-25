@@ -1,34 +1,16 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
       "type": "misc-contact",
-      "settings": {
-        "show_breadcrumb": true,
-        "page_title_fallback": "Get in touch.",
-        "lede": "We answer every wholesale enquiry, usually within one business day. Already our customer? Sign in to place orders, check stock and see incoming shipments.",
-        "show_register_block": true,
-        "register_eyebrow": "New to Misc",
-        "register_heading": "Become our customer.",
-        "register_body": "<p>Wholesale prices, credit terms and the full catalogue unlock once your shop is approved. Approval usually takes one business day.</p>",
-        "register_cta_label": "Register account",
-        "signin_cta_label": "Sign in",
-        "register_note": "Approval typically within 1 business day",
-        "channels_eyebrow": "Direct lines",
-        "channels_heading": "Talk to a person.",
-        "show_address_block": true,
-        "address_eyebrow": "Find us",
-        "address_heading": "Amsterdam warehouse & office.",
-        "address_richtext": "<p><strong>Misc. Distribution B.V.</strong>Keienbergweg 77<br>1101 GE Amsterdam Zuidoost<br>The Netherlands</p>",
-        "form_eyebrow": "Send us a message",
-        "form_heading": "Tell us what you need.",
-        "form_intro": "<p>A short note helps us route your message to the right person — sales, ops, or a brand specialist.</p>",
-        "submit_label": "Send message",
-        "response_note": "We reply within 1 business day",
-        "show_consent": true,
-        "consent_prefix": "I agree that Misc. Distribution may contact me about this enquiry and store the details I provide. See our",
-        "privacy_link_label": "Privacy Policy",
-        "consent_suffix": "for more."
-      },
       "blocks": {
         "channel_general": {
           "type": "channel",
@@ -45,8 +27,8 @@
           "settings": {
             "icon": "email",
             "meta_label": "Email · orders",
-            "value_label": "orders@misc-distribution.com",
-            "value_url": "mailto:orders@misc-distribution.com",
+            "value_label": "hello@misc-distribution.com",
+            "value_url": "mailto:hello@misc-distribution.com",
             "sub_text": "For existing customers, order changes and returns"
           }
         },
@@ -100,7 +82,37 @@
         "hour_mon_thu",
         "hour_fri",
         "hour_sat_sun"
-      ]
+      ],
+      "settings": {
+        "show_breadcrumb": true,
+        "page_title_fallback": "Get in touch.",
+        "lede": "We answer every wholesale enquiry, usually within one business day. Already our customer? Sign in to place orders, check stock and see incoming shipments.",
+        "show_register_block": true,
+        "register_eyebrow": "New to Misc",
+        "register_heading": "Become our customer.",
+        "register_body": "<p>Wholesale prices, credit terms and the full catalogue unlock once your shop is approved. Approval usually takes one business day.</p>",
+        "register_cta_label": "Register account",
+        "register_url": "",
+        "signin_cta_label": "Sign in",
+        "signin_url": "",
+        "register_note": "Approval typically within 1 business day",
+        "channels_eyebrow": "Direct lines",
+        "channels_heading": "Talk to a person.",
+        "show_address_block": true,
+        "address_eyebrow": "Find us",
+        "address_heading": "Amsterdam warehouse & office.",
+        "address_richtext": "<p><strong>Misc. Distribution B.V.</strong>Keienbergweg 77<br>1101 GE Amsterdam Zuidoost<br>The Netherlands</p>",
+        "form_eyebrow": "Send us a message",
+        "form_heading": "Tell us what you need.",
+        "form_intro": "<p>A short note helps us route your message to the right person — sales, ops, or a brand specialist.</p>",
+        "submit_label": "Send message",
+        "response_note": "We reply within 1 business day",
+        "show_consent": true,
+        "consent_prefix": "I agree that Misc. Distribution may contact me about this enquiry and store the details I provide. See our",
+        "privacy_link_label": "Privacy Policy",
+        "consent_suffix": "for more.",
+        "privacy_url": ""
+      }
     }
   },
   "order": [
