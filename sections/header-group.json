@@ -14,6 +14,7 @@
     "misc-header": {
       "type": "misc-header",
       "settings": {
+        "logo": "shopify://shop_images/misc-distribution_077d0d86-2ac1-4295-94a5-87afb6c44c20.png",
         "logo_text": "Misc.Distribution",
         "search_placeholder": "Search products, SKUs, brands",
         "menu": "main-menu",
