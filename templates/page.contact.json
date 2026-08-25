@@ -55,15 +55,8 @@
         "hour_mon_thu": {
           "type": "hour",
           "settings": {
-            "day_label": "Mon – Thu",
+            "day_label": "Mon – Fri",
             "hours_value": "09:00 – 17:30"
-          }
-        },
-        "hour_fri": {
-          "type": "hour",
-          "settings": {
-            "day_label": "Friday",
-            "hours_value": "09:00 – 16:00"
           }
         },
         "hour_sat_sun": {
@@ -80,7 +73,6 @@
         "channel_phone",
         "channel_instagram",
         "hour_mon_thu",
-        "hour_fri",
         "hour_sat_sun"
       ],
       "settings": {
